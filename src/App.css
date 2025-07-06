@@ -1,8 +1,39 @@
+/* Aggressive mobile fix - completely eliminate white overlay */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100vw !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  overflow-x: hidden !important;
+}
+
+/* Force full viewport coverage on mobile */
+@media (max-width: 768px) {
+  #root {
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    position: relative !important;
+  }
+  
+  /* Override any Tailwind or other CSS that might cause issues */
+  #root > * {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* Desktop optimization */
+@media (min-width: 1024px) {
+  #root {
+    max-width: 100%;
+    margin: 0 auto;
+  }
 }
 
 .logo {
