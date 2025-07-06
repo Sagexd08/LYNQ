@@ -250,27 +250,6 @@ We welcome contributions from the community! Please see our [Contributing Guidel
 
 ---
 
-## Support & Community
-
-### Get Help
-- [Documentation](https://docs.lynq.finance)
-- [Discord Community](https://discord.gg/lynq)
-- [Twitter](https://twitter.com/lynqfinance)
-- [Email Support](mailto:support@lynq.finance)
-
-### Community
-- [Telegram](https://t.me/lynqfinance)
-- [Reddit](https://reddit.com/r/lynqfinance)
-- [LinkedIn](https://linkedin.com/company/lynqfinance)
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## Disclaimer
 
 LYNQ is a DeFi platform that involves financial risk. Please ensure you understand the risks involved before using our services. This is not financial advice. Always do your own research and consider consulting with financial professionals.
