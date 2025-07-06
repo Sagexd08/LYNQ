@@ -1,7 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+
+// Import CSS in order of specificity
 import './index.css';
-import App from './App';
+import './textures.css';
+import './mobile-fix.css';
+
+import App from './App.tsx';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
