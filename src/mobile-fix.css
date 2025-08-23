@@ -1,0 +1,176 @@
+/* 
+ * MOBILE OPTIMIZATION - IMPROVED BRIGHTNESS AND STRUCTURE
+ * This file contains mobile-specific fixes for better visibility and UX
+ */
+
+/* Mobile-specific improvements for better visibility */
+@media (max-width: 768px) {
+  /* Root level fixes - prevent white overlay but keep good contrast */
+  html {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #0f0f0f !important; /* Slightly lighter than pure black */
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+  
+  body {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #0f0f0f !important; /* Slightly lighter than pure black */
+    overflow-x: hidden !important;
+    position: relative !important;
+    -webkit-overflow-scrolling: touch !important;
+    -webkit-text-size-adjust: 100% !important;
+  }
+  
+  /* Root container fixes */
+  #root {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* App container fixes */
+  #root > div {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    position: relative !important;
+  }
+  
+  /* Main content area fixes */
+  main {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    background: transparent !important;
+    position: relative !important;
+  }
+  
+  /* Container classes that might cause issues */
+  .container,
+  .max-w-7xl,
+  .max-w-6xl,
+  .max-w-5xl,
+  .max-w-4xl,
+  .mx-auto {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Grid background fixes - improved brightness */
+  .bg-grid {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    background-color: transparent !important;
+    position: relative !important;
+    /* Make grid more visible on mobile */
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+    opacity: 1 !important; /* Full opacity for better visibility */
+  }
+  
+  /* Landing page specific fixes - improved brightness */
+  .bg-black {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%) !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+  }
+  
+  /* App pages specific fixes - improved brightness */
+  .bg-gray-900 {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+  }
+  
+  .bg-gray-50 {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+  }
+  
+  /* Text improvements for better readability */
+  .text-white {
+    color: #f8fafc !important; /* Slightly off-white for better readability */
+  }
+  
+  .text-white\/80 {
+    color: rgba(248, 250, 252, 0.9) !important; /* More visible */
+  }
+  
+  .text-white\/60 {
+    color: rgba(248, 250, 252, 0.8) !important; /* More visible */
+  }
+  
+  /* Utility classes */
+  .min-h-screen {
+    min-height: 100vh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  .w-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* Small mobile devices - extra aggressive */
+@media (max-width: 480px) {
+  html, body, #root {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #000000 !important;
+  }
+  
+  .px-4, .px-6, .px-8 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Landscape mobile fix */
+@media (max-width: 768px) and (orientation: landscape) {
+  html, body, #root {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    overflow-x: hidden !important;
+    background: #000000 !important;
+  }
+}
