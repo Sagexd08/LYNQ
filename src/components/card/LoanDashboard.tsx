@@ -41,8 +41,6 @@ const LoanDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const contractAddress = "0xcc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec";
-
   // Check wallet connection and load user data
   useEffect(() => {
     const checkWallet = async () => {
@@ -136,18 +134,6 @@ const LoanDashboard: React.FC = () => {
     }
   };
   
-  // Get loan details - placeholder for EVM implementation
-  const getLoanDetails = async (loanId: string, borrower: string): Promise<any | null> => {
-    try {
-      // Placeholder for EVM contract interaction
-      console.log("Getting loan details for:", loanId, borrower);
-      return null; // Return null for now
-    } catch (error: any) {
-      console.error(`Error getting loan details for ${loanId}:`, error);
-      return null;
-    }
-  };
-
   // Get loan status text
   const getLoanStatusText = (status: number): string => {
     switch (status) {
@@ -295,11 +281,11 @@ const LoanDashboard: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-white/70">Total Borrowed:</span>
-                        <span className="text-white font-semibold">{totalBorrowed.toFixed(2)} APT</span>
+                        <span className="text-white font-semibold">{totalBorrowed.toFixed(2)} ETH</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/70">Total Repaid:</span>
-                        <span className="text-green-400 font-semibold">{totalRepaid.toFixed(2)} APT</span>
+                        <span className="text-green-400 font-semibold">{totalRepaid.toFixed(2)} ETH</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/70">Active Loans:</span>
@@ -342,7 +328,7 @@ const LoanDashboard: React.FC = () => {
                         <div key={loan.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                           <div>
                             <p className="text-white font-semibold">Loan #{loan.id}</p>
-                            <p className="text-white/70 text-sm">{formatAmount(loan.amount)} APT</p>
+                            <p className="text-white/70 text-sm">{formatAmount(loan.amount)} ETH</p>
                           </div>
                           <div className="text-right">
                             <span className={`px-2 py-1 rounded text-xs font-semibold ${getLoanStatusColor(loan.status)}`}>

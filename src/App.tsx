@@ -9,6 +9,7 @@ import Features from "./components/landing/Features";
 import CTASection from "./components/landing/CTASection";
 import Reputation from "./components/landing/Reputation";
 import Footer from "./components/landing/Footer";
+import BuiltOnEthereum from "./components/landing/BuiltOnEthereum";
 
 // Lazy load heavy components for better performance
 import {
@@ -53,13 +54,6 @@ interface Coin {
   sparkline_in_7d?: SparklineData;
 }
 
-interface EthereumAccountResource {
-  type: string;
-  data: {
-    balance: string;
-  };
-}
-
 // Constants
 const COIN_LIST = [
   "bitcoin",
@@ -86,7 +80,6 @@ const API_ENDPOINTS = {
 } as const;
 
 const REQUEST_TIMEOUT = 10000;
-const ETH_BALANCE_METHOD = "eth_getBalance";
 
 function App() {
   // Navigation State
@@ -140,7 +133,7 @@ function App() {
       setIsLoadingBalance(true);
       setBalanceError(null);
 
-      const { controller, timeout } = createAbortController();
+      const { timeout } = createAbortController();
 
       try {
         // For demo purposes, we'll just set a placeholder balance
@@ -373,7 +366,10 @@ function App() {
                 <div className="lg:col-span-2 space-y-6">
                   <ErrorBoundary>
                     <Suspense fallback={<LoadingFallback minHeight="300px" />}>
-                      <LazyProfileDashboard />
+                      <LazyProfileDashboard 
+                        walletAddress={walletAddress}
+                        ethBalance={ethBalance}
+                      />
                     </Suspense>
                   </ErrorBoundary>
                   <Suspense fallback={<LoadingFallback minHeight="200px" />}>
@@ -535,7 +531,7 @@ function App() {
                   <LazyFaucetModule />
                 </Suspense>
                 <Suspense fallback={<LoadingFallback minHeight="150px" />}>
-                  {/* Built on Ethereum - placeholder for future component */}
+                  <BuiltOnEthereum />
                 </Suspense>
                 <CTASection
                   onNavigateToApp={() => setCurrentPage("marketplace")}

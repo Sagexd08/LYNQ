@@ -8,7 +8,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
   // Mock portfolio data
   const portfolioData = {
     totalValue: ethBalance ? ethBalance * 2500 + 1250 : 0,
-    apt: {
+    eth: {
       amount: ethBalance || 0,
       value: ethBalance ? ethBalance * 2500 : 0,
       change24h: 5.2
@@ -44,20 +44,20 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
 
       {/* Breakdown */}
       <div className="space-y-4 text-sm">
-        {/* APT */}
+        {/* ETH */}
         <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center font-bold text-sm text-white">
-              A
+              E
             </div>
             <div>
               <div className="font-medium text-white">Ethereum (ETH)</div>
-              <div className="text-white/70">{portfolioData.apt.amount.toFixed(4)} APT</div>
+              <div className="text-white/70">{portfolioData.eth.amount.toFixed(4)} ETH</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="font-medium text-white">${portfolioData.apt.value.toFixed(2)}</div>
-            <div className="text-green-400">+{portfolioData.apt.change24h}%</div>
+            <div className="font-medium text-white">${portfolioData.eth.value.toFixed(2)}</div>
+            <div className="text-green-400">+{portfolioData.eth.change24h}%</div>
           </div>
         </div>
 
@@ -85,8 +85,8 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
               S
             </div>
             <div>
-              <div className="font-medium text-white">Staked APT</div>
-              <div className="text-white/70">{portfolioData.staked.amount.toFixed(4)} APT</div>
+              <div className="font-medium text-white">Staked ETH</div>
+              <div className="text-white/70">{portfolioData.staked.amount.toFixed(4)} ETH</div>
             </div>
           </div>
           <div className="text-right">

@@ -7,7 +7,7 @@
 //     {
 //       id: 'L001',
 //       amount: 500,
-//       collateral: '2.5 APT',
+//       collateral: '2.5 ETH',
 //       interestRate: 8.5,
 //       dueDate: '2025-08-15',
 //       status: 'active',
@@ -144,7 +144,7 @@ const ActiveLoans: React.FC<ActiveLoansProps> = ({ walletAddress }) => {
     {
       id: 'L001',
       amount: 500,
-      collateral: '2.5 APT',
+      collateral: '2.5 ETH',
       interestRate: 8.5,
       dueDate: '2025-08-15',
       status: 'active',

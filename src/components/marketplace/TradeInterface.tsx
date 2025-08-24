@@ -16,7 +16,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
   const [tradeType, setTradeType] = useState<string>("borrow");
   const [amount, setAmount] = useState<string>("");
   const [duration, setDuration] = useState<string>("30");
-  const [collateralType, setCollateralType] = useState<string>("apt");
+  const [collateralType, setCollateralType] = useState<string>("eth");
 
   const durations = [
     { value: "7", label: "7 days", apr: "6.5%" },
@@ -27,8 +27,8 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
 
   const collateralOptions = [
     {
-      value: "apt",
-      label: "APT Token",
+      value: "eth",
+      label: "ETH Token",
       ltv: "80%",
       icon: <Wallet className="w-5 h-5 text-blue-400" />,
     },
