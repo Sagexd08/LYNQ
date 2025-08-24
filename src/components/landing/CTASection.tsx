@@ -14,7 +14,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
   const faqs = [
     {
       q: 'What makes [NAME] different from other DeFi platforms?',
-      a: 'We use on-chain reputation and stake to power trustless, secure lending on Aptos. No credit scores, no KYC.',
+      a: "We use on-chain reputation and stake to power trustless, secure lending on Ethereum. No credit scores, no KYC.",
     },
     {
       q: 'Can I withdraw from the faucet?',
@@ -26,7 +26,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
     },
     {
       q: 'What chains are supported?',
-      a: 'We’re built entirely on Aptos to take advantage of its high throughput and Move-powered security.',
+      a: "We're built entirely on Ethereum to take advantage of its security, decentralization, and established ecosystem.",
     },
   ];
 

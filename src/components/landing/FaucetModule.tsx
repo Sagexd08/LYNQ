@@ -80,7 +80,7 @@ export default function FaucetModule() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-white/10 rounded-xl border border-cyan-400/30 backdrop-blur-sm shadow-lg">
                 <div className="text-2xl font-bold text-cyan-400">1000</div>
-                <div className="text-sm text-gray-300">APT Tokens</div>
+                <div className="text-sm text-gray-300">ETH Tokens</div>
               </div>
               <div className="text-center p-4 bg-white/10 rounded-xl border border-purple-400/30 backdrop-blur-sm shadow-lg">
                 <div className="text-2xl font-bold text-purple-400">One-Time</div>

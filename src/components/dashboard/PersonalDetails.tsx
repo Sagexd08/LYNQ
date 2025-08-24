@@ -73,10 +73,10 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         )}
 
-        {/* APT Balance & USD */}
+        {/* ETH Balance & USD */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-white/60 mb-1">APT Balance</label>
+            <label className="block text-white/60 mb-1">ETH Balance</label>
             <div className="text-lg font-bold text-green-400">
               {isLoadingBalance ? (
                 <span className="animate-pulse">Loading...</span>
