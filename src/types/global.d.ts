@@ -73,21 +73,19 @@ interface BaseWalletProvider {
   isConnected?(): Promise<boolean>;
 }
 
+// Ethereum provider interface
+interface EthereumProvider {
+  isMetaMask?: boolean;
+  isCoinbaseWallet?: boolean;
+  request(args: { method: string; params?: any[] }): Promise<any>;
+  on(event: string, handler: (...args: any[]) => void): void;
+  removeListener(event: string, handler: (...args: any[]) => void): void;
+}
+
 declare global {
   interface Window {
-    // Aptos wallet providers with standardized interface
-    aptos?: BaseWalletProvider;
-    martian?: BaseWalletProvider;
-    pontem?: BaseWalletProvider;
-    fewcha?: BaseWalletProvider;
-    rise?: BaseWalletProvider;
-    nightly?: {
-      aptos?: BaseWalletProvider;
-    };
-    // Add more wallet providers as needed
-    petra?: BaseWalletProvider;
-    hippo?: BaseWalletProvider;
-    okx?: BaseWalletProvider;
+    // Ethereum wallet providers
+    ethereum?: EthereumProvider;
   }
 
   // Vite environment variables with better typing
@@ -101,15 +99,15 @@ declare global {
     readonly VITE_APP_VERSION?: string;
     readonly VITE_APP_DESCRIPTION?: string;
     
-    // Particle configuration
+    // Particle configuration (can be used for other wallet providers)
     readonly VITE_PARTICLE_PROJECT_ID?: string;
     readonly VITE_PARTICLE_CLIENT_KEY?: string;
     readonly VITE_PARTICLE_APP_ID?: string;
     
     // Network configuration
-    readonly VITE_DEFAULT_NETWORK?: 'mainnet' | 'testnet' | 'devnet';
-    readonly VITE_APTOS_NODE_URL?: string;
-    readonly VITE_APTOS_FAUCET_URL?: string;
+    readonly VITE_DEFAULT_NETWORK?: 'mainnet' | 'testnet' | 'sepolia';
+    readonly VITE_ETHEREUM_NODE_URL?: string;
+    readonly VITE_INFURA_PROJECT_ID?: string;
     
     // Feature flags
     readonly VITE_ENABLE_ANALYTICS?: string;

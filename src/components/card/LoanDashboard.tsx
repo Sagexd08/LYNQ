@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { AptosClient } from "aptos";
+// Placeholder for Web3 smart contract interaction
+// import { ethers } from "ethers";
 import LoanRequestForm from "./LoanRequestForm";
 import LoanManagementSystem from "./LoanManagementSystem";
 
@@ -41,17 +42,18 @@ const LoanDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const contractAddress = "0xcc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec";
-  const client = new AptosClient("https://fullnode.testnet.aptoslabs.com");
 
   // Check wallet connection and load user data
   useEffect(() => {
     const checkWallet = async () => {
       try {
-        if (window.aptos) {
-          const account = await window.aptos.account();
-          setUserAddress(account.address);
-          setIsWalletConnected(true);
-          await loadUserData(account.address);
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            setUserAddress(accounts[0]);
+            setIsWalletConnected(true);
+            await loadUserData(accounts[0]);
+          }
         } else {
           setIsWalletConnected(false);
         }
@@ -89,65 +91,26 @@ const LoanDashboard: React.FC = () => {
   // Check contract status and trust score
   const checkContractAndTrustScore = async (address: string) => {
     try {
-      const trustScorePayload = {
-        function: `${contractAddress}::elegent_defi_v2::get_trust_score`,
-        type_arguments: [],
-        arguments: [address],
-      };
+      // Placeholder for EVM contract interaction
+      console.log("Checking contract and trust score for:", address);
       
-      try {
-        const trustScoreResult = await client.view(trustScorePayload);
-        console.log("Trust score result:", trustScoreResult);
-        
-        setIsContractInitialized(true);
-        setHasTrustScore(true);
-        setTrustScoreData({
-          score: trustScoreResult[0] as string,
-          tier: trustScoreResult[1] as string,
-          loanCount: "0", // Will be updated from loans
-          totalBorrowed: "0", // Will be calculated from loans
-          totalRepaid: "0", // Will be calculated from loans
-          defaults: "0", // Will be calculated from loans
-          lastUpdated: trustScoreResult[0] as string, // Using score as timestamp for now
-          stakedAmount: "0", // Will be fetched separately if needed
-          walletAge: "0", // Will be calculated
-          earlyRepayments: "0", // Will be calculated from loans
-          refinanceCount: "0", // Will be calculated from loans
-        });
-        
-        // Get max loan amount
-        try {
-          const maxLoanPayload = {
-            function: `${contractAddress}::elegent_defi_v2::get_max_loan_amount`,
-            type_arguments: [],
-            arguments: [address],
-          };
-          
-          const maxLoanResult = await client.view(maxLoanPayload);
-          if (maxLoanResult && maxLoanResult[0]) {
-            const maxLoanInAPT = (parseInt(String(maxLoanResult[0])) / 100000000).toFixed(2);
-            setMaxLoanAmount(maxLoanInAPT);
-          }
-        } catch (maxLoanError) {
-          console.log("Could not fetch max loan from contract, using default 100 APT");
-          setMaxLoanAmount("100");
-        }
-        
-      } catch (trustScoreError: any) {
-        console.log("Trust score error:", trustScoreError);
-        
-        const errorMessage = trustScoreError.message || '';
-        if (errorMessage.includes("E_NOT_INITIALIZED") || 
-            errorMessage.includes("0x60001") ||
-            errorMessage.includes("not found")) {
-          setIsContractInitialized(false);
-          setHasTrustScore(false);
-        } else {
-          setIsContractInitialized(true);
-          setHasTrustScore(false);
-        }
-        setMaxLoanAmount("100");
-      }
+      // Mock data for demonstration
+      setIsContractInitialized(true);
+      setHasTrustScore(true);
+      setTrustScoreData({
+        score: "750",
+        tier: "Good",
+        loanCount: "0",
+        totalBorrowed: "0",
+        totalRepaid: "0",
+        defaults: "0",
+        lastUpdated: Date.now().toString(),
+        stakedAmount: "0",
+        walletAge: "0",
+        earlyRepayments: "0",
+        refinanceCount: "0",
+      });
+      setMaxLoanAmount("100");
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -160,78 +123,26 @@ const LoanDashboard: React.FC = () => {
   // Load user loans
   const loadUserLoans = async (address: string) => {
     try {
-      const payload = {
-        function: `${contractAddress}::elegent_defi_v2::get_user_loans`,
-        type_arguments: [],
-        arguments: [address, address],
-      };
-
-      const result = await client.view(payload);
-      const loanIds = result[0] as string[];
-
-      const loans: any[] = [];
+      // Placeholder for EVM contract interaction
+      console.log("Loading user loans for:", address);
       
-      for (const loanId of loanIds) {
-        try {
-          const loanDetails = await getLoanDetails(loanId, address);
-          if (loanDetails) {
-            loans.push(loanDetails);
-          }
-        } catch (error) {
-          console.error(`Error loading loan ${loanId}:`, error);
-        }
-      }
-
-      setUserLoans(loans);
+      // Mock loan data for demonstration
+      const mockLoans: any[] = [];
+      setUserLoans(mockLoans);
       
-      // Update trust score data with loan statistics
-      if (trustScoreData && loans.length > 0) {
-        const totalBorrowed = loans.reduce((sum, loan) => sum + parseInt(loan.amount), 0);
-        const totalRepaid = loans.filter(loan => loan.status === 1).reduce((sum, loan) => sum + parseInt(loan.amount), 0);
-        const defaults = loans.filter(loan => loan.status === 2).length;
-        const earlyRepayments = loans.filter(loan => loan.status === 1 && parseInt(loan.dueDate) > Date.now() / 1000).length;
-        
-        setTrustScoreData(prev => prev ? {
-          ...prev,
-          loanCount: loans.length.toString(),
-          totalBorrowed: totalBorrowed.toString(),
-          totalRepaid: totalRepaid.toString(),
-          defaults: defaults.toString(),
-          earlyRepayments: earlyRepayments.toString(),
-        } : null);
-      }
-      
-    } catch (err: any) {
-      console.error("Error loading user loans:", err);
+    } catch (error: any) {
+      console.error("Error loading user loans:", error);
+      setUserLoans([]);
     }
   };
-
-  // Get loan details
+  
+  // Get loan details - placeholder for EVM implementation
   const getLoanDetails = async (loanId: string, borrower: string): Promise<any | null> => {
     try {
-      const payload = {
-        function: `${contractAddress}::elegent_defi_v2::get_loan_details`,
-        type_arguments: [],
-        arguments: [loanId, borrower],
-      };
-
-      const result = await client.view(payload);
-      
-      return {
-        id: loanId,
-        borrower: result[1] as string,
-        tokenType: "APT",
-        amount: result[2] as string,
-        interestAmount: result[3] as string,
-        dynamicInterestRate: result[4] as string,
-        dueDate: result[5] as string,
-        status: parseInt(result[6] as string),
-        createdAt: result[7] as string,
-        lastExtended: result[8] as string,
-        extensionCount: result[9] as string,
-        collateralAmount: result[10] as string,
-      };
-    } catch (error) {
+      // Placeholder for EVM contract interaction
+      console.log("Getting loan details for:", loanId, borrower);
+      return null; // Return null for now
+    } catch (error: any) {
       console.error(`Error getting loan details for ${loanId}:`, error);
       return null;
     }
@@ -279,7 +190,7 @@ const LoanDashboard: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🏦 Elegant DeFi Loan Platform</h1>
-          <p className="text-white/70">Decentralized lending with trust-based scoring on Aptos</p>
+          <p className="text-white/70">Decentralized lending with trust-based scoring on Ethereum</p>
         </div>
 
         {/* Wallet Status */}
@@ -367,7 +278,7 @@ const LoanDashboard: React.FC = () => {
                       </div>
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Max Loan</p>
-                        <p className="text-xl font-semibold text-purple-400">{maxLoanAmount} APT</p>
+                        <p className="text-xl font-semibold text-purple-400">{maxLoanAmount} ETH</p>
                       </div>
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Loans</p>

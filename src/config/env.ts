@@ -63,14 +63,14 @@ const parseEnvConfig = (): EnvironmentConfig => {
 export const ENV_CONFIG = parseEnvConfig();
 
 /**
- * Particle Network configuration
+ * Ethereum Network configuration
  */
-export const PARTICLE_CONFIG = {
+export const ETHEREUM_CONFIG = {
   projectId: ENV_CONFIG.PARTICLE_PROJECT_ID,
   clientKey: ENV_CONFIG.PARTICLE_CLIENT_KEY,
   appId: ENV_CONFIG.PARTICLE_APP_ID,
-  chainName: 'Aptos',
-  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 2 : 1, // 1 for mainnet, 2 for testnet
+  chainName: 'Ethereum',
+  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 11155111 : 1, // 1 for mainnet, 11155111 for sepolia
 } as const;
 
 /**
@@ -90,8 +90,8 @@ export const APP_CONFIG = {
  * Network endpoints configuration
  */
 export const NETWORK_ENDPOINTS = {
-  mainnet: 'https://fullnode.mainnet.aptoslabs.com/v1',
-  testnet: 'https://fullnode.testnet.aptoslabs.com/v1',
+  mainnet: 'https://mainnet.infura.io/v3/',
+  testnet: 'https://sepolia.infura.io/v3/',
 } as const;
 
 /**

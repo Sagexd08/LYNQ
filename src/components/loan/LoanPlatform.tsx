@@ -8,9 +8,9 @@ const LoanPlatform: React.FC = () => {
   React.useEffect(() => {
     const checkWallet = async () => {
       try {
-        if (window.aptos) {
-          const account = await window.aptos.account();
-          setIsConnected(true);
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          setIsConnected(accounts.length > 0);
         } else {
           setIsConnected(false);
         }
@@ -35,7 +35,7 @@ const LoanPlatform: React.FC = () => {
               </span>
             </h1>
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-              Decentralized lending powered by trust-based scoring on the Aptos blockchain. 
+              Decentralized lending powered by trust-based scoring on the Ethereum blockchain. 
               Get instant loans with competitive rates and flexible terms.
             </p>
             

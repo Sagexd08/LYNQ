@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { AptosClient } from "aptos";
+import { ethers } from "ethers";
 
 // Utility functions for validation
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
   // Remove 0x prefix if present
   const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
-  // Check if it's a valid hex string with correct length (64 characters for Aptos addresses)
-  return /^[0-9a-fA-F]{64}$/.test(cleanAddress);
+  // Check if it's a valid hex string with correct length (40 characters for Ethereum addresses)
+  return /^[0-9a-fA-F]{40}$/.test(cleanAddress);
 };
 
 const formatAddress = (address: string): string => {
@@ -53,17 +53,17 @@ const LoanRequestForm: React.FC = () => {
   const [maxLoanAmount, setMaxLoanAmount] = useState<string>("100");
   const [isWalletConnected, setIsWalletConnected] = useState<boolean>(false);
 
-  const client = new AptosClient("https://fullnode.testnet.aptoslabs.com");
-
   // Check wallet connection and get user address
   useEffect(() => {
     const checkWallet = async () => {
       try {
-        if (window.aptos) {
-          const account = await window.aptos.account();
-          setUserAddress(account.address);
-          setIsWalletConnected(true);
-          await checkContractAndUserStatus(account.address);
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            setUserAddress(accounts[0]);
+            setIsWalletConnected(true);
+            await checkContractAndUserStatus(accounts[0]);
+          }
         } else {
           setIsWalletConnected(false);
         }
@@ -85,55 +85,15 @@ const LoanRequestForm: React.FC = () => {
         return;
       }
 
-      const trustScorePayload = {
-        function: `${contractAddress}::elegent_defi_v2::get_trust_score`,
-        type_arguments: [],
-        arguments: [address],
-      };
+      // Placeholder for EVM contract interaction
+      // TODO: Implement actual smart contract calls
+      console.log("Checking contract status for address:", address);
       
-      try {
-        const trustScoreResult = await client.view(trustScorePayload);
-        console.log("Trust score result:", trustScoreResult);
-        
-        setIsContractInitialized(true);
-        setHasTrustScore(true);
-        setTrustScoreData(trustScoreResult);
-        
-        // Get max loan amount
-        try {
-          const maxLoanPayload = {
-            function: `${contractAddress}::elegent_defi_v2::get_max_loan_amount`,
-            type_arguments: [],
-            arguments: [address],
-          };
-          
-          const maxLoanResult = await client.view(maxLoanPayload);
-          if (maxLoanResult && maxLoanResult[0]) {
-            const maxLoanInAPT = (parseInt(String(maxLoanResult[0])) / 100000000).toFixed(2);
-            setMaxLoanAmount(maxLoanInAPT);
-          }
-        } catch (maxLoanError) {
-          console.log("Could not fetch max loan from contract, using default 100 APT");
-          setMaxLoanAmount("100");
-        }
-        
-      } catch (trustScoreError: any) {
-        console.log("Trust score error:", trustScoreError);
-        
-        // Check for specific error codes
-        const errorMessage = trustScoreError.message || '';
-        if (errorMessage.includes("E_NOT_INITIALIZED") || 
-            errorMessage.includes("0x60001") ||
-            errorMessage.includes("not found")) {
-          setIsContractInitialized(false);
-          setHasTrustScore(false);
-        } else {
-          // Contract is initialized but user doesn't have trust score
-          setIsContractInitialized(true);
-          setHasTrustScore(false);
-        }
-        setMaxLoanAmount("100");
-      }
+      // For now, simulate contract is initialized and user has trust score
+      setIsContractInitialized(true);
+      setHasTrustScore(true);
+      setTrustScoreData({ score: 750 }); // Mock data
+      setMaxLoanAmount("100"); // Default max loan amount
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -151,33 +111,33 @@ const LoanRequestForm: React.FC = () => {
     setValidationErrors({});
 
     try {
-      if (!window.aptos) throw new Error("Wallet not connected");
+      if (!window.ethereum) throw new Error("Wallet not connected");
 
-      const payload = {
-        type: "entry_function_payload",
-        function: `${contractAddress}::elegent_defi_v2::initialize`,
-        type_arguments: [],
-        arguments: [],
-      };
-
-      console.log("Initializing contract...");
-      const tx = await window.aptos.signAndSubmitTransaction(payload);
-      console.log("Initialize tx:", tx);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       
-      await client.waitForTransaction(tx.hash);
-
+      // Placeholder for smart contract initialization
+      // TODO: Replace with actual contract address and ABI
+      console.log("Initializing contract...");
+      
+      // Mock transaction for demonstration
+      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
+      
       setIsContractInitialized(true);
-      setTxHash(tx.hash);
+      setTxHash(mockTxHash);
       
       // Refresh status
-      await checkContractAndUserStatus(userAddress);
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        await checkContractAndUserStatus(accounts[0]);
+      }
       
     } catch (err: any) {
       console.error("Initialization error:", err);
       let errorMessage = "Initialization failed.";
       
       if (err.message) {
-        if (err.message.includes("insufficient balance")) {
+        if (err.message.includes("insufficient")) {
           errorMessage = "Insufficient balance to initialize contract.";
         } else if (err.message.includes("already initialized")) {
           errorMessage = "Contract is already initialized.";
@@ -200,26 +160,25 @@ const LoanRequestForm: React.FC = () => {
     setValidationErrors({});
 
     try {
-      if (!window.aptos) throw new Error("Wallet not connected");
+      if (!window.ethereum) throw new Error("Wallet not connected");
 
-      const payload = {
-        type: "entry_function_payload",
-        function: `${contractAddress}::elegent_defi_v2::create_trust_score`,
-        type_arguments: [],
-        arguments: [],
-      };
-
-      console.log("Creating trust score...");
-      const tx = await window.aptos.signAndSubmitTransaction(payload);
-      console.log("Trust score tx:", tx);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       
-      await client.waitForTransaction(tx.hash);
+      // Placeholder for smart contract interaction
+      console.log("Creating trust score...");
+      
+      // Mock transaction for demonstration
+      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
 
       setHasTrustScore(true);
-      setTxHash(tx.hash);
+      setTxHash(mockTxHash);
       
       // Refresh status
-      await checkContractAndUserStatus(userAddress);
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        await checkContractAndUserStatus(accounts[0]);
+      }
       
     } catch (err: any) {
       console.error("Trust score creation error:", err);
@@ -228,7 +187,7 @@ const LoanRequestForm: React.FC = () => {
       if (err.message) {
         if (err.message.includes("already exists")) {
           errorMessage = "Trust score already exists for this account.";
-        } else if (err.message.includes("insufficient balance")) {
+        } else if (err.message.includes("insufficient")) {
           errorMessage = "Insufficient balance to create trust score.";
         } else {
           errorMessage = err.message;
@@ -255,7 +214,7 @@ const LoanRequestForm: React.FC = () => {
     if (collateralAddress.trim()) {
       const formattedAddress = formatAddress(collateralAddress.trim());
       if (!isValidHexAddress(formattedAddress)) {
-        errors.collateralAddress = "Invalid collateral address format. Must be a valid Aptos address.";
+        errors.collateralAddress = "Invalid collateral address format. Must be a valid Ethereum address.";
       }
     }
 
@@ -285,12 +244,15 @@ const LoanRequestForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!window.aptos) throw new Error("Wallet not connected");
+      if (!window.ethereum) throw new Error("Wallet not connected");
       if (!isContractInitialized) throw new Error("Contract not initialized");
       if (!hasTrustScore) throw new Error("Trust score required");
 
-      // Convert amount to octas (1 APT = 10^8 octas)
-      const amountInOctas = Math.floor(parseFloat(amount) * 100000000);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      // Convert amount to Wei (smallest unit of ETH)
+      const amountInWei = ethers.parseEther(amount);
       
       // Format collateral address properly
       let collateralAddr = contractAddress; // default to contract address
@@ -301,24 +263,17 @@ const LoanRequestForm: React.FC = () => {
         }
       }
 
-      const payload = {
-        type: "entry_function_payload",
-        function: `${contractAddress}::elegent_defi_v2::request_loan`,
-        type_arguments: [],
-        arguments: [
-          amountInOctas.toString(), // u64 amount
-          purpose || tokenType,      // string token_type
-          collateralAddr,           // address (collateral address)
-        ],
-      };
-
-      console.log("Loan request payload:", payload);
-      const tx = await window.aptos.signAndSubmitTransaction(payload);
-      console.log("Loan request tx:", tx);
+      // Placeholder for smart contract interaction
+      console.log("Loan request:", {
+        amount: amountInWei.toString(),
+        purpose: purpose || tokenType,
+        collateral: collateralAddr
+      });
       
-      await client.waitForTransaction(tx.hash);
+      // Mock transaction for demonstration
+      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
 
-      setTxHash(tx.hash);
+      setTxHash(mockTxHash);
       
       // Reset form
       setAmount("");
@@ -326,14 +281,17 @@ const LoanRequestForm: React.FC = () => {
       setCollateralAddress("");
       
       // Refresh user data
-      await checkContractAndUserStatus(userAddress);
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        await checkContractAndUserStatus(accounts[0]);
+      }
       
     } catch (err: any) {
       console.error("Loan request error:", err);
       let errorMessage = "Loan request failed.";
       
       if (err.message) {
-        if (err.message.includes("insufficient balance")) {
+        if (err.message.includes("insufficient")) {
           errorMessage = "Insufficient balance to request loan.";
         } else if (err.message.includes("exceeds maximum")) {
           errorMessage = "Loan amount exceeds maximum allowed.";
@@ -591,7 +549,7 @@ const LoanRequestForm: React.FC = () => {
             View on Explorer:{" "}
             <a
               className="underline hover:text-green-200 font-mono"
-              href={`https://explorer.aptoslabs.com/txn/${txHash}?network=testnet`}
+              href={`https://etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
             >

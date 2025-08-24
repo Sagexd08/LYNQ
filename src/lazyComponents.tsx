@@ -80,10 +80,6 @@ export const LazyFaucetModule = lazy((): Promise<{ default: ComponentType<any> }
   import('./components/landing/FaucetModule')
 );
 
-export const LazyBuiltOnAptos = lazy((): Promise<{ default: ComponentType<any> }> => 
-  import('./components/landing/BuiltOnAptos')
-);
-
 // Enhanced HOC with better error boundaries and loading states
 export function withSuspense<T extends LazyComponentProps>(
   Component: ComponentType<T>,
@@ -190,5 +186,4 @@ export const LazyComponents = {
   
   // Landing
   FaucetModule: LazyFaucetModule,
-  BuiltOnAptos: LazyBuiltOnAptos,
 } as const;

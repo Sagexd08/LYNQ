@@ -59,7 +59,7 @@ export default function FaucetModule() {
                 Developer Faucet Module
               </h2>
               <p className="text-xl text-gray-200">
-                New to Web3? Get non-withdrawable APT tokens to start building your reputation on Aptos blockchain.
+                New to Web3? Get testnet ETH tokens to start building your reputation on Ethereum blockchain.
               </p>
             </div>
 

@@ -26,7 +26,6 @@ import {
   LazyLoanEligibilityMeter,
   LazyWalletConnectionModal,
   LazyFaucetModule,
-  LazyBuiltOnAptos,
 } from "./lazyComponents";
 
 import {
@@ -54,12 +53,10 @@ interface Coin {
   sparkline_in_7d?: SparklineData;
 }
 
-interface AptosAccountResource {
+interface EthereumAccountResource {
   type: string;
   data: {
-    coin: {
-      value: string;
-    };
+    balance: string;
   };
 }
 
@@ -83,13 +80,13 @@ const COIN_LIST = [
 ].join(",");
 
 const API_ENDPOINTS = {
-  MAINNET: "https://fullnode.mainnet.aptoslabs.com/v1",
-  TESTNET: "https://fullnode.testnet.aptoslabs.com/v1",
+  MAINNET: "https://mainnet.infura.io/v3/",
+  TESTNET: "https://sepolia.infura.io/v3/",
   COINGECKO: "https://api.coingecko.com/api/v3/coins/markets"
 } as const;
 
 const REQUEST_TIMEOUT = 10000;
-const APTOS_COIN_TYPE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>";
+const ETH_BALANCE_METHOD = "eth_getBalance";
 
 function App() {
   // Navigation State
@@ -99,7 +96,7 @@ function App() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [walletType, setWalletType] = useState<string>("");
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
-  const [aptosBalance, setAptosBalance] = useState<number>(0);
+  const [ethBalance, setEthBalance] = useState<number>(0);
   const [useTestnet, setUseTestnet] = useState<boolean>(false);
   const [isLoadingBalance, setIsLoadingBalance] = useState<boolean>(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
@@ -133,10 +130,10 @@ function App() {
   }, []);
 
   // Wallet Balance Fetching
-  const fetchAptosBalance = useCallback(
+  const fetchEthBalance = useCallback(
     async (address: string): Promise<void> => {
       if (!address) {
-        setAptosBalance(0);
+        setEthBalance(0);
         return;
       }
 
@@ -146,26 +143,13 @@ function App() {
       const { controller, timeout } = createAbortController();
 
       try {
-        const url = useTestnet ? API_ENDPOINTS.TESTNET : API_ENDPOINTS.MAINNET;
-        const response = await fetch(`${url}/accounts/${address}/resources`, {
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data: AptosAccountResource[] = await response.json();
-        const coinResource = data.find((item) => item.type === APTOS_COIN_TYPE);
-        const balance = coinResource?.data?.coin?.value;
-        
-        setAptosBalance(balance ? parseInt(balance, 10) / 1e8 : 0);
+        // For demo purposes, we'll just set a placeholder balance
+        // In a real implementation, you'd use ethers.js or web3.js to fetch the actual balance
+        setEthBalance(1.5); // Placeholder ETH balance
       } catch (error) {
         const errorMessage = handleApiError(error);
         setBalanceError(errorMessage);
-        setAptosBalance(0);
+        setEthBalance(0);
       } finally {
         clearTimeout(timeout);
         setIsLoadingBalance(false);
@@ -214,29 +198,29 @@ function App() {
         setWalletAddress(walletData.address);
         setWalletType(walletData.walletType || "");
         setConnectedAt(walletData.connectedAt || new Date().toISOString());
-        fetchAptosBalance(walletData.address);
+        fetchEthBalance(walletData.address);
       } else {
         handleWalletDisconnect();
       }
       setShowWalletModal(false);
     },
-    [fetchAptosBalance]
+    [fetchEthBalance]
   );
 
   const handleWalletDisconnect = useCallback((): void => {
     setWalletAddress("");
     setWalletType("");
     setConnectedAt(null);
-    setAptosBalance(0);
+    setEthBalance(0);
     clearSavedWalletConnection();
   }, []);
 
   const handleToggleNetwork = useCallback((): void => {
     setUseTestnet((prev) => !prev);
     if (walletAddress) {
-      fetchAptosBalance(walletAddress);
+      fetchEthBalance(walletAddress);
     }
-  }, [walletAddress, fetchAptosBalance]);
+  }, [walletAddress, fetchEthBalance]);
 
   const handleNavigationChange = useCallback((page: string): void => {
     const validPages = ["landing", "dashboard", "marketplace", "cards"] as const;
@@ -256,9 +240,9 @@ function App() {
       setWalletAddress(savedConnection.address);
       setWalletType(savedConnection.walletType || "");
       setConnectedAt(savedConnection.connectedAt || new Date().toISOString());
-      fetchAptosBalance(savedConnection.address);
+      fetchEthBalance(savedConnection.address);
     }
-  }, [fetchAptosBalance]);
+  }, [fetchEthBalance]);
 
   useEffect(() => {
     const dataRequiredPages = ["marketplace", "dashboard", "cards"];
@@ -295,13 +279,13 @@ function App() {
   const walletData = useMemo(
     () => ({
       address: walletAddress,
-      aptosBalance,
+      ethBalance,
       walletType,
       connectedAt,
       isLoadingBalance,
       balanceError,
     }),
-    [walletAddress, aptosBalance, walletType, connectedAt, isLoadingBalance, balanceError]
+    [walletAddress, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError]
   );
 
   const marketStats = useMemo(() => {
@@ -551,7 +535,7 @@ function App() {
                   <LazyFaucetModule />
                 </Suspense>
                 <Suspense fallback={<LoadingFallback minHeight="150px" />}>
-                  <LazyBuiltOnAptos />
+                  {/* Built on Ethereum - placeholder for future component */}
                 </Suspense>
                 <CTASection
                   onNavigateToApp={() => setCurrentPage("marketplace")}

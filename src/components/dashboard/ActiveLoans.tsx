@@ -16,7 +16,7 @@
 //     {
 //       id: 'L002',
 //       amount: 1200,
-//       collateral: 'Aptos Monkey NFT',
+//       collateral: 'Ethereum NFT',
 //       interestRate: 12.0,
 //       dueDate: '2025-07-30',
 //       status: 'active',
@@ -153,7 +153,7 @@ const ActiveLoans: React.FC<ActiveLoansProps> = ({ walletAddress }) => {
     {
       id: 'L002',
       amount: 1200,
-      collateral: 'Aptos Monkey NFT',
+      collateral: 'Ethereum NFT',
       interestRate: 12.0,
       dueDate: '2025-07-30',
       status: 'active',
