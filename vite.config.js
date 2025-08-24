@@ -31,11 +31,12 @@ export default defineConfig(({ mode }) => {
               return 'chart-vendor';
             }
             
-            // Group Aptos and blockchain dependencies
-            if (id.includes('node_modules/@aptos-labs') || 
-                id.includes('node_modules/aptos') ||
+            // Group Web3 and blockchain dependencies
+            if (id.includes('node_modules/ethers') || 
+                id.includes('node_modules/@metamask') ||
+                id.includes('node_modules/@coinbase') ||
                 id.includes('node_modules/axios')) {
-              return 'aptos-vendor';
+              return 'web3-vendor';
             }
             
             // Split animation libraries into smaller chunks
@@ -99,7 +100,6 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules') && 
                 !id.includes('react') &&
                 !id.includes('chart') &&
-                !id.includes('@aptos-labs') &&
                 !id.includes('framer-motion') &&
                 !id.includes('@splinetool') &&
                 !id.includes('lucide-react')) {

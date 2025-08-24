@@ -1,25 +1,25 @@
 // src/components/dashboard/BalanceOverview.tsx
 
 interface BalanceOverviewProps {
-  aptosBalance?: number;
+  ethBalance?: number;
 }
 
-const BalanceOverview: React.FC<BalanceOverviewProps> = ({ aptosBalance }) => {
+const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
   // Mock portfolio data
   const portfolioData = {
-    totalValue: aptosBalance ? aptosBalance * 8.5 + 1250 : 0,
+    totalValue: ethBalance ? ethBalance * 2500 + 1250 : 0,
     apt: {
-      amount: aptosBalance || 0,
-      value: aptosBalance ? aptosBalance * 8.5 : 0,
+      amount: ethBalance || 0,
+      value: ethBalance ? ethBalance * 2500 : 0,
       change24h: 5.2
     },
     nfts: {
-      count: aptosBalance ? 3 : 0,
-      value: aptosBalance ? 850 : 0
+      count: ethBalance ? 3 : 0,
+      value: ethBalance ? 850 : 0
     },
     staked: {
-      amount: aptosBalance ? aptosBalance * 0.3 : 0,
-      value: aptosBalance ? aptosBalance * 0.3 * 8.5 : 0,
+      amount: ethBalance ? ethBalance * 0.3 : 0,
+      value: ethBalance ? ethBalance * 0.3 * 2500 : 0,
       apy: 12.4
     }
   };
@@ -51,7 +51,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ aptosBalance }) => {
               A
             </div>
             <div>
-              <div className="font-medium text-white">Aptos (APT)</div>
+              <div className="font-medium text-white">Ethereum (ETH)</div>
               <div className="text-white/70">{portfolioData.apt.amount.toFixed(4)} APT</div>
             </div>
           </div>

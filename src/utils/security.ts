@@ -10,7 +10,7 @@ export const SECURITY_CONFIG = {
     'script-src': ["'self'", "'unsafe-inline'"],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", "data:", "https:"],
-    'connect-src': ["'self'", "https://api.coingecko.com", "https://fullnode.mainnet.aptoslabs.com", "https://fullnode.testnet.aptoslabs.com"],
+    'connect-src': ["'self'", "https://api.coingecko.com", "https://mainnet.infura.io", "https://sepolia.infura.io"],
     'font-src': ["'self'"],
     'frame-src': ["'none'"],
     'object-src': ["'none'"],
@@ -19,8 +19,8 @@ export const SECURITY_CONFIG = {
   // Allowed API endpoints (whitelist)
   ALLOWED_APIS: [
     'https://api.coingecko.com/api/v3/coins/markets',
-    'https://fullnode.mainnet.aptoslabs.com/v1',
-    'https://fullnode.testnet.aptoslabs.com/v1',
+    'https://mainnet.infura.io/v3',
+    'https://sepolia.infura.io/v3',
   ] as const,
   
   // Input validation patterns

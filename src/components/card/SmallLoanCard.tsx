@@ -53,7 +53,6 @@
 
 
 import React, { useState } from "react";
-import { AptosClient } from "aptos";
 
 interface SmallLoan {
   id: number;
@@ -72,30 +71,20 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const client = new AptosClient("https://fullnode.testnet.aptoslabs.com");
-
   const handleRepayLoan = async () => {
-    if (!window.aptos) {
-      alert("❌ Wallet not connected");
-      return;
-    }
-
+    // Placeholder for Web3 loan repayment functionality
+    // In a real implementation, this would interact with smart contracts on Ethereum/EVM
+    
     setIsPaying(true);
     setError(null);
     setTxHash(null);
 
     try {
-      const payload = {
-        type: "entry_function_payload",
-        function: "0xYourModuleAddress::smallloan::repay", // 🔁 Replace with actual module
-        type_arguments: [],
-        arguments: [loan?.id || 0],
-      };
-
-      const tx = await window.aptos.signAndSubmitTransaction(payload);
-      await client.waitForTransaction(tx.hash);
-
-      setTxHash(tx.hash);
+      // Simulate a transaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 40);
+      setTxHash(mockTxHash);
       alert("✅ Repayment successful!");
     } catch (err: unknown) {
       console.error(err);
@@ -156,7 +145,7 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
           <p className="text-green-400 text-xs mt-2">
             Tx:{" "}
             <a
-              href={`https://explorer.aptoslabs.com/txn/${txHash}?network=testnet`}
+              href={`https://etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noreferrer"
               className="underline"

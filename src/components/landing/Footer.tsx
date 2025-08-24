@@ -9,7 +9,7 @@ export default function Footer() {
           <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
             LYNQ
           </h3>
-          <p className="mt-2 text-sm text-white/70">Borrow. Build. Belong. DeFi on Aptos.</p>
+          <p className="mt-2 text-sm text-white/70">Borrow. Build. Belong. DeFi on Ethereum.</p>
         </div>
 
         {/* Right - Links + Socials */}
@@ -19,7 +19,7 @@ export default function Footer() {
             <a href="#features" className="hover:text-accent transition">Features</a>
             <a href="#reputation" className="hover:text-accent transition">Reputation</a>
             <a href="#faucet" className="hover:text-accent transition">Faucet</a>
-            <a href="#built-on-aptos" className="hover:text-accent transition">Built on Aptos</a>
+            <a href="#built-on-ethereum" className="hover:text-accent transition">Built on Ethereum</a>
             <a href="#faq" className="hover:text-accent transition">FAQ</a>
           </div>
 
