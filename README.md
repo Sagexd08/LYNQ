@@ -95,7 +95,7 @@ cp .env.example .env
 ## Smart Contract Information
 
 ### Contract Details
-- **Contract Address**: `cc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec`
+- **Contract Address**: `0x2D16943a0DB5363f0Ea583F5b4541d4a7fFaae50`
 - **Transaction Hash**: `0x05ba71a35eb4ce22aca3ab299f2ccf1e08690c779a5bb9fbc91bb6d48a14fd81`
 - **Gas Used**: 5,978 units
 - **Gas Unit Price**: 100
