@@ -17,7 +17,7 @@ const Transaction = () => {
     setStatus("");
 
     try {
-      // Simulate sending transaction (replace with Web3 call or backend API)
+      
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setStatus("✅ Transaction sent successfully!");

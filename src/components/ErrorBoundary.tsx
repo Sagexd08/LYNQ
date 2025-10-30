@@ -14,9 +14,7 @@ interface ErrorBoundaryState {
   errorId: string | null;
 }
 
-/**
- * Enhanced Error Boundary component with better error handling and reporting
- */
+
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryCount = 0;
   private readonly maxRetries = 3;
@@ -32,7 +30,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    // Generate unique error ID for tracking
+    
     const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     return { 
@@ -43,10 +41,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Store error info in state
+    
     this.setState({ errorInfo });
 
-    // Enhanced error logging
+    
     const errorDetails = {
       message: error.message,
       stack: error.stack,
@@ -58,7 +56,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       errorId: this.state.errorId,
     };
 
-    // Log to console in development
+    
     if (process.env.NODE_ENV === 'development') {
       console.group('🚨 Error Boundary Caught Error');
       console.error('Error:', error);
@@ -67,11 +65,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       console.groupEnd();
     }
 
-    // Call custom error handler if provided
+    
     this.props.onError?.(error, errorInfo);
 
-    // In production, you might want to send this to an error reporting service
-    // Example: Sentry.captureException(error, { extra: errorDetails });
+    
+    
   }
 
   private handleRetry = (): void => {
@@ -120,12 +118,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   render(): ReactNode {
     if (this.state.hasError) {
-      // Use custom fallback if provided
+      
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
+      
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
           <div className="text-center max-w-lg">

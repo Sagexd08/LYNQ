@@ -30,7 +30,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Initialize repayment service
+  
   useEffect(() => {
     const initService = async () => {
       if (loan?.contractAddress && typeof window !== 'undefined' && window.ethereum) {
@@ -40,7 +40,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
           await service.connectSigner();
           setRepaymentService(service);
           
-          // Fetch loan details
+          
           const details = await service.getLoanDetails(loan.id);
           setLoanDetails(details);
         } catch (err) {
@@ -74,10 +74,10 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         setSuccess(`Payment successful! Transaction: ${tx.hash}`);
         setPaymentAmount('');
         
-        // Wait for confirmation
+        
         await tx.wait();
         
-        // Refresh loan details
+        
         const updatedDetails = await repaymentService.getLoanDetails(loan.id);
         setLoanDetails(updatedDetails);
       }
@@ -99,7 +99,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
   return (
     <div className="w-full bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10 space-y-6">
       
-      {/* Header */}
+      {}
       <div className="flex justify-between items-start">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white">
@@ -120,7 +120,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </span>
       </div>
 
-      {/* Principal Amount */}
+      {}
       <div className="bg-white/5 border border-cyan-400/10 rounded-lg p-4 text-center shadow-inner shadow-cyan-500/5">
         <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-1">
           {loanDetails ? formatCurrency(ethers.formatEther(loanDetails.remainingBalance)) : (loan?.amount || '$0')}
@@ -130,7 +130,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </p>
       </div>
 
-      {/* Details Grid */}
+      {}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className="text-white/60 text-xs">Interest Rate</p>
@@ -146,7 +146,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       </div>
 
-      {/* Additional Details */}
+      {}
       {loanDetails && (
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -164,7 +164,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       )}
 
-      {/* Error/Success Messages */}
+      {}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
           {error}
@@ -177,11 +177,11 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       )}
 
-      {/* Payment Section */}
+      {}
       <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-4">
         <h3 className="text-lg font-semibold text-white">Make Payment</h3>
         
-        {/* Payment Type Selection */}
+        {}
         <div className="flex space-x-4">
           <button
             onClick={() => setPaymentType('partial')}
@@ -205,7 +205,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
           </button>
         </div>
 
-        {/* Amount Input (for partial payments) */}
+        {}
         {paymentType === 'partial' && (
           <div>
             <label className="block text-white/60 text-xs mb-2">Payment Amount (ETH)</label>
@@ -219,7 +219,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
           </div>
         )}
 
-        {/* Payment Button */}
+        {}
         <button
           onClick={handlePayment}
           disabled={isProcessing || (!paymentAmount && paymentType === 'partial')}

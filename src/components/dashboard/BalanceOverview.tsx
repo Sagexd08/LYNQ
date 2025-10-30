@@ -1,11 +1,11 @@
-// src/components/dashboard/BalanceOverview.tsx
+
 
 interface BalanceOverviewProps {
   ethBalance?: number;
 }
 
 const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
-  // Mock portfolio data
+  
   const portfolioData = {
     totalValue: ethBalance ? ethBalance * 2500 + 1250 : 0,
     eth: {
@@ -31,7 +31,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
         Balance Overview
       </h3>
 
-      {/* Total Portfolio Value */}
+      {}
       <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl shadow-inner shadow-cyan-500/10">
         <div className="text-sm text-white/70 mb-1">Total Portfolio Value</div>
         <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
@@ -42,9 +42,9 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
         </div>
       </div>
 
-      {/* Breakdown */}
+      {}
       <div className="space-y-4 text-sm">
-        {/* ETH */}
+        {}
         <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center font-bold text-sm text-white">
@@ -61,7 +61,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
           </div>
         </div>
 
-        {/* NFTs */}
+        {}
         <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center font-bold text-sm text-white">
@@ -78,7 +78,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
           </div>
         </div>
 
-        {/* Staked */}
+        {}
         <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center font-bold text-sm text-white">
@@ -96,7 +96,7 @@ const BalanceOverview: React.FC<BalanceOverviewProps> = ({ ethBalance }) => {
         </div>
       </div>
 
-      {/* Collateral Info */}
+      {}
       <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
         <div className="text-sm font-medium text-green-400 mb-1">
           💎 Available for Collateral

@@ -1,4 +1,4 @@
-// src/components/wallet/WalletConnectionModal.tsx
+
 import { useState } from 'react';
 import {
   walletProviders,
@@ -27,13 +27,13 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Use the wallet detection hook from walletConfig
+  
   const { detectedWallets, isDetecting } = useWalletDetection();
 
-  // Debug: Log detected wallets
+  
   console.log('Detected wallets:', detectedWallets);
 
-  // Universal wallet connection handler for crypto wallets
+  
   const handleWalletConnect = async (wallet: WalletProvider) => {
     console.log('Attempting to connect to wallet:', wallet.name);
     setIsConnecting(true);
@@ -41,21 +41,21 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
     setError(null);
 
     try {
-      // Use the connectToWallet function from walletConfig.js
+      
       const connectionResult: WalletResponse = await connectToWallet(wallet.id);
       console.log('Connection successful:', connectionResult);
       
-      // Create SavedWalletConnection object with required fields
+      
       const savedConnection: SavedWalletConnection = {
         ...connectionResult,
         walletType: wallet.name,
         connectedAt: new Date().toISOString()
       };
       
-      // Save connection to localStorage for persistence
+      
       saveWalletConnection(savedConnection);
       
-      // Call the parent component's callback with connection info
+      
       onWalletConnect(savedConnection);
       
       onClose();
@@ -69,7 +69,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
     }
   };
 
-  // Add test/demo wallet connection for development
+  
   const handleTestWalletConnect = () => {
     console.log('Connecting to test wallet...');
     const testWalletData: SavedWalletConnection = {
@@ -80,10 +80,10 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
       connectedAt: new Date().toISOString()
     };
     
-    // Save test connection
+    
     saveWalletConnection(testWalletData);
     
-    // Call parent callback
+    
     onWalletConnect(testWalletData);
     
     onClose();
@@ -94,7 +94,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[60] px-4" style={{ paddingTop: isLandingPage ? '120px' : '100px' }}>
       <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full max-h-[calc(100vh-140px)] overflow-y-auto shadow-2xl animate-fade-in">
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Select Wallet
@@ -109,14 +109,14 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
           </button>
         </div>
 
-        {/* AIP-62 Standard Notice */}
+        {}
         <div className="p-4 bg-green-50 dark:bg-green-900/20 border-b border-gray-200 dark:border-gray-700">
           <p className="text-sm text-green-700 dark:text-green-300 text-center">
             Powered by AIP-62 Wallet Standard
           </p>
         </div>
         
-        {/* Error Message */}
+        {}
         {error && (
           <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-gray-200 dark:border-gray-700">
             <p className="text-sm text-red-700 dark:text-red-300 text-center">
@@ -125,7 +125,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
           </div>
         )}
 
-        {/* Wallet Options */}
+        {}
         <div className="p-4">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Crypto Wallets
@@ -163,7 +163,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
               );
             })}
             
-            {/* Test Wallet for Development */}
+            {}
             <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
               <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                 For Testing
@@ -187,7 +187,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
           </div>
         </div>
 
-        {/* Network Reminder */}
+        {}
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-start gap-2">
             <div className="text-blue-500 mt-0.5">ℹ️</div>

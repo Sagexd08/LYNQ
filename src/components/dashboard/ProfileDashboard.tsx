@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import TrustScoreCard from "./TrustScoreCard";
 
-// Type definitions
+
 interface NFT {
   name: string;
   image: string;
@@ -27,7 +27,7 @@ interface WalletProps {
 }
 
 const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
-  // Use the account from props, or fallback to a placeholder
+  
   const walletAddress: string | undefined = account || "0x1234567890abcdef1234567890abcdef12345678";
 
   const [trustScore, setTrustScore] = useState<number | null>(null);
@@ -48,7 +48,7 @@ const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
         setLoading(true);
         setError(null);
 
-        // Calculate trust score based on ETH balance and account age
+        
         try {
           const ethBalance = parseFloat(balance || "0");
           let score = 0;
@@ -63,7 +63,7 @@ const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
           setTrustScore(0);
         }
 
-        // Mock NFTs for now (in a real app, you'd fetch from OpenSea API or similar)
+        
         try {
           const mockNFTs: NFT[] = [
             {
@@ -81,7 +81,7 @@ const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
           setNfts([]);
         }
 
-        // Mock transactions for now
+        
         setTransactions([
           {
             type: "ETH Transfer",
@@ -102,7 +102,7 @@ const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
     fetchData();
   }, [walletAddress]);
 
-  // Loading state
+  
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-white">
@@ -116,7 +116,7 @@ const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
     );
   }
 
-  // Error state
+  
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-white">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { FlowLoanService } from "../../services/flowLoanService";
+import { TelegramService } from "../../services/telegramService";
 
 const formatAmount = (wei: string): string => {
   return ethers.formatEther(wei);
@@ -77,8 +79,8 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
     
     setIsLoading(true);
     try {
-      // This would interact with the Ethereum smart contract
-      // For now, using mock data
+      
+      
       const mockLoans: Loan[] = [
         {
           id: "1",
@@ -86,7 +88,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
           amount: ethers.parseEther("1.0").toString(),
           interestRate: "10",
           interestAmount: ethers.parseEther("0.1").toString(),
-          dueDate: (Math.floor(Date.now() / 1000) + 2592000).toString(), // 30 days from now
+          dueDate: (Math.floor(Date.now() / 1000) + 2592000).toString(), 
           status: "active",
           reputation: "85",
           purpose: "Business expansion",
@@ -112,39 +114,44 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
 
     setIsLoading(true);
     try {
-      if (!window.ethereum) throw new Error("Wallet not connected");
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner();
       
-      // This would be the actual contract interaction
-      // const contract = new ethers.Contract(LOAN_CONTRACT_ADDRESS, LOAN_CONTRACT_ABI, signer);
-      // const tx = await contract.createLoan(
-      //   ethers.parseEther(newLoanAmount),
-      //   parseInt(newLoanDuration) * 10, // 10% base rate
-      //   parseInt(newLoanDuration) * 24 * 60 * 60, // duration in seconds
-      //   newLoanPurpose
-      // );
-      
-      // Mock transaction hash for demonstration
-      const mockTxHash = "0x" + Math.random().toString(16).substring(2, 66);
-      setTxHash(mockTxHash);
+      const amountUFix = `${parseFloat(newLoanAmount).toFixed(2)}`; 
+      const durationSeconds = parseInt(newLoanDuration) * 24 * 60 * 60;
+      const interestBps = 1000; 
+      const txId = await FlowLoanService.createLoan({
+        amount: amountUFix,
+        interestBps,
+        durationSeconds,
+        purpose: newLoanPurpose
+      });
 
-      // Create mock loan
+      setTxHash(String(txId));
+
+      
       const newLoan: Loan = {
         id: Date.now().toString(),
         borrower: currentAccount,
-        tokenType: "ETH",
+        tokenType: "FLOW",
         amount: ethers.parseEther(newLoanAmount).toString(),
-        interestRate: "10",
-        interestAmount: ethers.parseEther((parseFloat(newLoanAmount) * 0.1).toString()).toString(),
-        dueDate: (Math.floor(Date.now() / 1000) + parseInt(newLoanDuration) * 24 * 60 * 60).toString(),
+        interestRate: String(interestBps / 100),
+        interestAmount: ethers.parseEther((parseFloat(newLoanAmount) * (interestBps / 10000)).toString()).toString(),
+        dueDate: (Math.floor(Date.now() / 1000) + durationSeconds).toString(),
         status: "active",
         reputation: "85",
         purpose: newLoanPurpose
       };
 
       setLoans([...loans, newLoan]);
+
+      
+      const amountDisplay = newLoanAmount + ' FLOW';
+      void TelegramService.notifyLoanGranted({
+        loanId: newLoan.id,
+        borrower: currentAccount,
+        amountDisplay,
+        aprBps: String(interestBps),
+        dueDate: new Date(parseInt(newLoan.dueDate) * 1000).toLocaleString()
+      });
       setNewLoanAmount("");
       setNewLoanDuration("30");
       setNewLoanPurpose("");
@@ -170,17 +177,17 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.getSigner();
       
-      // This would be the actual contract interaction
-      // const contract = new ethers.Contract(LOAN_CONTRACT_ADDRESS, LOAN_CONTRACT_ABI, signer);
-      // const tx = await contract.repayLoan(repayLoanId, {
-      //   value: ethers.parseEther(repayAmount)
-      // });
+      
+      
+      
+      
+      
 
-      // Mock transaction hash for demonstration
+      
       const mockTxHash = "0x" + Math.random().toString(16).substring(2, 66);
       setTxHash(mockTxHash);
 
-      // Update loan status
+      
       setLoans(loans.map(loan => 
         loan.id === repayLoanId 
           ? { ...loan, status: "repaid" }
@@ -251,7 +258,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
 
       {currentAccount && (
         <div className="space-y-8">
-          {/* Current Loans */}
+          {}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Your Loans</h2>
@@ -311,7 +318,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
             )}
           </div>
 
-          {/* Create New Loan */}
+          {}
           <div className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4">Create New Loan</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -350,7 +357,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
             </div>
           </div>
 
-          {/* Repay Loan */}
+          {}
           <div className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4">Repay Loan</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

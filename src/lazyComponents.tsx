@@ -1,10 +1,10 @@
-// Lazy loading components for better code splitting and performance
+
 import React, { lazy, ComponentType, ReactNode, Suspense } from 'react';
 
-// Type definitions for better type safety
+
 type LazyComponentProps = Record<string, any>;
 
-// Loading fallback component for consistency
+
 const DefaultLoadingFallback = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const sizeClasses = {
     sm: 'h-5 w-5 min-h-[100px]',
@@ -19,7 +19,7 @@ const DefaultLoadingFallback = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) 
   );
 };
 
-// Dashboard components - loaded only when needed
+
 export const LazyProfileDashboard = lazy((): Promise<{ default: ComponentType<any> }> => 
   import('./components/dashboard/ProfileDashboard')
 );
@@ -32,7 +32,7 @@ export const LazyTransaction = lazy((): Promise<{ default: ComponentType<any> }>
   import('./components/dashboard/Transaction')
 );
 
-// Marketplace components - loaded only when needed
+
 export const LazyFilters = lazy((): Promise<{ default: ComponentType<any> }> => 
   import('./components/marketplace/Filters')
 );
@@ -53,7 +53,7 @@ export const LazyTradeInterface = lazy((): Promise<{ default: ComponentType<any>
   import('./components/marketplace/TradeInterface')
 );
 
-// Card components - loaded only when needed
+
 export const LazySmallLoanCard = lazy((): Promise<{ default: ComponentType<any> }> => 
   import('./components/card/SmallLoanCard')
 );
@@ -70,17 +70,17 @@ export const LazyLoanEligibilityMeter = lazy((): Promise<{ default: ComponentTyp
   import('./components/card/LoanEligibilityMeter')
 );
 
-// Wallet components - loaded only when needed
+
 export const LazyWalletConnectionModal = lazy((): Promise<{ default: ComponentType<any> }> => 
   import('./components/wallet/WalletConnectionModal')
 );
 
-// Landing page components - loaded only when needed  
+
 export const LazyFaucetModule = lazy((): Promise<{ default: ComponentType<any> }> => 
   import('./components/landing/FaucetModule')
 );
 
-// Enhanced HOC with better error boundaries and loading states
+
 export function withSuspense<T extends LazyComponentProps>(
   Component: ComponentType<T>,
   options: {
@@ -116,7 +116,7 @@ export function withSuspense<T extends LazyComponentProps>(
   };
 }
 
-// Simple error boundary for better error handling
+
 class ErrorBoundary extends React.Component<
   { children: ReactNode },
   { hasError: boolean }
@@ -156,34 +156,34 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Utility function to preload components
+
 export const preloadComponent = (importFn: () => Promise<{ default: ComponentType<any> }>): void => {
   importFn().catch(console.error);
 };
 
-// Export all lazy components as a convenient object
+
 export const LazyComponents = {
-  // Dashboard
+  
   ProfileDashboard: LazyProfileDashboard,
   PersonalDetails: LazyPersonalDetails,
   Transaction: LazyTransaction,
   
-  // Marketplace
+  
   Filters: LazyFilters,
   CoinCard: LazyCoinCard,
   AssetTable: LazyAssetTable,
   SummaryHeader: LazySummaryHeader,
   TradeInterface: LazyTradeInterface,
   
-  // Cards
+  
   SmallLoanCard: LazySmallLoanCard,
   BigLoanCard: LazyBigLoanCard,
   LoanRequestForm: LazyLoanRequestForm,
   LoanEligibilityMeter: LazyLoanEligibilityMeter,
   
-  // Wallet
+  
   WalletConnectionModal: LazyWalletConnectionModal,
   
-  // Landing
+  
   FaucetModule: LazyFaucetModule,
 } as const;

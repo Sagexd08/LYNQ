@@ -38,7 +38,7 @@ interface CoinCardProps {
 const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
   return (
     <div className="w-full max-w-sm bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-5 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all space-y-3">
-      {/* Coin Header */}
+      {}
       <div className="flex items-center gap-4">
         <img src={coin.image} alt={coin.name} className="w-10 h-10 rounded-full border border-white/20" />
         <div>
@@ -47,7 +47,7 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         </div>
       </div>
 
-      {/* Coin Info */}
+      {}
       <div className="text-sm text-white/80 space-y-1">
         <div className="flex justify-between">
           <span className="flex items-center gap-1">
@@ -95,7 +95,7 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         </div>
       </div>
 
-      {/* Sparkline Chart */}
+      {}
       <div className="h-24 mt-1">
         <Line
           data={{
@@ -117,7 +117,7 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         />
       </div>
 
-      {/* Trade Buttons */}
+      {}
       <div className="flex justify-between pt-2">
         <button
           onClick={() => onTrade(coin, true)}

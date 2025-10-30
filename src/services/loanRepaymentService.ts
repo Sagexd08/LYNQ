@@ -1,18 +1,18 @@
-import { ethers } from 'ethers';
+import { TelegramService } from './telegramService';
 
-// Types for loan repayment system
+
 export interface LoanDetails {
   id: string;
   borrower: string;
-  principal: string; // In wei
-  principalRemaining: string; // In wei
-  interestRate: string; // Basis points (e.g., 500 = 5%)
-  interestAccrued: string; // In wei
-  lateFine: string; // In wei
-  dueDate: number; // Unix timestamp
+  principal: string; 
+  principalRemaining: string; 
+  interestRate: string; 
+  interestAccrued: string; 
+  lateFine: string; 
+  dueDate: number; 
   isOverdue: boolean;
   status: 'ACTIVE' | 'PAID' | 'DEFAULTED';
-  tokenAddress: string; // ERC-20 token address, or ETH address
+  tokenAddress: string; 
 }
 
 export interface RepaymentCalculation {
@@ -26,7 +26,7 @@ export interface RepaymentCalculation {
 
 export interface RepaymentTransaction {
   type: 'PARTIAL' | 'FULL';
-  amount: string; // In wei
+  amount: string; 
   breakdown: {
     lateFinePayment: string;
     interestPayment: string;
@@ -34,20 +34,20 @@ export interface RepaymentTransaction {
   };
 }
 
-// Smart contract ABIs
+
 export const LOAN_CONTRACT_ABI = [
-  // View functions
+  
   "function getLoanDetails(uint256 loanId) external view returns (tuple(address borrower, uint256 principal, uint256 principalRemaining, uint256 interestRate, uint256 interestAccrued, uint256 lateFine, uint256 dueDate, uint8 status, address tokenAddress))",
   "function calculateRepaymentAmount(uint256 loanId) external view returns (uint256 totalPayable, uint256 lateFine, uint256 interestAccrued, uint256 principalRemaining)",
   "function isLoanOverdue(uint256 loanId) external view returns (bool)",
   "function getMaxLateFine(uint256 loanId) external view returns (uint256)",
   
-  // Repayment functions
+  
   "function repayLoan(uint256 loanId, uint256 amount) external",
   "function repayLoanFull(uint256 loanId) external",
   "function repayLoanWithToken(uint256 loanId, uint256 amount, address tokenAddress) external",
   
-  // Events
+  
   "event PaymentApplied(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 lateFinePayment, uint256 interestPayment, uint256 principalPayment, bool loanClosed)",
   "event LoanClosed(uint256 indexed loanId, address indexed borrower, uint256 timestamp)"
 ];
@@ -67,9 +67,7 @@ export class LoanRepaymentService {
     this.contract = new ethers.Contract(this.contract.target, LOAN_CONTRACT_ABI, this.signer);
   }
 
-  /**
-   * Fetch comprehensive loan details from smart contract
-   */
+  
   async getLoanDetails(loanId: string): Promise<LoanDetails> {
     try {
       const [loanData, isOverdue] = await Promise.all([
@@ -96,9 +94,7 @@ export class LoanRepaymentService {
     }
   }
 
-  /**
-   * Calculate total repayment amount with breakdown
-   */
+  
   async calculateRepaymentAmount(loanId: string): Promise<RepaymentCalculation> {
     try {
       const [repaymentData, maxLateFine] = await Promise.all([
@@ -130,9 +126,7 @@ export class LoanRepaymentService {
     }
   }
 
-  /**
-   * Prepare repayment transaction breakdown
-   */
+  
   calculateRepaymentBreakdown(
     paymentAmount: string,
     calculation: RepaymentCalculation
@@ -147,27 +141,27 @@ export class LoanRepaymentService {
     let interestPayment = 0n;
     let principalPayment = 0n;
 
-    // Payment priority: Late Fine → Interest → Principal
     
-    // 1. Pay late fine first
+    
+    
     if (remaining > 0n && lateFine > 0n) {
       lateFinePayment = remaining >= lateFine ? lateFine : remaining;
       remaining -= lateFinePayment;
     }
 
-    // 2. Pay interest second
+    
     if (remaining > 0n && interest > 0n) {
       interestPayment = remaining >= interest ? interest : remaining;
       remaining -= interestPayment;
     }
 
-    // 3. Pay principal last
+    
     if (remaining > 0n && principal > 0n) {
       principalPayment = remaining >= principal ? principal : remaining;
       remaining -= principalPayment;
     }
 
-    // Check for overpayment
+    
     if (remaining > 0n) {
       throw new Error('Payment amount exceeds total debt. Overpayment not allowed.');
     }
@@ -188,9 +182,7 @@ export class LoanRepaymentService {
     };
   }
 
-  /**
-   * Execute partial repayment
-   */
+  
   async executePartialRepayment(
     loanId: string, 
     amount: string, 
@@ -204,10 +196,10 @@ export class LoanRepaymentService {
       let tx: ethers.ContractTransactionResponse;
 
       if (tokenAddress && tokenAddress !== ethers.ZeroAddress) {
-        // ERC-20 token repayment
+        
         tx = await this.contract.repayLoanWithToken(loanId, amount, tokenAddress);
       } else {
-        // ETH repayment
+        
         tx = await this.contract.repayLoan(loanId, amount, {
           value: amount
         });
@@ -220,9 +212,7 @@ export class LoanRepaymentService {
     }
   }
 
-  /**
-   * Execute full repayment
-   */
+  
   async executeFullRepayment(loanId: string): Promise<ethers.ContractTransactionResponse> {
     if (!this.signer) {
       throw new Error('Signer not connected');
@@ -241,9 +231,7 @@ export class LoanRepaymentService {
     }
   }
 
-  /**
-   * Listen for payment events
-   */
+  
   onPaymentApplied(
     callback: (event: {
       loanId: string;
@@ -253,7 +241,15 @@ export class LoanRepaymentService {
       loanClosed: boolean;
     }) => void
   ): void {
-    this.contract.on('PaymentApplied', (loanId, borrower, amount, lateFinePayment, interestPayment, principalPayment, loanClosed) => {
+    this.contract.on('PaymentApplied', (
+      loanId: any,
+      borrower: string,
+      amount: any,
+      lateFinePayment: any,
+      interestPayment: any,
+      principalPayment: any,
+      loanClosed: boolean
+    ) => {
       callback({
         loanId: loanId.toString(),
         borrower,
@@ -265,12 +261,31 @@ export class LoanRepaymentService {
         },
         loanClosed
       });
+
+      
+      try {
+        if (TelegramService.isConfigured()) {
+          const amountDisplay = ethers.formatEther(amount);
+          const late = ethers.formatEther(lateFinePayment);
+          const intr = ethers.formatEther(interestPayment);
+          const princ = ethers.formatEther(principalPayment);
+          void TelegramService.notifyPaymentApplied({
+            loanId: loanId.toString(),
+            borrower,
+            amountDisplay: `${amountDisplay} ETH`,
+            lateFine: late !== '0.0' ? `${late} ETH` : undefined,
+            interest: intr !== '0.0' ? `${intr} ETH` : undefined,
+            principal: princ !== '0.0' ? `${princ} ETH` : undefined,
+            closed: Boolean(loanClosed)
+          });
+        }
+      } catch {
+        
+      }
     });
   }
 
-  /**
-   * Validate repayment amount
-   */
+  
   validateRepaymentAmount(amount: string, calculation: RepaymentCalculation): {
     isValid: boolean;
     error?: string;
@@ -286,7 +301,7 @@ export class LoanRepaymentService {
       return { isValid: false, error: 'Payment amount exceeds total debt' };
     }
 
-    // Minimum payment should cover at least late fine if exists
+    
     const lateFine = BigInt(calculation.lateFine);
     if (lateFine > 0n && amountBN < lateFine) {
       return { 
@@ -298,9 +313,7 @@ export class LoanRepaymentService {
     return { isValid: true };
   }
 
-  /**
-   * Format amounts for display
-   */
+  
   formatDisplayAmounts(calculation: RepaymentCalculation, decimals: number = 18) {
     return {
       principalRemaining: ethers.formatUnits(calculation.principalRemaining, decimals),
@@ -320,11 +333,9 @@ export class LoanRepaymentService {
   }
 }
 
-// Utility functions for handling decimals
+
 export const handleTokenDecimals = {
-  /**
-   * Convert user input to wei/token units
-   */
+  
   parseAmount: (amount: string, decimals: number): string => {
     try {
       return ethers.parseUnits(amount, decimals).toString();
@@ -333,9 +344,7 @@ export const handleTokenDecimals = {
     }
   },
 
-  /**
-   * Convert wei/token units to display format
-   */
+  
   formatAmount: (amount: string, decimals: number): string => {
     try {
       return ethers.formatUnits(amount, decimals);
@@ -344,11 +353,9 @@ export const handleTokenDecimals = {
     }
   },
 
-  /**
-   * Get token decimals from contract
-   */
+  
   getTokenDecimals: async (tokenAddress: string, provider: ethers.Provider): Promise<number> => {
-    if (tokenAddress === ethers.ZeroAddress) return 18; // ETH
+    if (tokenAddress === ethers.ZeroAddress) return 18; 
 
     const tokenContract = new ethers.Contract(
       tokenAddress,
@@ -359,7 +366,7 @@ export const handleTokenDecimals = {
     try {
       return await tokenContract.decimals();
     } catch {
-      return 18; // Default fallback
+      return 18; 
     }
   }
 };

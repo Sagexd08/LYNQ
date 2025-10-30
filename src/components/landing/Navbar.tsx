@@ -13,12 +13,12 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
 
   const handleWalletClick = () => {
     if (walletAddress) {
-      // If wallet is connected, show option to disconnect
+      
       if (onWalletDisconnect) {
         onWalletDisconnect();
       }
     } else {
-      // If no wallet connected, open connection modal
+      
       onWalletConnect();
     }
   };
@@ -27,7 +27,7 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
     <header className="fixed top-0 left-0 right-0 z-50 md:top-4 md:left-4 md:right-4 lg:left-20 lg:right-20">
       <div className="backdrop-blur-lg bg-black/40 border-b-[1px] md:border-[1px] border-[#1820c4] shadow-[0_0_8px_rgba(0,255,255,0.4)] md:rounded-xl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-3 lg:py-4 flex items-center justify-between text-white font-medium">
-          {/* Logo */}
+          {}
           <button 
             onClick={() => window.location.reload()}
             className="text-xl sm:text-2xl font-bold tracking-wide text-accent font-lynq cursor-pointer hover:scale-105 transition-transform z-10"
@@ -35,7 +35,7 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
             LYNQ
           </button>
 
-          {/* Desktop Nav */}
+          {}
           <ul className="hidden md:flex gap-6 lg:gap-8 items-center">
             <li className="relative group">
               <ScrollLink
@@ -61,7 +61,7 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
             </li>
           </ul>
 
-          {/* Mobile Menu Toggle - Improved */}
+          {}
           <div className="md:hidden z-10">
             <button 
               onClick={() => setIsOpen(!isOpen)}
@@ -76,7 +76,7 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
           </div>
         </nav>
 
-        {/* Mobile Dropdown - Improved */}
+        {}
         <AnimatePresence>
           {isOpen && (
             <motion.div

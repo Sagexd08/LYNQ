@@ -11,7 +11,7 @@ import Reputation from "./components/landing/Reputation";
 import Footer from "./components/landing/Footer";
 import BuiltOnEthereum from "./components/landing/BuiltOnEthereum";
 
-// Lazy load heavy components for better performance
+
 import {
   LazyProfileDashboard,
   LazyPersonalDetails,
@@ -34,7 +34,7 @@ import {
   clearSavedWalletConnection,
 } from "./components/wallet/walletConfig";
 
-// Types
+
 interface SparklineData {
   price: number[];
 }
@@ -54,7 +54,7 @@ interface Coin {
   sparkline_in_7d?: SparklineData;
 }
 
-// Constants
+
 const COIN_LIST = [
   "bitcoin",
   "ethereum", 
@@ -82,10 +82,10 @@ const API_ENDPOINTS = {
 const REQUEST_TIMEOUT = 10000;
 
 function App() {
-  // Navigation State
+  
   const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "marketplace" | "cards">("landing");
 
-  // Wallet State
+  
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [walletType, setWalletType] = useState<string>("");
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
@@ -95,7 +95,7 @@ function App() {
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
-  // Coin Data State
+  
   const [coins, setCoins] = useState<Coin[]>([]);
   const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
   const [isLoadingCoins, setIsLoadingCoins] = useState<boolean>(false);
@@ -105,10 +105,10 @@ function App() {
   const [chartRange, setChartRange] = useState<"7d" | "24h" | "1h">("7d");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
-  // UI State
+  
   const [showBorrowPopup, setShowBorrowPopup] = useState<boolean>(false);
 
-  // Utility Functions
+  
   const createAbortController = useCallback(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
@@ -122,7 +122,7 @@ function App() {
     return "An unknown error occurred";
   }, []);
 
-  // Wallet Balance Fetching
+  
   const fetchEthBalance = useCallback(
     async (address: string): Promise<void> => {
       if (!address) {
@@ -136,9 +136,9 @@ function App() {
       const { timeout } = createAbortController();
 
       try {
-        // For demo purposes, we'll just set a placeholder balance
-        // In a real implementation, you'd use ethers.js or web3.js to fetch the actual balance
-        setEthBalance(1.5); // Placeholder ETH balance
+        
+        
+        setEthBalance(1.5); 
       } catch (error) {
         const errorMessage = handleApiError(error);
         setBalanceError(errorMessage);
@@ -151,7 +151,7 @@ function App() {
     [useTestnet, createAbortController, handleApiError]
   );
 
-  // Coin Data Fetching
+  
   const fetchCoinsData = useCallback(async (): Promise<void> => {
     setIsLoadingCoins(true);
     setCoinsError(null);
@@ -184,7 +184,7 @@ function App() {
     }
   }, [createAbortController, handleApiError]);
 
-  // Event Handlers
+  
   const handleWalletConnect = useCallback(
     (walletData: any): void => {
       if (walletData?.address) {
@@ -226,7 +226,7 @@ function App() {
     alert(`${isBuy ? "Buying" : "Selling"} ${coin.name} (Coming soon)`);
   }, []);
 
-  // Effects
+  
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection?.address) {
@@ -247,7 +247,7 @@ function App() {
   useEffect(() => {
     let filteredResult = [...coins];
     
-    // Apply search filter
+    
     if (searchTerm.trim()) {
       const lowercaseSearch = searchTerm.toLowerCase().trim();
       filteredResult = filteredResult.filter(
@@ -257,7 +257,7 @@ function App() {
       );
     }
     
-    // Apply sorting
+    
     filteredResult.sort((a, b) => {
       if (sortBy === "volume") {
         return b.total_volume - a.total_volume;
@@ -268,7 +268,7 @@ function App() {
     setFilteredCoins(filteredResult);
   }, [searchTerm, sortBy, coins]);
 
-  // Memoized Values
+  
   const walletData = useMemo(
     () => ({
       address: walletAddress,
@@ -292,7 +292,7 @@ function App() {
     };
   }, [filteredCoins]);
 
-  // Sample Data
+  
   const sampleLoans = useMemo(() => ({
     bigLoan: {
       id: "001",
@@ -336,7 +336,7 @@ function App() {
     ],
   }), []);
 
-  // Loading Components
+  
   const LoadingSpinner = useMemo(() => ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg"; className?: string }) => {
     const sizeClasses = {
       sm: "h-5 w-5",
@@ -355,7 +355,7 @@ function App() {
     </div>
   ), [LoadingSpinner]);
 
-  // Render logic
+  
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
@@ -376,7 +376,7 @@ function App() {
                     <LazyPersonalDetails {...walletData} />
                   </Suspense>
                 </div>
-                {/* <BalanceOverview {...walletData} /> */}
+                {}
                 <Suspense fallback={<LoadingFallback minHeight="200px" />}>
                   <LazyTransaction />
                 </Suspense>
@@ -388,12 +388,12 @@ function App() {
         return (
           <div className="pt-10 max-w-7xl mx-auto space-y-10 px-4 sm:px-6 lg:px-8">
             <div className="space-y-8">
-              {/* Summary Header */}
+              {}
               <Suspense fallback={<LoadingFallback minHeight="100px" />}>
                 <LazySummaryHeader {...marketStats} />
               </Suspense>
 
-              {/* Filters */}
+              {}
               <div>
                 <Suspense fallback={<LoadingFallback minHeight="80px" size="sm" />}>
                   <LazyFilters
@@ -409,7 +409,7 @@ function App() {
                 </Suspense>
               </div>
 
-              {/* Toggle & Action Buttons */}
+              {}
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <button
                   onClick={() =>
@@ -427,7 +427,7 @@ function App() {
                 </button>
               </div>
 
-              {/* Coin Grid / Table */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isLoadingCoins ? (
                   <div className="col-span-full text-center py-10 text-lg text-gray-400">
@@ -457,11 +457,11 @@ function App() {
                 )}
               </div>
 
-              {/* Borrow Modal */}
+              {}
               {showBorrowPopup && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                   <div className="relative w-full max-w-6xl mx-auto bg-gray-900 border border-gray-700 rounded-2xl  shadow-2xl overflow-auto max-h-[90vh]">
-                    {/* Close Button */}
+                    {}
                     <button
                       onClick={() => setShowBorrowPopup(false)}
                       className="absolute top-1 right-3 text-white text-2xl hover:text-gray-400 z-50"
@@ -469,7 +469,7 @@ function App() {
                       ✕
                     </button>
 
-                    {/* Trade Interface (wide version) */}
+                    {}
                     <Suspense fallback={<LoadingFallback minHeight="150px" />}>
                       <LazyTradeInterface />
                     </Suspense>

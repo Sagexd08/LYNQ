@@ -62,7 +62,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-8 shadow-lg">
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <h3 className="text-2xl font-bold text-white flex items-center gap-2">
           {tradeType === "borrow" ? (
@@ -91,11 +91,11 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
         </div>
       </div>
 
-      {/* Horizontal Layout */}
+      {}
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Column */}
+        {}
         <div className="flex-1 space-y-6">
-          {/* Amount Input */}
+          {}
           <div>
             <label className="block text-sm font-medium text-white/70 mb-2">
               {tradeType === "borrow" ? "Borrow Amount" : "Lend Amount"} (USD)
@@ -114,7 +114,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
             </div>
           </div>
 
-          {/* Duration Selection */}
+          {}
           <div>
             <label className="block text-sm font-medium text-white/70 mb-2">
               Loan Duration
@@ -137,7 +137,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
             </div>
           </div>
 
-          {/* Collateral Type (only if borrowing) */}
+          {}
           {tradeType === "borrow" && (
             <div>
               <label className="block text-sm font-medium text-white/70 mb-2">
@@ -177,9 +177,9 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
           )}
         </div>
 
-        {/* Right Column */}
+        {}
         <div className="flex-1 space-y-6">
-          {/* Loan Summary */}
+          {}
           {amount && (
             <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
               <h4 className="font-semibold text-white mb-2">
@@ -208,7 +208,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
             </div>
           )}
 
-          {/* Submit Button */}
+          {}
           <button
             disabled={!amount}
             className={`w-full py-3 rounded-lg font-semibold transition-all ${
@@ -222,7 +222,7 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
             {tradeType === "borrow" ? "Request Loan" : "Start Lending"}
           </button>
 
-          {/* Risk Warning */}
+          {}
           <div className="bg-yellow-100/10 border border-yellow-300/20 rounded-lg p-3">
             <div className="text-sm text-yellow-300 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4" />

@@ -1,7 +1,8 @@
-// src/components/wallet/walletConfig.ts
+
 import { useState, useEffect } from 'react';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
+import { configureFCL, fcl } from '../../config/flow';
 
 export interface WalletResponse {
   address: string;
@@ -35,7 +36,7 @@ export interface SavedWalletConnection {
   social?: boolean;
 }
 
-// Initialize Coinbase Wallet SDK
+
 const coinbaseWallet = new CoinbaseWalletSDK({
   appName: 'LYNQ',
   appLogoUrl: ''
@@ -43,7 +44,7 @@ const coinbaseWallet = new CoinbaseWalletSDK({
 
 const coinbaseProvider = coinbaseWallet.makeWeb3Provider();
 
-// Available wallet providers configuration
+
 export const walletProviders: WalletProvider[] = [
   {
     id: 'metamask',
@@ -99,10 +100,37 @@ export const walletProviders: WalletProvider[] = [
         throw new Error('Coinbase Wallet connection failed');
       }
     }
+  },
+  {
+    id: 'flow-fcl',
+    name: 'Flow Wallet',
+    icon: '🌊',
+    description: 'Connect with Flow-compatible wallets via FCL',
+    downloadUrl: 'https://www.flow.com/',
+    detectMethod: () => true,
+    connect: async (): Promise<WalletResponse> => {
+      configureFCL();
+      try {
+        const currentUser = await fcl.currentUser.snapshot();
+        if (!currentUser?.addr) {
+          await fcl.authenticate();
+        }
+        const user = await fcl.currentUser.snapshot();
+        if (!user?.addr) throw new Error('Flow authentication failed');
+        return {
+          address: user.addr,
+          walletName: 'Flow Wallet',
+          networkName: 'Flow',
+          chainId: 'flow'
+        };
+      } catch (e) {
+        throw new Error('Flow wallet connection failed');
+      }
+    }
   }
 ];
 
-// Helper function to get network name from chain ID
+
 function getNetworkName(chainId: string): string {
   const networks: Record<string, string> = {
     '0x1': 'Ethereum Mainnet',
@@ -118,9 +146,7 @@ function getNetworkName(chainId: string): string {
   return networks[chainId] || 'Unknown Network';
 }
 
-/**
- * Fast, robust wallet detection hook
- */
+
 export const useWalletDetection = (): { detectedWallets: Record<string, boolean>; isDetecting: boolean } => {
   const [detectedWallets, setDetectedWallets] = useState<Record<string, boolean>>({});
   const [isDetecting, setIsDetecting] = useState<boolean>(true);
@@ -142,7 +168,7 @@ export const useWalletDetection = (): { detectedWallets: Record<string, boolean>
       }
     };
     detectWallets();
-    const interval = setInterval(detectWallets, 1500); // Fast detection
+    const interval = setInterval(detectWallets, 1500); 
     window.addEventListener('focus', detectWallets);
     document.addEventListener('visibilitychange', detectWallets);
     return () => {
@@ -155,21 +181,17 @@ export const useWalletDetection = (): { detectedWallets: Record<string, boolean>
   return { detectedWallets, isDetecting };
 };
 
-/**
- * Connect to any supported wallet by ID
- */
+
 export const connectToWallet = async (walletId: string): Promise<WalletResponse> => {
   const wallet = walletProviders.find(w => w.id === walletId);
   if (!wallet) throw new Error('Wallet not supported');
   return wallet.connect();
 };
 
-// Local storage keys
+
 const WALLET_CONNECTION_KEY = 'wallet_connection';
 
-/**
- * Save wallet connection info to localStorage
- */
+
 export const saveWalletConnection = (connectionInfo: SavedWalletConnection): void => {
   if (!connectionInfo) return;
   try {
@@ -179,9 +201,7 @@ export const saveWalletConnection = (connectionInfo: SavedWalletConnection): voi
   }
 };
 
-/**
- * Get saved wallet connection from localStorage
- */
+
 export const getSavedWalletConnection = (): SavedWalletConnection | null => {
   try {
     const saved = localStorage.getItem(WALLET_CONNECTION_KEY);
@@ -192,9 +212,7 @@ export const getSavedWalletConnection = (): SavedWalletConnection | null => {
   }
 };
 
-/**
- * Clear saved wallet connection from localStorage
- */
+
 export const clearSavedWalletConnection = (): void => {
   try {
     localStorage.removeItem(WALLET_CONNECTION_KEY);

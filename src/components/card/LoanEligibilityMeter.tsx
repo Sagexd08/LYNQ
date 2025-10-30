@@ -41,9 +41,9 @@ const LoanEligibilityMeter: React.FC<LoanEligibilityMeterProps> = ({ score, fact
 
       <h3 className="text-xl font-bold text-white">Loan Eligibility</h3>
 
-      {/* Stylized Circular Score Meter */}
+      {}
       <div className="relative mx-auto w-40 h-40 rounded-full border-8 border-white/10 bg-white/5 backdrop-blur-md shadow-inner shadow-cyan-500/10 flex items-center justify-center">
-        {/* Optional animated glow ring */}
+        {}
         <div className="absolute -inset-2 rounded-full bg-yellow-400/10 blur-xl animate-pulse"></div>
 
 
@@ -80,7 +80,7 @@ const LoanEligibilityMeter: React.FC<LoanEligibilityMeterProps> = ({ score, fact
         </div>
       </div>
 
-      {/* Factor Breakdown */}
+      {}
       <div className="space-y-4">
         <h4 className="font-semibold text-white border-b border-white/10 pb-2">Factors</h4>
         {eligibilityFactors.map((factor, index) => (
@@ -99,7 +99,7 @@ const LoanEligibilityMeter: React.FC<LoanEligibilityMeterProps> = ({ score, fact
         ))}
       </div>
 
-      {/* Recommendations */}
+      {}
       <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-cyan-400/10 via-transparent to-purple-400/10 border border-white/10">
         <h5 className="font-semibold text-white mb-2">Recommendations</h5>
         <ul className="text-sm text-white/80 space-y-1 list-disc list-inside">
