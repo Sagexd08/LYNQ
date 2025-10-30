@@ -6,7 +6,7 @@ const path = require('path');
 
 console.log('🔒 Starting security audit and fixes...\n');
 
-// Step 1: Backup package.json
+
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 const backupPath = path.join(process.cwd(), 'package.json.backup');
 
@@ -16,34 +16,34 @@ if (fs.existsSync(packageJsonPath)) {
 }
 
 try {
-  // Step 2: Update vulnerable packages manually
+  
   console.log('📦 Updating vulnerable packages...');
   
-  // Update axios to latest secure version
+  
   execSync('npm install axios@latest', { stdio: 'inherit' });
   
-  // Update other potentially vulnerable packages
+  
   execSync('npm update', { stdio: 'inherit' });
   
   console.log('✅ Packages updated successfully');
   
-  // Step 3: Run audit again
+  
   console.log('\n🔍 Running security audit...');
   try {
     execSync('npm audit', { stdio: 'inherit' });
     console.log('✅ No vulnerabilities found');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Some vulnerabilities may still exist. Check manually.');
   }
   
-  // Step 4: Clean up
+  
   fs.unlinkSync(backupPath);
   console.log('\n🎉 Security fixes completed!');
   
 } catch (error) {
   console.error('❌ Error during security fixes:', error.message);
   
-  // Restore backup if something went wrong
+  
   if (fs.existsSync(backupPath)) {
     fs.copyFileSync(backupPath, packageJsonPath);
     fs.unlinkSync(backupPath);

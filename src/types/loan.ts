@@ -1,4 +1,4 @@
-// Loan system types
+
 export interface TrustScore {
   score: number;
   creditHistory: number;
@@ -56,10 +56,10 @@ export interface LoanSettings {
   maxLoanAmount: number;
   minLoanAmount: number;
   baseInterestRate: number;
-  maxLoanTerm: number; // in days
+  maxLoanTerm: number; 
   minTrustScore: number;
-  collateralRatio: number; // percentage required
-  gracePeriod: number; // in days
+  collateralRatio: number; 
+  gracePeriod: number; 
 }
 
 export interface ContractState {
@@ -121,7 +121,7 @@ export interface LoanActivityLog {
   details?: string;
 }
 
-// Contract function payloads
+
 export interface ContractPayload {
   type: 'entry_function_payload';
   function: string;

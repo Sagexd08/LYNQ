@@ -1,7 +1,7 @@
-// Performance optimization utilities
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-// Generic debounce function with better typing
+
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   delay: number
@@ -13,7 +13,7 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-// Throttle function for scroll events
+
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   delay: number
@@ -28,7 +28,7 @@ export function throttle<T extends (...args: any[]) => any>(
   };
 }
 
-// Enhanced lazy loading utility for images with fallback
+
 export const createLazyImageLoader = (
   fallbackSrc?: string,
   options: IntersectionObserverInit = {}
@@ -47,7 +47,7 @@ export const createLazyImageLoader = (
           const src = image.dataset.src;
           
           if (src) {
-            // Preload image to handle errors
+            
             const tempImg = new Image();
             tempImg.onload = () => {
               image.src = src;
@@ -74,9 +74,9 @@ export const createLazyImageLoader = (
   };
 };
 
-// Performance monitoring utilities
+
 export const PerformanceMonitor = {
-  // Memory usage monitor (development only)
+  
   logMemoryUsage: () => {
     if (process.env.NODE_ENV === 'development' && 'memory' in performance) {
       const memInfo = (performance as any).memory;
@@ -90,7 +90,7 @@ export const PerformanceMonitor = {
     }
   },
 
-  // Performance timing
+  
   measureAsync: async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
     const start = performance.now();
     try {
@@ -105,7 +105,7 @@ export const PerformanceMonitor = {
     }
   },
 
-  // Measure component render time
+  
   measureRender: (componentName: string) => {
     const start = performance.now();
     return () => {
@@ -117,7 +117,7 @@ export const PerformanceMonitor = {
   }
 };
 
-// Hook for virtual scrolling with better performance
+
 export const useVirtualScroll = <T>(
   items: T[],
   containerHeight: number,
@@ -146,7 +146,7 @@ export const useVirtualScroll = <T>(
   };
 };
 
-// Resource preloader with promise support
+
 export interface ResourceToPreload {
   type: 'image' | 'font' | 'script' | 'style';
   url: string;
@@ -203,7 +203,7 @@ export const preloadResources = async (resources: ResourceToPreload[]): Promise<
   await Promise.allSettled(promises);
 };
 
-// Hook for intersection observer
+
 export const useIntersectionObserver = (
   options: IntersectionObserverInit = {}
 ) => {
@@ -234,7 +234,7 @@ export const useIntersectionObserver = (
   return { isIntersecting, entry, setElement };
 };
 
-// Hook for idle callback
+
 export const useIdleCallback = (callback: () => void, deps: any[] = []) => {
   useEffect(() => {
     const hasRequestIdleCallback = typeof window !== 'undefined' && 'requestIdleCallback' in window;

@@ -9,8 +9,9 @@ import Features from "./components/landing/Features";
 import CTASection from "./components/landing/CTASection";
 import Reputation from "./components/landing/Reputation";
 import Footer from "./components/landing/Footer";
+import BuiltOnEthereum from "./components/landing/BuiltOnEthereum";
 
-// Lazy load heavy components for better performance
+
 import {
   LazyProfileDashboard,
   LazyPersonalDetails,
@@ -26,7 +27,6 @@ import {
   LazyLoanEligibilityMeter,
   LazyWalletConnectionModal,
   LazyFaucetModule,
-  LazyBuiltOnAptos,
 } from "./lazyComponents";
 
 import {
@@ -34,7 +34,7 @@ import {
   clearSavedWalletConnection,
 } from "./components/wallet/walletConfig";
 
-// Types
+
 interface SparklineData {
   price: number[];
 }
@@ -54,16 +54,7 @@ interface Coin {
   sparkline_in_7d?: SparklineData;
 }
 
-interface AptosAccountResource {
-  type: string;
-  data: {
-    coin: {
-      value: string;
-    };
-  };
-}
 
-// Constants
 const COIN_LIST = [
   "bitcoin",
   "ethereum", 
@@ -83,29 +74,28 @@ const COIN_LIST = [
 ].join(",");
 
 const API_ENDPOINTS = {
-  MAINNET: "https://fullnode.mainnet.aptoslabs.com/v1",
-  TESTNET: "https://fullnode.testnet.aptoslabs.com/v1",
+  MAINNET: "https://mainnet.infura.io/v3/",
+  TESTNET: "https://sepolia.infura.io/v3/",
   COINGECKO: "https://api.coingecko.com/api/v3/coins/markets"
 } as const;
 
 const REQUEST_TIMEOUT = 10000;
-const APTOS_COIN_TYPE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>";
 
 function App() {
-  // Navigation State
+  
   const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "marketplace" | "cards">("landing");
 
-  // Wallet State
+  
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [walletType, setWalletType] = useState<string>("");
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
-  const [aptosBalance, setAptosBalance] = useState<number>(0);
+  const [ethBalance, setEthBalance] = useState<number>(0);
   const [useTestnet, setUseTestnet] = useState<boolean>(false);
   const [isLoadingBalance, setIsLoadingBalance] = useState<boolean>(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
-  // Coin Data State
+  
   const [coins, setCoins] = useState<Coin[]>([]);
   const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
   const [isLoadingCoins, setIsLoadingCoins] = useState<boolean>(false);
@@ -115,10 +105,10 @@ function App() {
   const [chartRange, setChartRange] = useState<"7d" | "24h" | "1h">("7d");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
-  // UI State
+  
   const [showBorrowPopup, setShowBorrowPopup] = useState<boolean>(false);
 
-  // Utility Functions
+  
   const createAbortController = useCallback(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
@@ -132,40 +122,27 @@ function App() {
     return "An unknown error occurred";
   }, []);
 
-  // Wallet Balance Fetching
-  const fetchAptosBalance = useCallback(
+  
+  const fetchEthBalance = useCallback(
     async (address: string): Promise<void> => {
       if (!address) {
-        setAptosBalance(0);
+        setEthBalance(0);
         return;
       }
 
       setIsLoadingBalance(true);
       setBalanceError(null);
 
-      const { controller, timeout } = createAbortController();
+      const { timeout } = createAbortController();
 
       try {
-        const url = useTestnet ? API_ENDPOINTS.TESTNET : API_ENDPOINTS.MAINNET;
-        const response = await fetch(`${url}/accounts/${address}/resources`, {
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data: AptosAccountResource[] = await response.json();
-        const coinResource = data.find((item) => item.type === APTOS_COIN_TYPE);
-        const balance = coinResource?.data?.coin?.value;
         
-        setAptosBalance(balance ? parseInt(balance, 10) / 1e8 : 0);
+        
+        setEthBalance(1.5); 
       } catch (error) {
         const errorMessage = handleApiError(error);
         setBalanceError(errorMessage);
-        setAptosBalance(0);
+        setEthBalance(0);
       } finally {
         clearTimeout(timeout);
         setIsLoadingBalance(false);
@@ -174,7 +151,7 @@ function App() {
     [useTestnet, createAbortController, handleApiError]
   );
 
-  // Coin Data Fetching
+  
   const fetchCoinsData = useCallback(async (): Promise<void> => {
     setIsLoadingCoins(true);
     setCoinsError(null);
@@ -207,36 +184,36 @@ function App() {
     }
   }, [createAbortController, handleApiError]);
 
-  // Event Handlers
+  
   const handleWalletConnect = useCallback(
     (walletData: any): void => {
       if (walletData?.address) {
         setWalletAddress(walletData.address);
         setWalletType(walletData.walletType || "");
         setConnectedAt(walletData.connectedAt || new Date().toISOString());
-        fetchAptosBalance(walletData.address);
+        fetchEthBalance(walletData.address);
       } else {
         handleWalletDisconnect();
       }
       setShowWalletModal(false);
     },
-    [fetchAptosBalance]
+    [fetchEthBalance]
   );
 
   const handleWalletDisconnect = useCallback((): void => {
     setWalletAddress("");
     setWalletType("");
     setConnectedAt(null);
-    setAptosBalance(0);
+    setEthBalance(0);
     clearSavedWalletConnection();
   }, []);
 
   const handleToggleNetwork = useCallback((): void => {
     setUseTestnet((prev) => !prev);
     if (walletAddress) {
-      fetchAptosBalance(walletAddress);
+      fetchEthBalance(walletAddress);
     }
-  }, [walletAddress, fetchAptosBalance]);
+  }, [walletAddress, fetchEthBalance]);
 
   const handleNavigationChange = useCallback((page: string): void => {
     const validPages = ["landing", "dashboard", "marketplace", "cards"] as const;
@@ -249,16 +226,16 @@ function App() {
     alert(`${isBuy ? "Buying" : "Selling"} ${coin.name} (Coming soon)`);
   }, []);
 
-  // Effects
+  
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection?.address) {
       setWalletAddress(savedConnection.address);
       setWalletType(savedConnection.walletType || "");
       setConnectedAt(savedConnection.connectedAt || new Date().toISOString());
-      fetchAptosBalance(savedConnection.address);
+      fetchEthBalance(savedConnection.address);
     }
-  }, [fetchAptosBalance]);
+  }, [fetchEthBalance]);
 
   useEffect(() => {
     const dataRequiredPages = ["marketplace", "dashboard", "cards"];
@@ -270,7 +247,7 @@ function App() {
   useEffect(() => {
     let filteredResult = [...coins];
     
-    // Apply search filter
+    
     if (searchTerm.trim()) {
       const lowercaseSearch = searchTerm.toLowerCase().trim();
       filteredResult = filteredResult.filter(
@@ -280,7 +257,7 @@ function App() {
       );
     }
     
-    // Apply sorting
+    
     filteredResult.sort((a, b) => {
       if (sortBy === "volume") {
         return b.total_volume - a.total_volume;
@@ -291,17 +268,17 @@ function App() {
     setFilteredCoins(filteredResult);
   }, [searchTerm, sortBy, coins]);
 
-  // Memoized Values
+  
   const walletData = useMemo(
     () => ({
       address: walletAddress,
-      aptosBalance,
+      ethBalance,
       walletType,
       connectedAt,
       isLoadingBalance,
       balanceError,
     }),
-    [walletAddress, aptosBalance, walletType, connectedAt, isLoadingBalance, balanceError]
+    [walletAddress, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError]
   );
 
   const marketStats = useMemo(() => {
@@ -315,7 +292,7 @@ function App() {
     };
   }, [filteredCoins]);
 
-  // Sample Data
+  
   const sampleLoans = useMemo(() => ({
     bigLoan: {
       id: "001",
@@ -359,7 +336,7 @@ function App() {
     ],
   }), []);
 
-  // Loading Components
+  
   const LoadingSpinner = useMemo(() => ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg"; className?: string }) => {
     const sizeClasses = {
       sm: "h-5 w-5",
@@ -378,7 +355,7 @@ function App() {
     </div>
   ), [LoadingSpinner]);
 
-  // Render logic
+  
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
@@ -389,14 +366,17 @@ function App() {
                 <div className="lg:col-span-2 space-y-6">
                   <ErrorBoundary>
                     <Suspense fallback={<LoadingFallback minHeight="300px" />}>
-                      <LazyProfileDashboard />
+                      <LazyProfileDashboard 
+                        walletAddress={walletAddress}
+                        ethBalance={ethBalance}
+                      />
                     </Suspense>
                   </ErrorBoundary>
                   <Suspense fallback={<LoadingFallback minHeight="200px" />}>
                     <LazyPersonalDetails {...walletData} />
                   </Suspense>
                 </div>
-                {/* <BalanceOverview {...walletData} /> */}
+                {}
                 <Suspense fallback={<LoadingFallback minHeight="200px" />}>
                   <LazyTransaction />
                 </Suspense>
@@ -408,12 +388,12 @@ function App() {
         return (
           <div className="pt-10 max-w-7xl mx-auto space-y-10 px-4 sm:px-6 lg:px-8">
             <div className="space-y-8">
-              {/* Summary Header */}
+              {}
               <Suspense fallback={<LoadingFallback minHeight="100px" />}>
                 <LazySummaryHeader {...marketStats} />
               </Suspense>
 
-              {/* Filters */}
+              {}
               <div>
                 <Suspense fallback={<LoadingFallback minHeight="80px" size="sm" />}>
                   <LazyFilters
@@ -429,7 +409,7 @@ function App() {
                 </Suspense>
               </div>
 
-              {/* Toggle & Action Buttons */}
+              {}
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <button
                   onClick={() =>
@@ -447,7 +427,7 @@ function App() {
                 </button>
               </div>
 
-              {/* Coin Grid / Table */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isLoadingCoins ? (
                   <div className="col-span-full text-center py-10 text-lg text-gray-400">
@@ -477,11 +457,11 @@ function App() {
                 )}
               </div>
 
-              {/* Borrow Modal */}
+              {}
               {showBorrowPopup && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                   <div className="relative w-full max-w-6xl mx-auto bg-gray-900 border border-gray-700 rounded-2xl  shadow-2xl overflow-auto max-h-[90vh]">
-                    {/* Close Button */}
+                    {}
                     <button
                       onClick={() => setShowBorrowPopup(false)}
                       className="absolute top-1 right-3 text-white text-2xl hover:text-gray-400 z-50"
@@ -489,7 +469,7 @@ function App() {
                       ✕
                     </button>
 
-                    {/* Trade Interface (wide version) */}
+                    {}
                     <Suspense fallback={<LoadingFallback minHeight="150px" />}>
                       <LazyTradeInterface />
                     </Suspense>
@@ -551,7 +531,7 @@ function App() {
                   <LazyFaucetModule />
                 </Suspense>
                 <Suspense fallback={<LoadingFallback minHeight="150px" />}>
-                  <LazyBuiltOnAptos />
+                  <BuiltOnEthereum />
                 </Suspense>
                 <CTASection
                   onNavigateToApp={() => setCurrentPage("marketplace")}

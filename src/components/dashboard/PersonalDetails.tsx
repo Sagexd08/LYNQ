@@ -1,32 +1,32 @@
 import React, { useEffect, useState } from 'react';
 
 interface PersonalDetailsProps {
-  address: string;
-  aptosBalance: number;
-  walletType: string;
-  connectedAt: string | null;
-  isLoadingBalance: boolean;
-  balanceError: string | null;
+  address?: string;
+  ethBalance: number;
+  walletType?: string;
+  connectedAt?: string | null;
+  isLoadingBalance?: boolean;
+  balanceError?: string | null;
 }
 
-const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance, walletType, connectedAt, isLoadingBalance, balanceError }) => {
-  const [usdRate, setUsdRate] = useState(8.5);
-  const [trustScore] = useState(75); // Mock score since useTrustScore hook doesn't exist
+const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError }) => {
+  const [usdRate, setUsdRate] = useState(2500); 
+  const [trustScore] = useState(75); 
   const [trustTier, setTrustTier] = useState("🥈 Gold");
 
   const fetchPrice = async () => {
     try {
-      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=aptos&vs_currencies=usd");
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
       const data = await res.json();
-      setUsdRate(data.aptos.usd || 8.5);
+      setUsdRate(data.ethereum.usd || 2500);
     } catch (err) {
-      console.error("Failed to fetch APT price:", err);
+      console.error("Failed to fetch ETH price:", err);
     }
   };
 
   useEffect(() => {
     fetchPrice();
-    // Set trust tier based on mock score
+    
     if (trustScore >= 86) setTrustTier("🥇 Elite");
     else if (trustScore >= 61) setTrustTier("🥈 Gold");
     else if (trustScore >= 31) setTrustTier("🥉 Silver");
@@ -40,7 +40,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
     }
   };
 
-  const network = address?.startsWith('0x') ? 'Aptos Testnet' : 'Unknown';
+  const network = address?.startsWith('0x') ? 'Ethereum Mainnet' : 'Unknown';
 
   return (
     <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg shadow-purple-500/10 transition-all hover:shadow-purple-500/20">
@@ -49,7 +49,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
       </h3>
 
       <div className="space-y-6 text-sm text-white/80">
-        {/* Wallet Address */}
+        {}
         <div>
           <label className="block text-white/60 mb-1">Wallet Address</label>
           <div className="p-3 bg-white/5 border border-white/10 rounded-lg font-mono break-all text-white text-sm flex justify-between items-center">
@@ -65,7 +65,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         </div>
 
-        {/* Wallet Provider */}
+        {}
         {walletType && (
           <div>
             <label className="block text-white/60 mb-1">Wallet Provider</label>
@@ -73,17 +73,17 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         )}
 
-        {/* APT Balance & USD */}
+        {}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-white/60 mb-1">APT Balance</label>
+            <label className="block text-white/60 mb-1">ETH Balance</label>
             <div className="text-lg font-bold text-green-400">
               {isLoadingBalance ? (
                 <span className="animate-pulse">Loading...</span>
               ) : balanceError ? (
                 <span className="text-red-400">Error</span>
-              ) : aptosBalance ? (
-                `${aptosBalance.toFixed(4)} APT`
+              ) : ethBalance ? (
+                `${ethBalance.toFixed(4)} ETH`
               ) : (
                 '--'
               )}
@@ -102,8 +102,8 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
             <div className="text-lg font-bold text-white">
               {isLoadingBalance ? (
                 <span className="animate-pulse">Loading...</span>
-              ) : aptosBalance ? (
-                `$${(aptosBalance * usdRate).toFixed(2)}`
+              ) : ethBalance ? (
+                `$${(ethBalance * usdRate).toFixed(2)}`
               ) : (
                 '--'
               )}
@@ -111,7 +111,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         </div>
 
-        {/* TrustScore + Tier */}
+        {}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-white/60 mb-1">TrustScore</label>
@@ -123,7 +123,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         </div>
 
-        {/* Account Status */}
+        {}
         <div>
           <label className="block text-white/60 mb-1">Account Status</label>
           <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         </div>
 
-        {/* Connected At */}
+        {}
         {address && (
           <div>
             <label className="block text-white/60 mb-1">Connected At</label>
@@ -146,7 +146,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         )}
 
-        {/* Network */}
+        {}
         {address && (
           <div>
             <label className="block text-white/60 mb-1">Network</label>
@@ -157,7 +157,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, aptosBalance
           </div>
         )}
 
-        {/* Balance Error Display */}
+        {}
         {balanceError && (
           <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
             <label className="block text-red-400 mb-1">Balance Error</label>

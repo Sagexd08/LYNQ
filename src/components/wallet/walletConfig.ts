@@ -1,11 +1,15 @@
-// src/components/wallet/walletConfig.ts
+
 import { useState, useEffect } from 'react';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
+import { configureFCL, fcl } from '../../config/flow';
 
 export interface WalletResponse {
   address: string;
   publicKey?: string;
   walletName?: string;
   networkName?: string;
+  chainId?: string;
 }
 
 export interface WalletProvider {
@@ -26,123 +30,123 @@ export interface SavedWalletConnection {
   walletName?: string;
   publicKey?: string;
   networkName?: string;
+  chainId?: string;
   email?: string;
   name?: string;
   social?: boolean;
 }
 
-// Available wallet providers configuration
+
+const coinbaseWallet = new CoinbaseWalletSDK({
+  appName: 'LYNQ',
+  appLogoUrl: ''
+});
+
+const coinbaseProvider = coinbaseWallet.makeWeb3Provider();
+
+
 export const walletProviders: WalletProvider[] = [
   {
-    id: 'petra',
-    name: 'Petra',
-    icon: '🟠',
-    description: 'The most popular Aptos wallet',
-    downloadUrl: 'https://petra.app/',
-    detectMethod: () => !!(window.aptos && typeof window.aptos.connect === 'function'),
+    id: 'metamask',
+    name: 'MetaMask',
+    icon: '🦊',
+    description: 'The most popular Ethereum wallet',
+    downloadUrl: 'https://metamask.io/',
+    detectMethod: () => !!(window.ethereum && window.ethereum.isMetaMask),
     connect: async (): Promise<WalletResponse> => {
-      if (!window.aptos) throw new Error('Petra wallet not found');
-      const response = await window.aptos.connect();
-      const account = await window.aptos.account();
+      const provider = await detectEthereumProvider();
+      if (!provider || !window.ethereum) {
+        throw new Error('MetaMask wallet not found');
+      }
+      
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' }) as string;
+      
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found');
+      }
+      
       return {
-        address: response.address,
-        publicKey: account?.publicKey || '',
-        networkName: typeof window.aptos.network === 'function' ? 
-          (await window.aptos.network()).name : '',
-        walletName: 'Petra'
+        address: accounts[0],
+        walletName: 'MetaMask',
+        chainId: chainId,
+        networkName: getNetworkName(chainId)
       };
     }
   },
   {
-    id: 'martian',
-    name: 'Martian',
-    icon: '🔴',
-    description: 'Multi-chain wallet for Aptos',
-    downloadUrl: 'https://martianwallet.xyz/',
-    detectMethod: () => !!window.martian,
-    connect: async () => {
-      if (!window.martian) throw new Error('Martian wallet not found');
-      const response = await window.martian.connect();
-      return {
-        address: response.address,
-        publicKey: response.publicKey || '',
-        walletName: 'Martian'
-      };
+    id: 'coinbase',
+    name: 'Coinbase Wallet',
+    icon: '�',
+    description: 'Secure wallet by Coinbase',
+    downloadUrl: 'https://www.coinbase.com/wallet',
+    detectMethod: () => !!(window.ethereum && window.ethereum.isCoinbaseWallet),
+    connect: async (): Promise<WalletResponse> => {
+      try {
+        const accounts = await coinbaseProvider.request({ method: 'eth_requestAccounts' }) as string[];
+        const chainId = await coinbaseProvider.request({ method: 'eth_chainId' }) as string;
+        
+        if (!accounts || accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+        
+        return {
+          address: accounts[0],
+          walletName: 'Coinbase Wallet',
+          chainId: chainId,
+          networkName: getNetworkName(chainId)
+        };
+      } catch (error) {
+        throw new Error('Coinbase Wallet connection failed');
+      }
     }
   },
   {
-    id: 'pontem',
-    name: 'Pontem',
-    icon: '🟣',
-    description: 'First wallet for Aptos',
-    downloadUrl: 'https://pontem.network/',
-    detectMethod: () => !!window.pontem,
-    connect: async () => {
-      if (!window.pontem) throw new Error('Pontem wallet not found');
-      const response = await window.pontem.connect();
-      return {
-        address: response.address,
-        publicKey: response.publicKey || '',
-        walletName: 'Pontem'
-      };
-    }
-  },
-  {
-    id: 'nightly',
-    name: 'Nightly',
-    icon: '🟦',
-    description: 'Multi-chain DeFi wallet',
-    downloadUrl: 'https://nightly.app/',
-    detectMethod: () => !!window.nightly && !!window.nightly.aptos,
-    connect: async () => {
-      if (!window.nightly || !window.nightly.aptos) throw new Error('Nightly wallet not found');
-      const response = await window.nightly.aptos.connect();
-      return {
-        address: response.address,
-        publicKey: response.publicKey || '',
-        walletName: 'Nightly'
-      };
-    }
-  },
-  {
-    id: 'fewcha',
-    name: 'Fewcha',
-    icon: '🟡',
-    description: 'Simple and secure Aptos wallet',
-    downloadUrl: 'https://fewcha.app/',
-    detectMethod: () => !!window.fewcha,
-    connect: async () => {
-      if (!window.fewcha) throw new Error('Fewcha wallet not found');
-      const response = await window.fewcha.connect();
-      return {
-        address: response.address,
-        publicKey: response.publicKey || '',
-        walletName: 'Fewcha'
-      };
-    }
-  },
-  {
-    id: 'rise',
-    name: 'Rise',
-    icon: '🔵',
-    description: 'Professional Aptos wallet',
-    downloadUrl: 'https://risewallet.io/',
-    detectMethod: () => !!window.rise,
-    connect: async () => {
-      if (!window.rise) throw new Error('Rise wallet not found');
-      const response = await window.rise.connect();
-      return {
-        address: response.address,
-        publicKey: response.publicKey || '',
-        walletName: 'Rise'
-      };
+    id: 'flow-fcl',
+    name: 'Flow Wallet',
+    icon: '🌊',
+    description: 'Connect with Flow-compatible wallets via FCL',
+    downloadUrl: 'https://www.flow.com/',
+    detectMethod: () => true,
+    connect: async (): Promise<WalletResponse> => {
+      configureFCL();
+      try {
+        const currentUser = await fcl.currentUser.snapshot();
+        if (!currentUser?.addr) {
+          await fcl.authenticate();
+        }
+        const user = await fcl.currentUser.snapshot();
+        if (!user?.addr) throw new Error('Flow authentication failed');
+        return {
+          address: user.addr,
+          walletName: 'Flow Wallet',
+          networkName: 'Flow',
+          chainId: 'flow'
+        };
+      } catch (e) {
+        throw new Error('Flow wallet connection failed');
+      }
     }
   }
 ];
 
-/**
- * Fast, robust wallet detection hook
- */
+
+function getNetworkName(chainId: string): string {
+  const networks: Record<string, string> = {
+    '0x1': 'Ethereum Mainnet',
+    '0x5': 'Goerli Testnet',
+    '0xaa36a7': 'Sepolia Testnet',
+    '0x89': 'Polygon Mainnet',
+    '0x13881': 'Polygon Mumbai',
+    '0xa': 'Optimism',
+    '0xa4b1': 'Arbitrum One',
+    '0x38': 'BSC Mainnet',
+    '0x61': 'BSC Testnet'
+  };
+  return networks[chainId] || 'Unknown Network';
+}
+
+
 export const useWalletDetection = (): { detectedWallets: Record<string, boolean>; isDetecting: boolean } => {
   const [detectedWallets, setDetectedWallets] = useState<Record<string, boolean>>({});
   const [isDetecting, setIsDetecting] = useState<boolean>(true);
@@ -164,7 +168,7 @@ export const useWalletDetection = (): { detectedWallets: Record<string, boolean>
       }
     };
     detectWallets();
-    const interval = setInterval(detectWallets, 1500); // Fast detection
+    const interval = setInterval(detectWallets, 1500); 
     window.addEventListener('focus', detectWallets);
     document.addEventListener('visibilitychange', detectWallets);
     return () => {
@@ -177,21 +181,17 @@ export const useWalletDetection = (): { detectedWallets: Record<string, boolean>
   return { detectedWallets, isDetecting };
 };
 
-/**
- * Connect to any supported wallet by ID
- */
+
 export const connectToWallet = async (walletId: string): Promise<WalletResponse> => {
   const wallet = walletProviders.find(w => w.id === walletId);
   if (!wallet) throw new Error('Wallet not supported');
   return wallet.connect();
 };
 
-// Local storage keys
+
 const WALLET_CONNECTION_KEY = 'wallet_connection';
 
-/**
- * Save wallet connection info to localStorage
- */
+
 export const saveWalletConnection = (connectionInfo: SavedWalletConnection): void => {
   if (!connectionInfo) return;
   try {
@@ -201,9 +201,7 @@ export const saveWalletConnection = (connectionInfo: SavedWalletConnection): voi
   }
 };
 
-/**
- * Get saved wallet connection from localStorage
- */
+
 export const getSavedWalletConnection = (): SavedWalletConnection | null => {
   try {
     const saved = localStorage.getItem(WALLET_CONNECTION_KEY);
@@ -214,9 +212,7 @@ export const getSavedWalletConnection = (): SavedWalletConnection | null => {
   }
 };
 
-/**
- * Clear saved wallet connection from localStorage
- */
+
 export const clearSavedWalletConnection = (): void => {
   try {
     localStorage.removeItem(WALLET_CONNECTION_KEY);
