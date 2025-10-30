@@ -14,7 +14,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
   const faqs = [
     {
       q: 'What makes [NAME] different from other DeFi platforms?',
-      a: 'We use on-chain reputation and stake to power trustless, secure lending on Aptos. No credit scores, no KYC.',
+      a: "We use on-chain reputation and stake to power trustless, secure lending on Ethereum. No credit scores, no KYC.",
     },
     {
       q: 'Can I withdraw from the faucet?',
@@ -26,7 +26,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
     },
     {
       q: 'What chains are supported?',
-      a: 'We’re built entirely on Aptos to take advantage of its high throughput and Move-powered security.',
+      a: "We're built entirely on Ethereum to take advantage of its security, decentralization, and established ecosystem.",
     },
   ];
 
@@ -35,7 +35,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
       id="faq"
       className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 sm:gap-12 items-start justify-between relative z-10"
     >
-      {/* CTA LEFT */}
+      {}
       <div className="lg:w-1/2 space-y-4 sm:space-y-6 text-center lg:text-left">
         <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
           Ready to Join the Future of DeFi?
@@ -51,7 +51,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
         </button>
       </div>
 
-      {/* FAQ RIGHT */}
+      {}
       <div className="lg:w-1/2 w-full bg-white/5 border border-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-lg hover:drop-shadow-glow transition-all">
         <h3 className="text-2xl font-semibold text-accent mb-6">Frequently Asked Questions</h3>
         <ul className="space-y-5">

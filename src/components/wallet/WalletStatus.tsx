@@ -1,4 +1,4 @@
-// src/components/wallet/WalletStatus.tsx
+
 import { useState, useEffect } from 'react';
 import {
   getSavedWalletConnection,
@@ -17,13 +17,13 @@ const WalletStatus: React.FC<WalletStatusProps> = ({ onDisconnect = () => {} }) 
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // Get saved wallet connection on mount
+    
     const savedConnection = getSavedWalletConnection();
     if (savedConnection) {
       setWalletInfo(savedConnection);
     }
     
-    // Listen for storage changes (for multi-tab support)
+    
     const handleStorageChange = () => {
       const connection = getSavedWalletConnection();
       setWalletInfo(connection);
@@ -41,15 +41,15 @@ const WalletStatus: React.FC<WalletStatusProps> = ({ onDisconnect = () => {} }) 
   };
 
   if (!walletInfo) {
-    return null; // Don't render anything if not connected
+    return null; 
   }
 
-  // Truncate address for display
+  
   const shortAddress = walletInfo.address.length > 10
     ? `${walletInfo.address.slice(0, 6)}...${walletInfo.address.slice(-4)}`
     : walletInfo.address;
 
-  // Use logo if available, fallback to emoji
+  
   const logo = walletInfo.walletName ? WALLET_LOGOS[walletInfo.walletName] : undefined;
 
   const handleCopy = () => {
@@ -60,7 +60,7 @@ const WalletStatus: React.FC<WalletStatusProps> = ({ onDisconnect = () => {} }) 
 
   return (
     <div className="relative">
-      {/* Wallet Button */}
+      {}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={`flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 transition-colors ${isMenuOpen ? 'ring-2 ring-blue-400' : ''}`}
@@ -84,7 +84,7 @@ const WalletStatus: React.FC<WalletStatusProps> = ({ onDisconnect = () => {} }) 
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
+      {}
       {isMenuOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 animate-fade-in-down">
           <div className="p-5">

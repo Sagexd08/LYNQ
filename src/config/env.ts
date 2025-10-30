@@ -1,8 +1,6 @@
-/**
- * Environment configuration and validation for the application
- */
 
-// Types for environment variables
+
+
 interface EnvironmentConfig {
   PARTICLE_PROJECT_ID: string;
   PARTICLE_CLIENT_KEY: string;
@@ -11,9 +9,11 @@ interface EnvironmentConfig {
   MODULE_ADDRESS?: string;
   API_BASE_URL?: string;
   ENABLE_ANALYTICS?: string;
+  VITE_TELEGRAM_BOT_TOKEN?: string;
+  VITE_TELEGRAM_DEFAULT_CHAT_ID?: string;
 }
 
-// Environment variable keys
+
 const ENV_KEYS = {
   PARTICLE_PROJECT_ID: 'VITE_PARTICLE_PROJECT_ID',
   PARTICLE_CLIENT_KEY: 'VITE_PARTICLE_CLIENT_KEY', 
@@ -22,9 +22,11 @@ const ENV_KEYS = {
   MODULE_ADDRESS: 'VITE_MODULE_ADDRESS',
   API_BASE_URL: 'VITE_API_BASE_URL',
   ENABLE_ANALYTICS: 'VITE_ENABLE_ANALYTICS',
+  TELEGRAM_BOT_TOKEN: 'VITE_TELEGRAM_BOT_TOKEN',
+  TELEGRAM_DEFAULT_CHAT_ID: 'VITE_TELEGRAM_DEFAULT_CHAT_ID',
 } as const;
 
-// Default values
+
 const DEFAULTS = {
   DEFAULT_NETWORK: 'testnet' as const,
   PARTICLE_PROJECT_ID: 'your_particle_project_id',
@@ -32,19 +34,17 @@ const DEFAULTS = {
   PARTICLE_APP_ID: 'your_particle_app_id',
   API_BASE_URL: 'https://api.coingecko.com/api/v3',
   ENABLE_ANALYTICS: 'false',
+  VITE_TELEGRAM_BOT_TOKEN: '',
+  VITE_TELEGRAM_DEFAULT_CHAT_ID: '',
 } as const;
 
-/**
- * Get environment variable with fallback (type-safe)
- */
+
 const getEnvVar = (key: string, defaultValue?: string): string => {
   const env = import.meta.env as unknown as Record<string, string>;
   return env[key] || defaultValue || '';
 };
 
-/**
- * Parse environment variables with type safety
- */
+
 const parseEnvConfig = (): EnvironmentConfig => {
   const network = getEnvVar(ENV_KEYS.DEFAULT_NETWORK, DEFAULTS.DEFAULT_NETWORK);
   
@@ -56,26 +56,24 @@ const parseEnvConfig = (): EnvironmentConfig => {
     MODULE_ADDRESS: getEnvVar(ENV_KEYS.MODULE_ADDRESS),
     API_BASE_URL: getEnvVar(ENV_KEYS.API_BASE_URL, DEFAULTS.API_BASE_URL),
     ENABLE_ANALYTICS: getEnvVar(ENV_KEYS.ENABLE_ANALYTICS, DEFAULTS.ENABLE_ANALYTICS),
+    VITE_TELEGRAM_BOT_TOKEN: getEnvVar(ENV_KEYS.TELEGRAM_BOT_TOKEN, DEFAULTS.VITE_TELEGRAM_BOT_TOKEN),
+    VITE_TELEGRAM_DEFAULT_CHAT_ID: getEnvVar(ENV_KEYS.TELEGRAM_DEFAULT_CHAT_ID, DEFAULTS.VITE_TELEGRAM_DEFAULT_CHAT_ID),
   };
 };
 
-// Parsed environment configuration
+
 export const ENV_CONFIG = parseEnvConfig();
 
-/**
- * Particle Network configuration
- */
-export const PARTICLE_CONFIG = {
+
+export const ETHEREUM_CONFIG = {
   projectId: ENV_CONFIG.PARTICLE_PROJECT_ID,
   clientKey: ENV_CONFIG.PARTICLE_CLIENT_KEY,
   appId: ENV_CONFIG.PARTICLE_APP_ID,
-  chainName: 'Aptos',
-  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 2 : 1, // 1 for mainnet, 2 for testnet
+  chainName: 'Ethereum',
+  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 11155111 : 1, 
 } as const;
 
-/**
- * Application configuration derived from environment
- */
+
 export const APP_CONFIG = {
   isDevelopment: import.meta.env.DEV,
   isProduction: import.meta.env.PROD,
@@ -86,21 +84,17 @@ export const APP_CONFIG = {
   enableDebugLogs: import.meta.env.DEV,
 } as const;
 
-/**
- * Network endpoints configuration
- */
+
 export const NETWORK_ENDPOINTS = {
-  mainnet: 'https://fullnode.mainnet.aptoslabs.com/v1',
-  testnet: 'https://fullnode.testnet.aptoslabs.com/v1',
+  mainnet: 'https://mainnet.infura.io/v3/',
+  testnet: 'https://sepolia.infura.io/v3/',
 } as const;
 
-/**
- * Validation functions
- */
+
 export const validateEnv = (): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
   
-  // Check required Particle Network variables
+  
   const requiredParticleVars = [
     'PARTICLE_PROJECT_ID',
     'PARTICLE_CLIENT_KEY', 
@@ -114,14 +108,19 @@ export const validateEnv = (): { isValid: boolean; errors: string[] } => {
     }
   }
   
-  // Validate network
+  
   if (!['mainnet', 'testnet'].includes(ENV_CONFIG.DEFAULT_NETWORK)) {
     errors.push('DEFAULT_NETWORK must be either "mainnet" or "testnet"');
   }
   
-  // Validate module address format if provided
+  
   if (ENV_CONFIG.MODULE_ADDRESS && !/^0x[a-fA-F0-9]+$/.test(ENV_CONFIG.MODULE_ADDRESS)) {
     errors.push('MODULE_ADDRESS must be a valid hex address starting with 0x');
+  }
+
+  
+  if (!ENV_CONFIG.VITE_TELEGRAM_BOT_TOKEN) {
+    
   }
   
   return {
@@ -130,9 +129,7 @@ export const validateEnv = (): { isValid: boolean; errors: string[] } => {
   };
 };
 
-/**
- * Log environment status
- */
+
 export const logEnvStatus = (): void => {
   if (!APP_CONFIG.enableDebugLogs) return;
   
@@ -153,7 +150,7 @@ export const logEnvStatus = (): void => {
   console.groupEnd();
 };
 
-// Auto-validate and log in development
+
 if (APP_CONFIG.isDevelopment) {
   logEnvStatus();
 }

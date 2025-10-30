@@ -1,27 +1,27 @@
-// scripts/install-visualizer.js
-// This script helps install the visualizer plugin for bundle analysis
+
+
 
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Get current file's directory
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Path to package.json
+
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 
-// Read package.json
+
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
-// Check if rollup-plugin-visualizer is already installed
+
 if (!packageJson.devDependencies?.['rollup-plugin-visualizer']) {
   console.log('Installing rollup-plugin-visualizer...');
   
   try {
-    // Install the package
+    
     execSync('npm install --save-dev rollup-plugin-visualizer', { 
       stdio: 'inherit',
       cwd: path.join(__dirname, '..')
@@ -29,11 +29,11 @@ if (!packageJson.devDependencies?.['rollup-plugin-visualizer']) {
     
     console.log('\nVisualizer plugin installed successfully!');
     
-    // Update vite.config.js to use the plugin
+    
     const viteConfigPath = path.join(__dirname, '..', 'vite.config.js');
     let viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
     
-    // Check if we need to add the import for visualizer
+    
     if (!viteConfig.includes('rollup-plugin-visualizer')) {
       const analyzeBlock = `  // Add visualization plugin in analyze mode
   if (mode === 'analyze') {
@@ -77,11 +77,11 @@ if (!packageJson.devDependencies?.['rollup-plugin-visualizer']) {
   console.log('rollup-plugin-visualizer is already installed.');
 }
 
-// Add a script to analyze the bundle if it doesn't exist
+
 if (!packageJson.scripts['build:analyze']) {
   packageJson.scripts['build:analyze'] = 'vite build --mode analyze';
   
-  // Write the updated package.json
+  
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   console.log('Added build:analyze script to package.json');
 }

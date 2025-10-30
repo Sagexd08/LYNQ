@@ -1,15 +1,9 @@
 
 
 import React, { useEffect, useState } from "react";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { AptosClient } from "aptos";
 import TrustScoreCard from "./TrustScoreCard";
 
-const NODE_URL = "https://fullnode.testnet.aptoslabs.com";
-const INDEXER_URL = "https://indexer-testnet.staging.gcp.aptosdev.com/v1";
-const aptos = new AptosClient(NODE_URL);
 
-// Type definitions
 interface NFT {
   name: string;
   image: string;
@@ -22,23 +16,19 @@ interface Transaction {
   hash?: string;
 }
 
-interface TokenData {
-  metadata?: {
-    name?: string;
-    uri?: string;
-  };
+interface WalletProps {
+  account?: string;
+  balance?: string;
 }
 
-interface IndexerResource {
-  type: string;
-  data?: {
-    token_data?: TokenData;
-  };
+interface WalletProps {
+  account?: string;
+  balance?: string;
 }
 
-const ProfileDashboard: React.FC = () => {
-  const { account } = useWallet();
-  const walletAddress: string | undefined = account?.address?.toString();
+const ProfileDashboard: React.FC<WalletProps> = ({ account, balance }) => {
+  
+  const walletAddress: string | undefined = account || "0x1234567890abcdef1234567890abcdef12345678";
 
   const [trustScore, setTrustScore] = useState<number | null>(null);
   const [stakingTab, setStakingTab] = useState<boolean>(false);
@@ -58,60 +48,48 @@ const ProfileDashboard: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch TrustScore with better error handling
+        
         try {
-          const res = await aptos.getAccountResource(
-            walletAddress,
-            "0xaf1472b72a6d6fc5ace1313c8856ab71174fcc2a846de8fd7d10ab3e32510c94::trust_score::TrustScore"
-          ) as any;
-          setTrustScore(res?.data?.score || 0);
+          const ethBalance = parseFloat(balance || "0");
+          let score = 0;
+          
+          if (ethBalance > 0) score += 30;
+          if (ethBalance > 1) score += 30;
+          if (ethBalance > 5) score += 40;
+          
+          setTrustScore(score);
         } catch (err) {
-          console.warn("TrustScore not found, setting to 0");
+          console.warn("Failed to calculate trust score, setting to 0");
           setTrustScore(0);
         }
 
-        // Fetch NFTs with better error handling
+        
         try {
-          const response = await fetch(
-            `${INDEXER_URL}/accounts/${walletAddress}/resources`,
+          const mockNFTs: NFT[] = [
             {
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              }
+              name: "Ethereum NFT #1",
+              image: "https://via.placeholder.com/300x300?text=ETH+NFT+1",
+            },
+            {
+              name: "Ethereum NFT #2", 
+              image: "https://via.placeholder.com/300x300?text=ETH+NFT+2",
             }
-          );
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const data: IndexerResource[] = await response.json();
-
-          if (Array.isArray(data)) {
-            const tokenResources = data.filter((resource: IndexerResource) =>
-              resource.type && resource.type.startsWith("0x3::token::Token")
-            );
-
-            const extractedNFTs: NFT[] = tokenResources.map((res: IndexerResource) => {
-              const { name, uri } = res.data?.token_data?.metadata || {};
-              return {
-                name: name || "Unnamed NFT",
-                image: uri || "https://via.placeholder.com/300x300?text=No+Image",
-              };
-            });
-
-            setNfts(extractedNFTs);
-          } else {
-            setNfts([]);
-          }
+          ];
+          setNfts(mockNFTs);
         } catch (err) {
           console.warn("Failed to fetch NFTs:", err);
           setNfts([]);
         }
 
-        // Mock transactions for now
-        setTransactions([]);
+        
+        setTransactions([
+          {
+            type: "ETH Transfer",
+            version: "1.0",
+            timestamp: new Date().toISOString(),
+            hash: "0xabc123def456..."
+          }
+        ]);
         
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -124,7 +102,7 @@ const ProfileDashboard: React.FC = () => {
     fetchData();
   }, [walletAddress]);
 
-  // Loading state
+  
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-white">
@@ -138,7 +116,7 @@ const ProfileDashboard: React.FC = () => {
     );
   }
 
-  // Error state
+  
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-white">
@@ -165,7 +143,7 @@ const ProfileDashboard: React.FC = () => {
           👤 Profile Dashboard
         </h1>
         <p className="text-gray-300">
-          Welcome to your Web3 dashboard, powered by Aptos.
+          Welcome to your Web3 dashboard, powered by Ethereum.
         </p>
         {walletAddress && (
           <p className="text-sm text-gray-400 mt-2">

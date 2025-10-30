@@ -4,13 +4,13 @@ import LoanDashboard from "../card/LoanDashboard";
 const LoanPlatform: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
-  // Check if wallet is available
+  
   React.useEffect(() => {
     const checkWallet = async () => {
       try {
-        if (window.aptos) {
-          const account = await window.aptos.account();
-          setIsConnected(true);
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          setIsConnected(accounts.length > 0);
         } else {
           setIsConnected(false);
         }
@@ -24,7 +24,7 @@ const LoanPlatform: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      {/* Hero Section */}
+      {}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
@@ -35,11 +35,11 @@ const LoanPlatform: React.FC = () => {
               </span>
             </h1>
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-              Decentralized lending powered by trust-based scoring on the Aptos blockchain. 
+              Decentralized lending powered by trust-based scoring on the Ethereum blockchain. 
               Get instant loans with competitive rates and flexible terms.
             </p>
             
-            {/* Wallet Connection Status */}
+            {}
             <div className="inline-flex items-center px-6 py-3 rounded-full bg-white/10 border border-white/20 mb-8">
               <div className={`w-3 h-3 rounded-full mr-3 ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
               <span className="text-white font-medium">
@@ -47,7 +47,7 @@ const LoanPlatform: React.FC = () => {
               </span>
             </div>
 
-            {/* Features Grid */}
+            {}
             <div className="grid md:grid-cols-3 gap-8 mt-16">
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                 <div className="text-4xl mb-4">🔐</div>
@@ -77,7 +77,7 @@ const LoanPlatform: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Dashboard */}
+      {}
       <LoanDashboard />
     </div>
   );

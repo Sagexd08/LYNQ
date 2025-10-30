@@ -5,10 +5,10 @@
   
   **Borrow. Build. Belong.**
   
-  *A comprehensive DeFi platform built on the Aptos blockchain*
+  *A comprehensive multi-chain DeFi platform*
 
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-  [![Aptos](https://img.shields.io/badge/Built%20on-Aptos-00D4AA.svg)](https://aptos.dev)
+  [![Multi-Chain](https://img.shields.io/badge/Built%20on-Multi--Chain-00D4AA.svg)](https://aptos.dev)
   [![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB.svg)](https://react.dev)
   [![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6.svg)](https://typescriptlang.org)
 </div>
@@ -17,13 +17,16 @@
 
 ## Overview
 
-LYNQ is a revolutionary decentralized finance platform built entirely on the Aptos blockchain. Our mission is to democratize access to financial services while maintaining the highest standards of security, compliance, and user experience. We provide innovative lending solutions for both crypto-native users and Web3 newcomers.
+LYNQ is a revolutionary decentralized finance platform supporting multiple blockchain networks. Our mission is to democratize access to financial services while maintaining the highest standards of security, compliance, and user experience. We provide innovative lending solutions for both crypto-native users and Web3 newcomers across Ethereum, Aptos, and Flow networks.
 
 ### Key Features
 
+- **Multi-Chain Support**: Ethereum, Aptos, and Flow blockchain integration
 - **Dual Loan System**: Collateral-based Big Loans & Real-money-backed Small Loans
 - **Web3 Onboarding**: Locked mainnet tokens for beginners
 - **Reputation System**: Build onchain trust and unlock better rates
+- **Telegram Notifications**: Real-time loan updates and alerts
+- **Multi-Wallet Integration**: MetaMask, Coinbase Wallet, and Flow-compatible wallets
 - **Compliance First**: MiCA Framework & RBI Digital Lending Guidelines compliant
 - **No-KYC Options**: Privacy-preserving financial services
 
@@ -64,8 +67,8 @@ LYNQ is a revolutionary decentralized finance platform built entirely on the Apt
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn
-- Aptos Wallet (Petra, Martian, etc.)
+- npm, yarn, or pnpm
+- Compatible Web3 wallet (MetaMask, Coinbase Wallet, Flow-compatible, etc.)
 
 ### Installation
 
@@ -90,43 +93,173 @@ cp .env.example .env
 # Configure your environment variables
 ```
 
+Required environment variables:
+- `VITE_PARTICLE_PROJECT_ID` - Particle Network project ID
+- `VITE_PARTICLE_CLIENT_KEY` - Particle Network client key
+- `VITE_PARTICLE_APP_ID` - Particle Network app ID
+- `VITE_TELEGRAM_BOT_TOKEN` - Telegram bot token for notifications (optional)
+- `VITE_TELEGRAM_DEFAULT_CHAT_ID` - Default Telegram chat ID (optional)
+- `VITE_DEFAULT_NETWORK` - Default network (mainnet/testnet)
+
+---
+
+## Multi-Chain Architecture
+
+### Supported Blockchains
+
+#### Ethereum (EVM)
+- **Mainnet**: Production Ethereum blockchain
+- **Sepolia Testnet**: Testing environment
+- **Wallets**: MetaMask, Coinbase Wallet, WalletConnect
+- **Smart Contracts**: Solidity-based lending contracts
+- **Features**: Full EVM compatibility, gas optimization
+
+#### Aptos
+- **Network**: High-performance Aptos blockchain
+- **Language**: Move smart contracts
+- **Wallets**: Petra, Martian, Aptos-compatible wallets
+- **Features**: 160K+ TPS capability, advanced resource management
+
+#### Flow
+- **Network**: Flow blockchain with FCL integration
+- **Language**: Cadence smart contracts
+- **Wallets**: Flow-compatible wallets via FCL
+- **Features**: Developer-friendly architecture, composability
+
+### Cross-Chain Features
+- **Unified Interface**: Single UI for all supported blockchains
+- **Multi-Wallet Support**: Connect with different wallets per chain
+- **Network Switching**: Seamless switching between supported networks
+- **Consistent UX**: Same lending experience across all chains
+
 ---
 
 ## Smart Contract Information
 
-### Contract Details
-- **Contract Address**: `cc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec`
-- **Transaction Hash**: `0x05ba71a35eb4ce22aca3ab299f2ccf1e08690c779a5bb9fbc91bb6d48a14fd81`
-- **Gas Used**: 5,978 units
-- **Gas Unit Price**: 100
+### Flow Blockchain (Cadence)
 
-### Contract Functions
-- `initiate_big_loan()` - Create collateral-based loan
-- `initiate_small_loan()` - Create real-money backed loan
-- `repay_loan()` - Repay existing loan
-- `liquidate_collateral()` - Emergency liquidation
-- `update_reputation()` - Reputation system management
+**LoanPlatform Contract**
+- **Language**: Cadence
+- **Location**: `contracts/LoanPlatform.cdc`
+
+#### Contract Functions
+- `createLoan()` - Create a new loan with borrower, amount, interest, and duration
+- `getLoan()` - Retrieve loan details by ID
+- `applyRepayment()` - Apply payment to existing loan
+- `calculateTotalOwed()` - Calculate total amount owed including interest
+
+#### Events
+- `LoanCreated` - Emitted when a new loan is created
+- `LoanRepaid` - Emitted when a loan is repaid
+
+### Additional Smart Contract Platforms
+
+#### Ethereum (EVM)
+- **Status**: Integration ready
+- **Standards**: ERC-20, ERC-721 compatible
+- **Gas Optimization**: Advanced gas efficiency patterns
+
+#### Aptos (Move)
+- **Status**: Integration ready  
+- **Standards**: Aptos Coin Standard, Token Standard
+- **Resource Model**: Advanced resource safety
 
 ---
 
 ## Technology Stack
 
 ### Frontend
-- **React 18** - Modern UI framework
+- **React 18** - Modern UI framework with Suspense and code splitting
 - **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
-- **Framer Motion** - Smooth animations
-- **Vite** - Lightning-fast build tool
+- **Tailwind CSS** - Utility-first styling with custom design system
+- **Framer Motion** - Smooth animations and transitions
+- **Vite** - Lightning-fast build tool with HMR
+- **Axios** - HTTP client for API interactions
+- **React Hot Toast** - Toast notifications
 
-### Blockchain
-- **Aptos Blockchain** - High-performance L1
-- **Move Language** - Smart contract development
-- **Aptos SDK** - Blockchain integration
+### Blockchain Infrastructure
+- **Multi-Chain SDKs**:
+  - `@onflow/fcl` - Flow blockchain integration
+  - `ethers` - Ethereum/EVM integration
+  - `@coinbase/wallet-sdk` - Coinbase Wallet integration
+  - `@metamask/detect-provider` - MetaMask integration
+- **Smart Contract Languages**:
+  - Cadence (Flow)
+  - Solidity (Ethereum)
+  - Move (Aptos)
+
+### Services & Integrations
+- **Telegram Bot API** - Real-time notifications
+- **CoinGecko API** - Market data and pricing
+- **Particle Network** - Wallet infrastructure
+- **Axios** - HTTP requests
 
 ### Development Tools
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
+- **ESLint** - Code linting and quality
+- **PostCSS** - CSS processing and optimization
+- **pnpm/npm** - Package management
 - **Git** - Version control
+
+---
+
+## Project Architecture
+
+### Directory Structure
+
+```
+LYNQ/
+├── contracts/           # Smart contracts
+│   ├── LoanPlatform.cdc # Flow/Cadence contract
+│   └── scripts/         # Deployment scripts
+├── src/
+│   ├── components/      # React components
+│   │   ├── card/        # Loan card components
+│   │   ├── dashboard/   # Dashboard views
+│   │   ├── landing/     # Landing page sections
+│   │   ├── loan/        # Loan management
+│   │   ├── marketplace/ # Trading interface
+│   │   ├── wallet/      # Wallet integration
+│   │   └── hooks/       # Custom React hooks
+│   ├── config/          # Configuration files
+│   ├── constants/       # Constants and types
+│   ├── services/        # Business logic & APIs
+│   │   ├── telegramService.ts      # Telegram notifications
+│   │   ├── loanRepaymentService.ts # Loan management
+│   │   ├── flowLoanService.ts      # Flow integration
+│   │   └── userTelegramService.ts  # User-Telegram mapping
+│   ├── types/           # TypeScript type definitions
+│   └── utils/           # Utility functions
+├── scripts/             # Build and deployment scripts
+├── dist/                # Production build output
+└── public/              # Static assets
+```
+
+### Key Components
+
+#### Wallet Integration
+- **Multi-Wallet Support**: Automatic detection and connection
+- **Persistence**: Session management and auto-reconnect
+- **Network Switching**: Seamless chain switching
+- **Error Handling**: Comprehensive error boundaries
+
+#### Notification System
+- **Telegram Bot**: Real-time notifications via Telegram Bot API
+- **User Mapping**: LocalStorage-based wallet-to-chat mapping
+- **Event Types**: Loan granted, payment received, overdue alerts
+- **Optional**: Graceful degradation when not configured
+
+#### Loan Management
+- **Dual System**: Big loans (collateral) and small loans (real-money)
+- **Repayment Tracking**: Real-time payment application
+- **State Management**: Custom hooks for loan state
+- **Credit Scoring**: Trust score calculation and tracking
+
+### Security Features
+- **Input Validation**: Comprehensive validation patterns
+- **Rate Limiting**: API and transaction rate limits
+- **XSS Protection**: Content Security Policy
+- **Error Boundaries**: React error handling
+- **Audit Logging**: Security event tracking
 
 ---
 
@@ -139,6 +272,19 @@ cp .env.example .env
 - [x] Real-money Small Loans
 - [x] Web3 onboarding with locked tokens
 - [x] Initial compliance framework
+- [x] **Multi-Chain Integration**
+  - Ethereum/EVM support
+  - Flow blockchain integration
+  - Aptos blockchain support
+- [x] **Wallet Infrastructure**
+  - MetaMask integration
+  - Coinbase Wallet support
+  - Flow FCL integration
+  - Auto-detection and connection
+- [x] **Telegram Notifications**
+  - Real-time loan status updates
+  - Payment notifications
+  - Overdue alerts
 
 ### Phase 2: Enhanced Features (Q2 2025)
 - [ ] **No-Collateral Loans**

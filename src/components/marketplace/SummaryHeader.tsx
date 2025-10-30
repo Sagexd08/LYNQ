@@ -9,7 +9,7 @@ interface SummaryHeaderProps {
 const SummaryHeader: React.FC<SummaryHeaderProps> = ({ marketSize, totalBorrowed, lentOut }) => {
   return (
     <div className="flex flex-col gap-6 mb-10 w-full max-w-7xl mx-auto px-4 sm:px-6 mt-20">
-      {/* Metrics */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
         {[
           {
@@ -44,7 +44,7 @@ const SummaryHeader: React.FC<SummaryHeaderProps> = ({ marketSize, totalBorrowed
         ))}
       </div>
 
-      {/* Bridge CTA */}
+      {}
       <div className="w-full flex justify-center lg:justify-end">
         <a
           href="https://bridge.example.com"
