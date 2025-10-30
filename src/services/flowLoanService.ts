@@ -12,7 +12,12 @@ export const FlowLoanService = {
     
     const { amount, interestBps, durationSeconds, purpose } = params;
     const tx = await fcl.mutate({
-      cadence: `transaction(amount: UFix64, interestBps: UInt64, durationSeconds: UFix64, purpose: String) { prepare(acct: AuthAccount) { } execute { } }`,
+      cadence: `transaction(amount: UFix64, interestBps: UInt64, durationSeconds: UFix64, purpose: String) {
+        prepare(acct: AuthAccount) {}
+        execute {
+          LoanPlatform.createLoan(borrower: acct.address, amount: amount, interestBps: interestBps, durationSeconds: durationSeconds, purpose: purpose)
+        }
+      }`,
       args: (arg: any, t: any) => [
         arg(amount, t.UFix64),
         arg(String(interestBps), t.UInt64),

@@ -53,7 +53,7 @@ pub contract LoanPlatform {
         return loan.amount + interest
     }
 
-    pub fun createLoan(amount: UFix64, interestBps: UInt64, durationSeconds: UFix64, purpose: String) {
+    pub fun createLoan(borrower: Address, amount: UFix64, interestBps: UInt64, durationSeconds: UFix64, purpose: String) {
         let id = self.nextLoanId
         self.nextLoanId = id + 1
 
@@ -62,7 +62,7 @@ pub contract LoanPlatform {
 
         let loan = Loan(
             id: id,
-            borrower: AuthAccount(payer: signer).address,
+            borrower: borrower,
             amount: amount,
             interestBps: interestBps,
             durationSeconds: durationSeconds,
