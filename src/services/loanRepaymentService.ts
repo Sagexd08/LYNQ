@@ -1,4 +1,5 @@
 import { TelegramService } from './telegramService';
+import { ethers } from 'ethers';
 
 
 export interface LoanDetails {

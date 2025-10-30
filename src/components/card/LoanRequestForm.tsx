@@ -41,7 +41,6 @@ const LoanRequestForm: React.FC = () => {
   const [purpose, setPurpose] = useState<string>("");
   const [loanType, setLoanType] = useState<string>("standard"); 
   const [flashLoanData, setFlashLoanData] = useState<string>(""); 
-  const contractAddress = "0xcc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec";
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
