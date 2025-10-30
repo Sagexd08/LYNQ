@@ -67,7 +67,7 @@ function NavBar({
                 </li>
               ))}
               
-              {/* Network Toggle */}
+              {}
               {onToggleNetwork && (
                 <li>
                   <button
@@ -93,7 +93,7 @@ function NavBar({
               </li>
             </ul>
 
-            {/* Mobile Menu Toggle */}
+            {}
             <div className="md:hidden z-10">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -120,7 +120,7 @@ function NavBar({
             </div>
           </nav>
 
-          {/* Mobile Dropdown Menu */}
+          {}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -147,7 +147,7 @@ function NavBar({
                     </button>
                   ))}
 
-                  {/* Network Toggle for Mobile */}
+                  {}
                   {onToggleNetwork && (
                     <button
                       onClick={() => {

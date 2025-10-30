@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-// Placeholder for Web3 smart contract interaction
-// import { ethers } from "ethers";
+
+
 import LoanRequestForm from "./LoanRequestForm";
 import LoanManagementSystem from "./LoanManagementSystem";
 
-// Utility functions
+
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
   const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
@@ -41,7 +41,7 @@ const LoanDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check wallet connection and load user data
+  
   useEffect(() => {
     const checkWallet = async () => {
       try {
@@ -64,7 +64,7 @@ const LoanDashboard: React.FC = () => {
     checkWallet();
   }, []);
 
-  // Load comprehensive user data
+  
   const loadUserData = async (address: string) => {
     if (!isValidHexAddress(address)) return;
     
@@ -72,10 +72,10 @@ const LoanDashboard: React.FC = () => {
     setError(null);
 
     try {
-      // Check contract initialization and trust score
+      
       await checkContractAndTrustScore(address);
       
-      // Load user loans
+      
       await loadUserLoans(address);
       
     } catch (err: any) {
@@ -86,13 +86,13 @@ const LoanDashboard: React.FC = () => {
     }
   };
 
-  // Check contract status and trust score
+  
   const checkContractAndTrustScore = async (address: string) => {
     try {
-      // Placeholder for EVM contract interaction
+      
       console.log("Checking contract and trust score for:", address);
       
-      // Mock data for demonstration
+      
       setIsContractInitialized(true);
       setHasTrustScore(true);
       setTrustScoreData({
@@ -118,13 +118,13 @@ const LoanDashboard: React.FC = () => {
     }
   };
 
-  // Load user loans
+  
   const loadUserLoans = async (address: string) => {
     try {
-      // Placeholder for EVM contract interaction
+      
       console.log("Loading user loans for:", address);
       
-      // Mock loan data for demonstration
+      
       const mockLoans: any[] = [];
       setUserLoans(mockLoans);
       
@@ -134,7 +134,7 @@ const LoanDashboard: React.FC = () => {
     }
   };
   
-  // Get loan status text
+  
   const getLoanStatusText = (status: number): string => {
     switch (status) {
       case 0: return "Active";
@@ -145,7 +145,7 @@ const LoanDashboard: React.FC = () => {
     }
   };
 
-  // Get loan status color
+  
   const getLoanStatusColor = (status: number): string => {
     switch (status) {
       case 0: return "text-yellow-400";
@@ -156,30 +156,30 @@ const LoanDashboard: React.FC = () => {
     }
   };
 
-  // Calculate total borrowed
+  
   const totalBorrowed = userLoans.reduce((sum, loan) => sum + parseFloat(formatAmount(loan.amount)), 0);
   
-  // Calculate total repaid
+  
   const totalRepaid = userLoans
     .filter(loan => loan.status === 1)
     .reduce((sum, loan) => sum + parseFloat(formatAmount(loan.amount)), 0);
   
-  // Calculate active loans
+  
   const activeLoans = userLoans.filter(loan => loan.status === 0);
   
-  // Calculate defaulted loans
+  
   const defaultedLoans = userLoans.filter(loan => loan.status === 2);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
+        {}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🏦 Elegant DeFi Loan Platform</h1>
           <p className="text-white/70">Decentralized lending with trust-based scoring on Ethereum</p>
         </div>
 
-        {/* Wallet Status */}
+        {}
         <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-white/10 mb-6">
           <div className="flex justify-between items-center">
             <div>
@@ -203,7 +203,7 @@ const LoanDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {}
         <div className="flex space-x-1 bg-white/5 rounded-lg p-1 mb-6">
           {[
             { id: "overview", label: "📊 Overview", icon: "📊" },
@@ -224,7 +224,7 @@ const LoanDashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Loading State */}
+        {}
         {isLoading && (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto"></div>
@@ -232,7 +232,7 @@ const LoanDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Error State */}
+        {}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
             <div className="flex items-center space-x-2">
@@ -243,13 +243,13 @@ const LoanDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Tab Content */}
+        {}
         {!isLoading && (
           <>
-            {/* Overview Tab */}
+            {}
             {activeTab === "overview" && (
               <div className="space-y-6">
-                {/* Trust Score Card */}
+                {}
                 {hasTrustScore && trustScoreData && (
                   <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-xl p-6 border border-white/10">
                     <h3 className="text-white font-semibold mb-4">📈 Trust Score Overview</h3>
@@ -274,7 +274,7 @@ const LoanDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Loan Statistics */}
+                {}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                     <h3 className="text-white font-semibold mb-4">📊 Loan Statistics</h3>
@@ -319,7 +319,7 @@ const LoanDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Recent Loans */}
+                {}
                 {userLoans.length > 0 && (
                   <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                     <h3 className="text-white font-semibold mb-4">📋 Recent Loans</h3>
@@ -346,12 +346,12 @@ const LoanDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Request Loan Tab */}
+            {}
             {activeTab === "request" && (
               <LoanRequestForm />
             )}
 
-            {/* Manage Loans Tab */}
+            {}
             {activeTab === "manage" && (
               <LoanManagementSystem />
             )}

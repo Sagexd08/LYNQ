@@ -1,6 +1,6 @@
-// Global type declarations for the project
 
-// Asset imports
+
+
 declare module '*.svg' {
   const content: string;
   export default content;
@@ -31,7 +31,7 @@ declare module '*.webp' {
   export default content;
 }
 
-// Font imports
+
 declare module '*.ttf' {
   const content: string;
   export default content;
@@ -47,7 +47,7 @@ declare module '*.woff2' {
   export default content;
 }
 
-// Common wallet interface for better type safety
+
 interface WalletAccount {
   address: string;
   publicKey?: string;
@@ -73,7 +73,7 @@ interface BaseWalletProvider {
   isConnected?(): Promise<boolean>;
 }
 
-// Ethereum provider interface
+
 interface EthereumProvider {
   isMetaMask?: boolean;
   isCoinbaseWallet?: boolean;
@@ -84,53 +84,53 @@ interface EthereumProvider {
 
 declare global {
   interface Window {
-    // Ethereum wallet providers
+    
     ethereum?: EthereumProvider;
   }
 
-  // Vite environment variables with better typing
+  
   interface ImportMeta {
     readonly env: ImportMetaEnv;
   }
 
   interface ImportMetaEnv {
-    // App configuration
+    
     readonly VITE_APP_NAME?: string;
     readonly VITE_APP_VERSION?: string;
     readonly VITE_APP_DESCRIPTION?: string;
     
-    // Particle configuration (can be used for other wallet providers)
+    
     readonly VITE_PARTICLE_PROJECT_ID?: string;
     readonly VITE_PARTICLE_CLIENT_KEY?: string;
     readonly VITE_PARTICLE_APP_ID?: string;
     
-    // Network configuration
+    
     readonly VITE_DEFAULT_NETWORK?: 'mainnet' | 'testnet' | 'sepolia';
     readonly VITE_ETHEREUM_NODE_URL?: string;
     readonly VITE_INFURA_PROJECT_ID?: string;
     
-    // Feature flags
+    
     readonly VITE_ENABLE_ANALYTICS?: string;
     readonly VITE_ENABLE_ERROR_REPORTING?: string;
     readonly VITE_ENABLE_DEBUG?: string;
     
-    // API configuration
+    
     readonly VITE_API_BASE_URL?: string;
     readonly VITE_API_KEY?: string;
     
-    // Standard Vite env vars
+    
     readonly DEV: boolean;
     readonly PROD: boolean;
     readonly MODE: string;
     readonly BASE_URL: string;
     readonly SSR: boolean;
     
-    // Allow any other env vars for flexibility
+    
     readonly [key: `VITE_${string}`]: string | undefined;
   }
 }
 
-// Common types for the application
+
 export interface AppError extends Error {
   code?: string;
   details?: any;
@@ -152,7 +152,7 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
   };
 }
 
-// Utility types
+
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};

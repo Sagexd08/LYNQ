@@ -1,18 +1,18 @@
-// SPDX-License-Identifier: MIT
+
 const { ethers } = require("hardhat");
 
 async function main() {
   console.log("Deploying LYNQ Loan Platform to Ethereum...");
 
-  // Get the deployer account
+  
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with account:", deployer.address);
 
-  // Check deployer balance
+  
   const balance = await deployer.getBalance();
   console.log("Account balance:", ethers.utils.formatEther(balance), "ETH");
 
-  // Deploy the LoanPlatform contract
+  
   const LoanPlatform = await ethers.getContractFactory("LoanPlatform");
   console.log("Deploying LoanPlatform...");
 
@@ -22,11 +22,11 @@ async function main() {
   console.log("LoanPlatform deployed to:", loanPlatform.address);
   console.log("Transaction hash:", loanPlatform.deployTransaction.hash);
 
-  // Wait for a few block confirmations
+  
   console.log("Waiting for block confirmations...");
   await loanPlatform.deployTransaction.wait(5);
 
-  // Verify contract on Etherscan (if not localhost)
+  
   if (network.name !== "hardhat" && network.name !== "localhost") {
     console.log("Verifying contract on Etherscan...");
     try {
@@ -40,7 +40,7 @@ async function main() {
     }
   }
 
-  // Save deployment information
+  
   const deploymentInfo = {
     network: network.name,
     chainId: network.config.chainId,
@@ -54,7 +54,7 @@ async function main() {
   console.log("\n=== Deployment Summary ===");
   console.log(JSON.stringify(deploymentInfo, null, 2));
 
-  // Save to file
+  
   const fs = require("fs");
   const path = require("path");
   
@@ -70,7 +70,7 @@ async function main() {
   console.log("\nDeployment completed successfully!");
 }
 
-// Error handling
+
 main()
   .then(() => process.exit(0))
   .catch((error) => {

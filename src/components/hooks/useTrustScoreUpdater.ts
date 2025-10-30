@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-// Types
+
 interface TrustScoreUpdateState {
   isLoading: boolean;
   error: string | null;
@@ -13,9 +13,7 @@ interface TrustScoreUpdaterHook {
   clearState: () => void;
 }
 
-/**
- * Custom hook for trust score updates - EVM placeholder
- */
+
 export const useTrustScoreUpdater = (): TrustScoreUpdaterHook => {
   const [state, setState] = useState<TrustScoreUpdateState>({
     isLoading: false,
@@ -36,10 +34,10 @@ export const useTrustScoreUpdater = (): TrustScoreUpdaterHook => {
     setState(prev => ({ ...prev, isLoading: true, error: null, success: false }));
 
     try {
-      // Placeholder for EVM smart contract interaction
+      
       console.log("Updating trust score with action:", action);
       
-      // Simulate transaction
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setState(prev => ({ 

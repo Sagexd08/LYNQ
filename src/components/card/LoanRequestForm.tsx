@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { FlowLoanService } from "../../services/flowLoanService";
+import { TelegramService } from "../../services/telegramService";
 
-// Utility functions for validation
+
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
-  // Remove 0x prefix if present
+  
   const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
-  // Check if it's a valid hex string with correct length (40 characters for Ethereum addresses)
+  
   return /^[0-9a-fA-F]{40}$/.test(cleanAddress);
 };
 
 const formatAddress = (address: string): string => {
   if (!address) return '';
-  // Ensure it starts with 0x
+  
   const cleanAddress = address.startsWith('0x') ? address : `0x${address}`;
   return cleanAddress;
 };
@@ -37,8 +39,8 @@ const LoanRequestForm: React.FC = () => {
   const [tokenType, setTokenType] = useState<string>("ETH");
   const [collateralAddress, setCollateralAddress] = useState<string>("");
   const [purpose, setPurpose] = useState<string>("");
-  const [loanType, setLoanType] = useState<string>("standard"); // New state for loan type
-  const [flashLoanData, setFlashLoanData] = useState<string>(""); // Flash loan execution data
+  const [loanType, setLoanType] = useState<string>("standard"); 
+  const [flashLoanData, setFlashLoanData] = useState<string>(""); 
   const contractAddress = "0xcc5e97e0015543dfac2d3e686fed214a7450e5c1efe15786dfde118987c3fbec";
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,7 +57,7 @@ const LoanRequestForm: React.FC = () => {
   const [maxLoanAmount, setMaxLoanAmount] = useState<string>("100");
   const [isWalletConnected, setIsWalletConnected] = useState<boolean>(false);
 
-  // Check wallet connection and get user address
+  
   useEffect(() => {
     const checkWallet = async () => {
       try {
@@ -78,24 +80,24 @@ const LoanRequestForm: React.FC = () => {
     checkWallet();
   }, []);
 
-  // Comprehensive status check with better error handling
+  
   const checkContractAndUserStatus = async (address: string) => {
     try {
-      // Validate address format
+      
       if (!isValidHexAddress(address)) {
         console.error("Invalid address format:", address);
         return;
       }
 
-      // Placeholder for EVM contract interaction
-      // TODO: Implement actual smart contract calls
+      
+      
       console.log("Checking contract status for address:", address);
       
-      // For now, simulate contract is initialized and user has trust score
+      
       setIsContractInitialized(true);
       setHasTrustScore(true);
-      setTrustScoreData({ score: 750 }); // Mock data
-      setMaxLoanAmount("100"); // Default max loan amount
+      setTrustScoreData({ score: 750 }); 
+      setMaxLoanAmount("100"); 
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -105,7 +107,7 @@ const LoanRequestForm: React.FC = () => {
     }
   };
 
-  // Initialize the contract with better error handling
+  
   const initializeContract = async () => {
     setIsInitializing(true);
     setError(null);
@@ -116,19 +118,19 @@ const LoanRequestForm: React.FC = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); // Verify wallet connection
+      await provider.getSigner(); 
       
-      // Placeholder for smart contract initialization
-      // TODO: Replace with actual contract address and ABI
+      
+      
       console.log("Initializing contract...");
       
-      // Mock transaction for demonstration
+      
       const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
       
       setIsContractInitialized(true);
       setTxHash(mockTxHash);
       
-      // Refresh status
+      
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
@@ -154,7 +156,7 @@ const LoanRequestForm: React.FC = () => {
     }
   };
 
-  // Create trust score with better error handling
+  
   const createTrustScore = async () => {
     setIsCreatingTrustScore(true);
     setError(null);
@@ -165,18 +167,18 @@ const LoanRequestForm: React.FC = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); // Verify wallet connection
+      await provider.getSigner(); 
       
-      // Placeholder for smart contract interaction
+      
       console.log("Creating trust score...");
       
-      // Mock transaction for demonstration
+      
       const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
 
       setHasTrustScore(true);
       setTxHash(mockTxHash);
       
-      // Refresh status
+      
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
@@ -202,19 +204,19 @@ const LoanRequestForm: React.FC = () => {
     }
   };
 
-  // Validate form inputs
+  
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
 
-    // Validate amount
+    
     const amountValidation = validateAmount(amount, maxLoanAmount);
     if (!amountValidation.isValid) {
       errors.amount = amountValidation.error!;
     }
 
-    // For flash loans, skip collateral validation as it's not needed
+    
     if (loanType === "standard") {
-      // Validate collateral address if provided
+      
       if (collateralAddress.trim()) {
         const formattedAddress = formatAddress(collateralAddress.trim());
         if (!isValidHexAddress(formattedAddress)) {
@@ -222,13 +224,13 @@ const LoanRequestForm: React.FC = () => {
         }
       }
     } else if (loanType === "flash") {
-      // Validate flash loan data
+      
       if (!flashLoanData.trim()) {
         errors.flashLoanData = "Flash loan execution data is required for flash loans.";
       }
     }
 
-    // Validate purpose length
+    
     if (purpose.length > 100) {
       errors.purpose = "Purpose description is too long (max 100 characters).";
     }
@@ -237,16 +239,16 @@ const LoanRequestForm: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Submit loan request with comprehensive validation
+  
   const handleLoanRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors
+    
     setError(null);
     setTxHash(null);
     setValidationErrors({});
 
-    // Validate form
+    
     if (!validateForm()) {
       return;
     }
@@ -254,47 +256,36 @@ const LoanRequestForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!window.ethereum) throw new Error("Wallet not connected");
       if (!isContractInitialized) throw new Error("Contract not initialized");
       if (!hasTrustScore) throw new Error("Trust score required");
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); // Verify wallet connection
       
-      // Convert amount to Wei (smallest unit of ETH)
-      const amountInWei = ethers.parseEther(amount);
-      
-      // Format collateral address properly
-      let collateralAddr = contractAddress; // default to contract address
-      if (collateralAddress.trim()) {
-        const formattedAddress = formatAddress(collateralAddress.trim());
-        if (isValidHexAddress(formattedAddress)) {
-          collateralAddr = formattedAddress;
-        }
-      }
+      const interestBps = 1000; 
+      const durationSeconds = parseInt(maxLoanAmount) ? parseInt(maxLoanAmount) : 30 * 24 * 60 * 60; 
+      const txId = await FlowLoanService.createLoan({
+        amount: `${parseFloat(amount).toFixed(2)}`,
+        interestBps,
+        durationSeconds,
+        purpose: purpose || tokenType
+      });
 
-      // Placeholder for smart contract interaction
-      console.log("Loan request:", {
-        amount: amountInWei.toString(),
-        purpose: purpose || tokenType,
-        collateral: collateralAddr
+      setTxHash(String(txId));
+
+      
+      void TelegramService.notifyLoanGranted({
+        loanId: String(Date.now()),
+        borrower: userAddress,
+        amountDisplay: `${amount} FLOW`,
+        aprBps: String(interestBps),
+        dueDate: new Date(Date.now() + durationSeconds * 1000).toLocaleString()
       });
       
-      // Mock transaction for demonstration
-      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
-
-      setTxHash(mockTxHash);
       
-      // Reset form
       setAmount("");
       setPurpose("");
       setCollateralAddress("");
       
-      // Refresh user data
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        await checkContractAndUserStatus(accounts[0]);
-      }
+      
       
     } catch (err: any) {
       console.error("Loan request error:", err);
@@ -320,21 +311,21 @@ const LoanRequestForm: React.FC = () => {
     }
   };
 
-  // Handle flash loan request
+  
   const handleFlashLoanRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors
+    
     setError(null);
     setTxHash(null);
     setValidationErrors({});
 
-    // Validate form
+    
     if (!validateForm()) {
       return;
     }
 
-    // Additional validation for flash loans
+    
     if (!flashLoanData.trim()) {
       setValidationErrors(prev => ({ 
         ...prev, 
@@ -349,12 +340,12 @@ const LoanRequestForm: React.FC = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); // Verify wallet connection
+      await provider.getSigner(); 
       
-      // Convert amount to Wei (smallest unit of ETH)
+      
       const amountInWei = ethers.parseEther(amount);
       
-      // Flash loans don't need collateral as they must be repaid in same transaction
+      
       console.log("Flash loan request:", {
         amount: amountInWei.toString(),
         tokenType,
@@ -362,12 +353,12 @@ const LoanRequestForm: React.FC = () => {
         purpose: purpose || "Flash loan operation"
       });
       
-      // Mock transaction for flash loan
-      const mockTxHash = "0xFL" + Math.random().toString(16).substr(2, 6); // FL prefix for flash loan
+      
+      const mockTxHash = "0xFL" + Math.random().toString(16).substr(2, 6); 
 
       setTxHash(mockTxHash);
       
-      // Reset form
+      
       setAmount("");
       setPurpose("");
       setFlashLoanData("");
@@ -394,23 +385,23 @@ const LoanRequestForm: React.FC = () => {
     }
   };
 
-  // Handle collateral address input with validation
+  
   const handleCollateralAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCollateralAddress(value);
     
-    // Clear validation error when user starts typing
+    
     if (validationErrors.collateralAddress) {
       setValidationErrors(prev => ({ ...prev, collateralAddress: "" }));
     }
   };
 
-  // Handle amount input with validation
+  
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAmount(value);
     
-    // Clear validation error when user starts typing
+    
     if (validationErrors.amount) {
       setValidationErrors(prev => ({ ...prev, amount: "" }));
     }
@@ -423,7 +414,7 @@ const LoanRequestForm: React.FC = () => {
         <p className="text-white/70 text-sm">Decentralized lending with trust-based scoring</p>
       </div>
       
-      {/* User Status Dashboard */}
+      {}
       <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-white/10">
         <h3 className="text-white font-semibold mb-3">📊 Account Status</h3>
         <div className="space-y-2 text-sm">
@@ -454,7 +445,7 @@ const LoanRequestForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Step 1: Initialize Contract */}
+      {}
       {!isContractInitialized && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <h3 className="text-red-400 font-semibold mb-2">🚫 Contract Not Initialized</h3>
@@ -472,7 +463,7 @@ const LoanRequestForm: React.FC = () => {
         </div>
       )}
 
-      {/* Step 2: Create Trust Score */}
+      {}
       {isContractInitialized && !hasTrustScore && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
           <h3 className="text-yellow-400 font-semibold mb-2">📈 Create Your Trust Score</h3>
@@ -490,12 +481,12 @@ const LoanRequestForm: React.FC = () => {
         </div>
       )}
 
-      {/* Step 3: Loan Request Form */}
+      {}
       {isContractInitialized && hasTrustScore && (
         <div className="bg-white/5 rounded-xl p-6 border border-white/10">
           <h3 className="text-white font-semibold mb-4">💰 Request a Loan</h3>
           
-          {/* Loan Type Selector */}
+          {}
           <div className="mb-6">
             <label className="block text-white/80 text-sm font-medium mb-3">
               Loan Type *
@@ -538,7 +529,7 @@ const LoanRequestForm: React.FC = () => {
                 : "Flash loans must be borrowed and repaid within the same transaction. No collateral required."}
             </div>
             
-            {/* Flash Loan Information */}
+            {}
             {loanType === "flash" && (
               <div className="mt-4 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
                 <h4 className="text-purple-300 font-semibold mb-2 flex items-center">
@@ -634,7 +625,7 @@ const LoanRequestForm: React.FC = () => {
               </p>
             </div>
 
-            {/* Flash Loan Execution Data */}
+            {}
             {loanType === "flash" && (
               <div>
                 <label className="block text-white/80 text-sm font-medium mb-2">
@@ -667,7 +658,7 @@ const LoanRequestForm: React.FC = () => {
               </div>
             )}
 
-            {/* Collateral Address - Only for Standard Loans */}
+            {}
             {loanType === "standard" && (
               <div>
                 <label className="block text-white/80 text-sm font-medium mb-2">
@@ -726,7 +717,7 @@ const LoanRequestForm: React.FC = () => {
         </div>
       )}
 
-      {/* Transaction Results */}
+      {}
       {txHash && (
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
           <div className="flex items-center space-x-2 mb-2">

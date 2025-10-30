@@ -10,8 +10,8 @@ interface PersonalDetailsProps {
 }
 
 const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError }) => {
-  const [usdRate, setUsdRate] = useState(2500); // ETH price placeholder
-  const [trustScore] = useState(75); // Mock score since useTrustScore hook doesn't exist
+  const [usdRate, setUsdRate] = useState(2500); 
+  const [trustScore] = useState(75); 
   const [trustTier, setTrustTier] = useState("🥈 Gold");
 
   const fetchPrice = async () => {
@@ -26,7 +26,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
 
   useEffect(() => {
     fetchPrice();
-    // Set trust tier based on mock score
+    
     if (trustScore >= 86) setTrustTier("🥇 Elite");
     else if (trustScore >= 61) setTrustTier("🥈 Gold");
     else if (trustScore >= 31) setTrustTier("🥉 Silver");
@@ -49,7 +49,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
       </h3>
 
       <div className="space-y-6 text-sm text-white/80">
-        {/* Wallet Address */}
+        {}
         <div>
           <label className="block text-white/60 mb-1">Wallet Address</label>
           <div className="p-3 bg-white/5 border border-white/10 rounded-lg font-mono break-all text-white text-sm flex justify-between items-center">
@@ -65,7 +65,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Wallet Provider */}
+        {}
         {walletType && (
           <div>
             <label className="block text-white/60 mb-1">Wallet Provider</label>
@@ -73,7 +73,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         )}
 
-        {/* ETH Balance & USD */}
+        {}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-white/60 mb-1">ETH Balance</label>
@@ -111,7 +111,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* TrustScore + Tier */}
+        {}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-white/60 mb-1">TrustScore</label>
@@ -123,7 +123,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Account Status */}
+        {}
         <div>
           <label className="block text-white/60 mb-1">Account Status</label>
           <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Connected At */}
+        {}
         {address && (
           <div>
             <label className="block text-white/60 mb-1">Connected At</label>
@@ -146,7 +146,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         )}
 
-        {/* Network */}
+        {}
         {address && (
           <div>
             <label className="block text-white/60 mb-1">Network</label>
@@ -157,7 +157,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         )}
 
-        {/* Balance Error Display */}
+        {}
         {balanceError && (
           <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
             <label className="block text-red-400 mb-1">Balance Error</label>

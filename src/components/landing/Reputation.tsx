@@ -1,4 +1,4 @@
-// Inline Card Component
+
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -12,7 +12,7 @@ function Card({ children, className = '' }: CardProps) {
   );
 }
 
-// Inline CheckCircle Icon (Lucide style)
+
 function CheckCircle({ className = '' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -27,16 +27,16 @@ export default function Reputation() {
   return (
     <section className="py-12 sm:py-16 md:py-20 relative" id="reputation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Section Header */}
+        {}
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Reputation System Highlight
           </h2>
         </div>
 
-        {/* Main Grid */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-          {/* Left Side */}
+          {}
           <div className="space-y-6 sm:space-y-8">
             <Card className="bg-white/10 backdrop-blur-xl border border-green-400/30 p-6 sm:p-8 shadow-lg shadow-green-500/20">
               <div className="space-y-4 sm:space-y-6">
@@ -64,7 +64,7 @@ export default function Reputation() {
               </div>
             </Card>
 
-            {/* Checklist */}
+            {}
             <div className="space-y-4">
               {[
                 "On-chain repayment history builds reputation",
@@ -79,7 +79,7 @@ export default function Reputation() {
             </div>
           </div>
 
-          {/* Right Side – Steps */}
+          {}
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <h3 className="text-2xl font-bold text-white">How It Works</h3>

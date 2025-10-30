@@ -12,7 +12,7 @@ interface FiltersProps {
 const Filters: React.FC<FiltersProps> = ({ searchTerm, setSearchTerm, sortBy, setSortBy, chartRange, setChartRange }) => {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
-      {/* Search Bar */}
+      {}
       <input
         type="text"
         placeholder="Search Coin"
@@ -21,7 +21,7 @@ const Filters: React.FC<FiltersProps> = ({ searchTerm, setSearchTerm, sortBy, se
         className=" px-4 py-2 rounded-lg bg-white/5 text-white placeholder-white/50 border border-white/10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
       />
 
-      {/* Sort Dropdown */}
+      {}
       <select
         value={sortBy}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value)}
@@ -31,7 +31,7 @@ const Filters: React.FC<FiltersProps> = ({ searchTerm, setSearchTerm, sortBy, se
         <option value="volume" className='text-black'>Sort by Volume</option>
       </select>
 
-      {/* Chart Range Dropdown */}
+      {}
       <select
         value={chartRange}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setChartRange(e.target.value)}

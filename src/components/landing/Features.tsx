@@ -10,7 +10,7 @@ import {
   Repeat
 } from 'lucide-react';
 
-// 🟢 Inline Button component
+
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
@@ -34,7 +34,7 @@ function Button({ children, onClick, size = 'default', className = '' }: ButtonP
   );
 }
 
-// 🟢 Inline Card and CardContent components
+
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -122,7 +122,7 @@ export default function FeaturesCarousel() {
         </div>
 
         <div className="relative">
-          {/* Mobile View */}
+          {}
           <div className="block lg:hidden">
             <div className="flex flex-col items-center space-y-6">
               <Card className="w-full max-w-sm mx-auto bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
@@ -173,7 +173,7 @@ export default function FeaturesCarousel() {
             </div>
           </div>
 
-          {/* Desktop View */}
+          {}
           <div className="hidden lg:flex items-center justify-center space-x-8 mb-8">
             <Button
               onClick={prevFeature}
@@ -184,7 +184,7 @@ export default function FeaturesCarousel() {
             </Button>
 
             <div className="flex items-center space-x-6 px-8">
-              {/* Left Card */}
+              {}
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform -rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
@@ -201,7 +201,7 @@ export default function FeaturesCarousel() {
                 </CardContent>
               </Card>
 
-              {/* Center Card */}
+              {}
               <Card className="w-80 h-96 bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transform scale-110 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
                 <CardContent className="p-8 h-full flex flex-col justify-center items-center text-center space-y-6">
                   <div
@@ -218,7 +218,7 @@ export default function FeaturesCarousel() {
                 </CardContent>
               </Card>
 
-              {/* Right Card */}
+              {}
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
@@ -245,7 +245,7 @@ export default function FeaturesCarousel() {
             </Button>
           </div>
 
-          {/* Indicator Dots */}
+          {}
           <div className="flex justify-center space-x-2">
             {features.map((_, index) => (
               <button

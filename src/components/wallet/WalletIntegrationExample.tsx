@@ -1,4 +1,4 @@
-// src/components/wallet/WalletIntegrationExample.tsx
+
 import { useState, useEffect } from 'react';
 import WalletConnectionModal from './WalletConnectionModal';
 import WalletStatus from './WalletStatus';
@@ -8,7 +8,7 @@ const WalletIntegrationExample: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [walletInfo, setWalletInfo] = useState<SavedWalletConnection | null>(null);
   
-  // Check for existing wallet connection on mount
+  
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection) {
@@ -31,7 +31,7 @@ const WalletIntegrationExample: React.FC = () => {
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold">Wallet Integration Demo</h1>
         
-        {/* Show wallet status if connected, or connect button if not */}
+        {}
         {walletInfo ? (
           <WalletStatus onDisconnect={handleWalletDisconnect} />
         ) : (
@@ -44,7 +44,7 @@ const WalletIntegrationExample: React.FC = () => {
         )}
       </div>
 
-      {/* Display connected wallet info */}
+      {}
       {walletInfo && (
         <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Connected Wallet Info</h2>
@@ -82,7 +82,7 @@ const WalletIntegrationExample: React.FC = () => {
         </div>
       )}
 
-      {/* Instructions for integration */}
+      {}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
         <h2 className="text-xl font-bold mb-4">Integration Instructions</h2>
         <ol className="list-decimal pl-5 space-y-2">
@@ -95,7 +95,7 @@ const WalletIntegrationExample: React.FC = () => {
         </ol>
       </div>
 
-      {/* Wallet Connection Modal */}
+      {}
       <WalletConnectionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -1,20 +1,20 @@
-/* Custom cursor with fallback */
+
 .custom-cursor {
   cursor: url('/assets/cursor-glow.svg'), auto;
 }
 
-/* Optimized textured background with responsive sizing */
+
 .bg-texture {
   background-image: url('/assets/textured-dark-bg.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  background-attachment: fixed; /* Better performance on desktop */
+  background-attachment: fixed; 
   width: 100%;
   min-height: 100vh;
 }
 
-/* Aggressive responsive grid background - eliminate white overlay completely */
+
 .bg-grid {
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
@@ -24,22 +24,22 @@
   width: 100vw !important;
   min-width: 100vw !important;
   min-height: 100vh !important;
-  /* GPU acceleration for better performance */
+  
   transform: translateZ(0);
   will-change: auto;
   position: relative;
 }
 
-/* Mobile-specific aggressive fixes to prevent white overlay */
+
 @media (max-width: 768px) {
-  /* Ensure full coverage on mobile - no white space anywhere */
+  
   body, html {
     margin: 0 !important;
     padding: 0 !important;
     width: 100vw !important;
     min-height: 100vh !important;
     overflow-x: hidden !important;
-    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%) !important; /* Slightly brighter gradient */
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%) !important; 
   }
   
   #root {
@@ -51,7 +51,7 @@
   }
   
   .bg-texture {
-    background-attachment: scroll; /* Better performance on mobile */
+    background-attachment: scroll; 
     background-size: cover;
     width: 100vw !important;
     min-width: 100vw !important;
@@ -60,24 +60,24 @@
   }
   
   .bg-grid {
-    background-size: 20px 20px; /* Smaller grid on mobile */
-    opacity: 1 !important; /* Full opacity for better visibility */
+    background-size: 20px 20px; 
+    opacity: 1 !important; 
     width: 100vw !important;
     min-width: 100vw !important;
     min-height: 100vh !important;
     position: relative;
     background-color: transparent !important;
-    /* Brighter grid lines for better visibility */
+    
     background-image: 
       linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px) !important;
   }
   
   .custom-cursor {
-    cursor: auto; /* Fallback to default cursor on mobile */
+    cursor: auto; 
   }
   
-  /* Prevent any potential white space issues - nuclear option */
+  
   .min-h-screen {
     min-height: 100vh !important;
     width: 100vw !important;
@@ -85,7 +85,7 @@
     background: transparent !important;
   }
   
-  /* Force all containers to full width */
+  
   .max-w-7xl, .container, .mx-auto {
     width: 100% !important;
     max-width: 100vw !important;
@@ -94,27 +94,27 @@
   }
 }
 
-/* Small mobile devices */
+
 @media (max-width: 480px) {
   .bg-grid {
-    background-size: 15px 15px; /* Even smaller grid on small mobile */
-    opacity: 0.5; /* More reduced opacity for tiny screens */
+    background-size: 15px 15px; 
+    opacity: 0.5; 
   }
   
-  /* Additional mobile fixes */
+  
   body {
     -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Tablet optimizations */
+
 @media (min-width: 769px) and (max-width: 1024px) {
   .bg-grid {
-    background-size: 30px 30px; /* Medium grid on tablets */
+    background-size: 30px 30px; 
   }
 }
 
-/* Reduced motion support for accessibility */
+
 @media (prefers-reduced-motion: reduce) {
   .bg-texture {
     background-attachment: scroll;
@@ -126,7 +126,7 @@
   }
 }
 
-/* High DPI display optimizations */
+
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .bg-grid {
     background-size: 40px 40px;

@@ -11,7 +11,7 @@ export default function Hero({ onNavigateToApp }: HeroProps) {
       id="hero"
       className="min-h-screen pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-24 px-4 sm:px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center justify-between max-w-7xl mx-auto relative z-10"
     >
-      {/* Left: Headline, Buttons, Stats */}
+      {}
       <motion.div
         className="lg:w-1/2 text-center lg:text-left"
         initial={{ opacity: 0, y: 20 }}
@@ -52,7 +52,7 @@ export default function Hero({ onNavigateToApp }: HeroProps) {
           </button>
         </div>
 
-        {/* Highlight Stats */}
+        {}
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-6 text-center text-white/80 text-sm">
           <div>
             <p className="text-2xl font-bold text-white">266M+</p>
@@ -69,7 +69,7 @@ export default function Hero({ onNavigateToApp }: HeroProps) {
         </div>
       </motion.div>
 
-      {/* Right: Spline 3D Chain */}
+      {}
       <motion.div
         className="w-full lg:w-1/2 h-[400px] md:h-[500px] lg:h-[600px] relative"
         initial={{ opacity: 0, scale: 0.95 }}
