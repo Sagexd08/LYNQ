@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 
 import './index.css';
@@ -8,6 +9,7 @@ import './mobile-fix.css';
 
 import App from './App';
 import { configureFCL } from './config/flow';
+import { queryClient } from './hooks/useQuery';
 
 
 const rootElement = document.getElementById('root');
@@ -20,6 +22,8 @@ configureFCL();
 const root = createRoot(rootElement);
 root.render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </StrictMode>
 );

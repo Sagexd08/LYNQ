@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  walletAddress   String   @unique
+  email           String?
+  name            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  loans           Loan[]
+  trustScores     TrustScore[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+}
+
+model Loan {
+  id                  String   @id @default(cuid())
+  borrowerId          String
+  borrower            User     @relation(fields: [borrowerId], references: [id], onDelete: Cascade)
+  
+  principalAmount     BigInt
+  remainingPrincipal  BigInt
+  interestAccrued     BigInt
+  lateFee             BigInt
+  
+  interestRateBps     Int
+  createdAt           DateTime @default(now())
+  dueDate             DateTime
+  
+  status              String   @default("PENDING") // PENDING, ACTIVE, REPAID, DEFAULTED, CANCELLED
+  tokenType           String
+  purpose             String
+  collateralAddress   String?
+  collateralAmount    BigInt   @default(0)
+  
+  txHash              String?
+  chainId             String
+  
+  repayments          Repayment[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([borrowerId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Repayment {
+  id                  String   @id @default(cuid())
+  loanId              String
+  loan                Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  
+  amount              BigInt
+  principalPaid       BigInt
+  interestPaid        BigInt
+  lateFeePaid         BigInt
+  
+  paymentNumber       Int
+  dueDate             DateTime
+  paidDate            DateTime?
+  
+  status              String   @default("PENDING") // PENDING, PAID, OVERDUE
+  txHash              String?
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([loanId])
+  @@index([status])
+}
+
+model TrustScore {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  score           Int      @default(500)
+  creditHistory   Int      @default(0)
+  repaymentRecord Int      @default(0)
+  collateralValue BigInt   @default(0)
+  
+  lastUpdated     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@unique([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // LOAN_GRANTED, PAYMENT_RECEIVED, OVERDUE, etc.
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  
+  relatedLoanId String?
+  txHash         String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([read])
+}
+
+model NotificationSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  
+  telegramEnabled Boolean  @default(false)
+  emailEnabled    Boolean  @default(false)
+  pushEnabled     Boolean  @default(true)
+  
+  telegramChatId  String?
+  email           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  action    String
+  resource  String
+  resourceId String?
+  details   Json?
+  
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model PlatformStats {
+  id                String   @id @default(cuid())
+  
+  totalLoans        BigInt   @default(0)
+  totalAmountLent   BigInt   @default(0)
+  totalRepaid       BigInt   @default(0)
+  activeLoans       Int      @default(0)
+  defaultedLoans    Int      @default(0)
+  
+  averageInterestRate Float  @default(0)
+  defaultRate        Float   @default(0)
+  totalUsers         Int     @default(0)
+  
+  lastUpdated        DateTime @default(now())
+  createdAt          DateTime @default(now())
+  
+  @@unique([id])
+}
+
