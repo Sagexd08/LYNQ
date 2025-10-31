@@ -1,5 +1,31 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +33,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Testing
+coverage/
+.nyc_output/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-.ntvs
-*.njsproj
-*.sln
-*.sw?
+# Contract artifacts (can be regenerated)
+contracts/ethereum/artifacts/
+contracts/ethereum/cache/
+contracts/ethereum/typechain/
+
+# Flow
+flow.json
+contracts/deployments/
+
+# Prisma
+backend/prisma/migrations/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backend
+backend/.env
+backend/dist/
+
+# Docker
+docker-compose.override.yml
