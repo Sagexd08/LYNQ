@@ -1,0 +1,258 @@
+// Learning Platform Database Schema
+// PostgreSQL migrations using Prisma
+
+model LearningModule {
+  id                String    @id @default(cuid())
+  title             String
+  description       String    @db.Text
+  category          String    // 'Beginner' | 'Intermediate' | 'Advanced'
+  difficulty        Int       @default(1) // 1-5
+  estimatedTime     Int       // minutes
+  points            Int       @default(100)
+  icon              String?
+  imageUrl          String?
+  
+  lessons           LearningLesson[]
+  quizzes           LearningQuiz[]
+  prerequisites     LearningModule[]      @relation("Prerequisites", fields: [prerequisiteIds], references: [id])
+  prerequisiteIds   String[]              @default([])
+  dependents        LearningModule[]      @relation("Prerequisites")
+  
+  userProgress      UserLearningProgress[]
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([category])
+  @@index([difficulty])
+}
+
+model LearningLesson {
+  id                String    @id @default(cuid())
+  moduleId          String
+  module            LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  title             String
+  content           String    @db.Text // HTML or markdown
+  videoUrl          String?
+  order             Int
+  estimatedTime     Int       // minutes
+  
+  resources         LearningResource[]
+  userProgress      UserLessonProgress[]
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([moduleId])
+  @@index([order])
+}
+
+model LearningResource {
+  id                String    @id @default(cuid())
+  lessonId          String
+  lesson            LearningLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  title             String
+  type              String    // 'article' | 'video' | 'documentation' | 'tool'
+  url               String
+  description       String?
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([lessonId])
+  @@index([type])
+}
+
+model LearningQuiz {
+  id                String    @id @default(cuid())
+  moduleId          String
+  module            LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  title             String
+  description       String?
+  order             Int
+  passingScore      Int       @default(70) // percentage
+  rewards           Int       @default(50) // points
+  
+  questions         LearningQuestion[]
+  results           LearningQuizResult[]
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([moduleId])
+}
+
+model LearningQuestion {
+  id                String    @id @default(cuid())
+  quizId            String
+  quiz              LearningQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  question          String    @db.Text
+  type              String    // 'multiple-choice' | 'true-false' | 'short-answer'
+  options           String[]  @default([])
+  correctAnswer     String
+  explanation       String    @db.Text
+  points            Int       @default(10)
+  order             Int
+  
+  userAnswers       LearningUserAnswer[]
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([quizId])
+}
+
+model LearningUserAnswer {
+  id                String    @id @default(cuid())
+  questionId        String
+  question          LearningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  userId            String
+  resultId          String
+  result            LearningQuizResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  
+  answer            String
+  isCorrect         Boolean
+  pointsEarned      Int
+  
+  createdAt         DateTime  @default(now())
+  
+  @@unique([resultId, questionId])
+  @@index([userId])
+  @@index([resultId])
+}
+
+model LearningQuizResult {
+  id                String    @id @default(cuid())
+  quizId            String
+  quiz              LearningQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  score             Int
+  maxScore          Int
+  percentScore      Float     // percentage
+  passed            Boolean
+  attemptNumber     Int       @default(1)
+  
+  userAnswers       LearningUserAnswer[]
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([quizId])
+  @@index([userId])
+  @@index([passed])
+}
+
+model LearningBadge {
+  id                String    @id @default(cuid())
+  name              String
+  description       String
+  icon              String    // emoji or image URL
+  requirement       String    @db.Text
+  category          String    // 'Achievement' | 'Milestone' | 'Expert' | 'Special'
+  rarity            String    @default("common") // 'common' | 'rare' | 'epic' | 'legendary'
+  
+  users             UserBadge[]
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([category])
+  @@index([rarity])
+}
+
+model UserLearningProgress {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  moduleId          String
+  module            LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  progressPercentage Float   @default(0)
+  completedAt       DateTime?
+  startedAt         DateTime  @default(now())
+  lastAccessedAt    DateTime  @default(now())
+  
+  lessonProgress    UserLessonProgress[]
+  
+  @@unique([userId, moduleId])
+  @@index([userId])
+  @@index([moduleId])
+}
+
+model UserLessonProgress {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  lessonId          String
+  lesson            LearningLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  moduleProgressId  String
+  moduleProgress    UserLearningProgress @relation(fields: [moduleProgressId], references: [id], onDelete: Cascade)
+  
+  completed         Boolean   @default(false)
+  completedAt       DateTime?
+  viewCount         Int       @default(0)
+  lastViewedAt      DateTime?
+  
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([completed])
+}
+
+model UserBadge {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  badgeId           String
+  badge             LearningBadge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  unlockedAt        DateTime  @default(now())
+  
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([unlockedAt])
+}
+
+model UserLearningStats {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  totalPoints       Int       @default(0)
+  totalLessonsCompleted Int   @default(0)
+  totalQuizzesCompleted Int   @default(0)
+  totalModulesCompleted Int   @default(0)
+  totalBadgesEarned Int       @default(0)
+  
+  currentStreak     Int       @default(0)
+  longestStreak     Int       @default(0)
+  lastActiveDate    DateTime  @default(now())
+  joinDate          DateTime  @default(now())
+  
+  level             Int       @default(1)
+  nextLevelPoints   Int       @default(250)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([totalPoints])
+  @@index([level])
+  @@index([currentStreak])
+}
+
+// Extend User model (assumes existing User model)
+// Add these fields to your existing User model:
+// learningStats     UserLearningStats?
+// learningProgress  UserLearningProgress[]
+// lessonProgress    UserLessonProgress[]
+// quizResults       LearningQuizResult[]
+// badges            UserBadge[]
+// userAnswers       LearningUserAnswer[]

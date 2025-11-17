@@ -8,6 +8,16 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
 
+export interface AuditLogEntry {
+  action: string; // e.g., AI_RISK_ASSESSMENT
+  actorId?: string;
+  actorRole?: string;
+  resource?: string; // e.g., flashloan:txPreview or loan:application
+  outcome: 'APPROVE' | 'WARN' | 'BLOCK' | 'INFO' | 'ERROR';
+  correlationId?: string;
+  metadata?: Record<string, unknown>;
+}
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -29,7 +39,12 @@ const logger = winston.createLogger({
       maxFiles: 5,
     }),
   ],
-});
+}) as winston.Logger & { audit?: (entry: AuditLogEntry) => void };
+
+// Attach a convenience method for structured audit logs
+logger.audit = (entry: AuditLogEntry) => {
+  logger.info('AUDIT', entry as any);
+};
 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({

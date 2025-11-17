@@ -27,6 +27,7 @@ function NavBar({
     { id: "marketplace", label: "MARKETPLACE" },
     { id: "dashboard", label: "DASHBOARD" },
     { id: "cards", label: "LOAN CARDS" },
+    { id: "flashloan", label: "FLASH LOANS" },
   ];
 
   const handleWalletClick = () => {

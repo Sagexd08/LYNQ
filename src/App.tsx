@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense, lazy } from "react";
 import axios from "axios";
 
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -28,6 +28,8 @@ import {
   LazyWalletConnectionModal,
   LazyFaucetModule,
 } from "./lazyComponents";
+
+const LazyFlashLoanDashboard = lazy(() => import("./components/flashloan/FlashLoanDashboard"));
 
 import {
   getSavedWalletConnection,
@@ -83,7 +85,7 @@ const REQUEST_TIMEOUT = 10000;
 
 function App() {
   
-  const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "marketplace" | "cards">("landing");
+  const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "marketplace" | "cards" | "flashloan">("landing");
 
   
   const [walletAddress, setWalletAddress] = useState<string>("");
@@ -216,7 +218,7 @@ function App() {
   }, [walletAddress, fetchEthBalance]);
 
   const handleNavigationChange = useCallback((page: string): void => {
-    const validPages = ["landing", "dashboard", "marketplace", "cards"] as const;
+    const validPages = ["landing", "dashboard", "marketplace", "cards", "flashloan"] as const;
     if (validPages.includes(page as any)) {
       setCurrentPage(page as typeof validPages[number]);
     }
@@ -517,6 +519,18 @@ function App() {
             </div>
           </section>
         );
+      case "flashloan":
+        return (
+          <div className="min-h-screen w-full text-white">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+              <ErrorBoundary>
+                <Suspense fallback={<LoadingFallback minHeight="300px" />}>
+                  <LazyFlashLoanDashboard />
+                </Suspense>
+              </ErrorBoundary>
+            </div>
+          </div>
+        );
       default:
         return (
           <div className="bg-black text-white font-sans relative">
@@ -548,7 +562,7 @@ function App() {
     <ErrorBoundary>
       <div
         className={`min-h-screen ${
-          ["landing", "cards", "dashboard", "marketplace"].includes(currentPage)
+          ["landing", "cards", "dashboard", "marketplace", "flashloan"].includes(currentPage)
             ? "bg-black text-white"
             : ""
         }`}
