@@ -80,6 +80,7 @@ export const APP_CONFIG = {
   network: ENV_CONFIG.DEFAULT_NETWORK,
   moduleAddress: ENV_CONFIG.MODULE_ADDRESS,
   apiBaseUrl: ENV_CONFIG.API_BASE_URL,
+  backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000',
   enableAnalytics: ENV_CONFIG.ENABLE_ANALYTICS === 'true',
   enableDebugLogs: import.meta.env.DEV,
 } as const;

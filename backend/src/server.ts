@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import logger from './utils/logger';
 import errorHandler from './middleware/errorHandler';
 import rateLimiter from './middleware/rateLimiter';
+import deviceFingerprint from './middleware/deviceFingerprint';
 import { setupRoutes } from './routes';
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(rateLimiter);
+app.use(deviceFingerprint);
 
 // Request logging
 app.use((req, res, next) => {
