@@ -809,6 +809,37 @@ export class AIValidationEngine {
       lastProfileUpdate: Date.now(),
     });
   }
+
+  /**
+   * AI Financial Assistant - Answer user questions
+   */
+  static async askAI(question: string): Promise<string> {
+    // Simple keyword-based responses for financial questions
+    const lowerQuestion = question.toLowerCase();
+
+    if (lowerQuestion.includes('loan') && lowerQuestion.includes('interest')) {
+      return 'Interest rates vary based on your trust score and market conditions. Higher trust scores get better rates. Current average APR is around 8-12% for most borrowers.';
+    }
+
+    if (lowerQuestion.includes('flash loan')) {
+      return 'Flash loans allow borrowing without collateral for arbitrage opportunities. They must be repaid in the same transaction. Use with caution as they carry high risk.';
+    }
+
+    if (lowerQuestion.includes('trust score')) {
+      return 'Your trust score is calculated from repayment history, transaction volume, and account age. Scores range from 0-1000, with higher scores unlocking better loan terms.';
+    }
+
+    if (lowerQuestion.includes('repay') || lowerQuestion.includes('payment')) {
+      return 'Repayments can be made anytime before the due date. Early repayment saves on interest. Late payments incur penalties.';
+    }
+
+    if (lowerQuestion.includes('risk') || lowerQuestion.includes('safe')) {
+      return 'Always verify transaction details. Our AI system flags suspicious activities. For high-value transactions, consider splitting them or waiting for better market conditions.';
+    }
+
+    // Default response
+    return 'I\'m here to help with financial questions about loans, flash loans, trust scores, and DeFi best practices. Please ask something specific about LYNQ platform features!';
+  }
 }
 
 export default AIValidationEngine;

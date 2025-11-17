@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import { z } from 'zod';
 import logger from '../utils/logger';
 import { LearningService } from '../services/learningService';
 
@@ -93,7 +92,7 @@ learningRouter.get('/badges', (_req: Request, res: Response) => {
  * GET /api/learning/stats
  * Get user learning statistics (mock implementation)
  */
-learningRouter.get('/stats', (req: Request, res: Response) => {
+learningRouter.get('/stats', (_req: Request, res: Response) => {
   try {
     // In production, this would fetch from database using user ID
     const mockStats = {
@@ -228,7 +227,7 @@ learningRouter.get('/leaderboard', (req: Request, res: Response) => {
  * GET /api/learning/recommended
  * Get recommended modules for user
  */
-learningRouter.get('/recommended', (req: Request, res: Response) => {
+learningRouter.get('/recommended', (_req: Request, res: Response) => {
   try {
     // In production, would get user level and completed modules from database
     const userLevel = 2;

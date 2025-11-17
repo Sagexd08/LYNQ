@@ -65,26 +65,6 @@ interface Badge {
   unlockedAt?: number; // Timestamp
 }
 
-interface UserProgress {
-  userId: string;
-  moduleId: string;
-  lessonProgress: Map<string, boolean>; // lessonId -> completed
-  quizResults: QuizResult[];
-  completedAt?: number;
-  progressPercentage: number;
-  currentStreak: number; // Days
-  lastAccessedAt: number;
-}
-
-interface QuizResult {
-  quizId: string;
-  score: number;
-  maxScore: number;
-  attemptCount: number;
-  lastAttempt: number;
-  passed: boolean;
-}
-
 interface UserStats {
   userId: string;
   totalPoints: number;
@@ -335,7 +315,7 @@ export class LearningService {
   /**
    * Get leaderboard
    */
-  static getLeaderboard(limit: number = 10): any[] {
+  static getLeaderboard(_limit: number = 10): any[] {
     // This would query from database in production
     return [];
   }
@@ -404,7 +384,7 @@ learningRouter.get('/modules/:moduleId', (req: Request, res: Response) => {
  * GET /learning/badges
  * Get all available badges
  */
-learningRouter.get('/badges', (req: Request, res: Response) => {
+learningRouter.get('/badges', (_req: Request, res: Response) => {
   try {
     const badges = LearningService.getAllBadges();
     res.json({

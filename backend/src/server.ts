@@ -9,6 +9,7 @@ import errorHandler from './middleware/errorHandler';
 import rateLimiter from './middleware/rateLimiter';
 import deviceFingerprint from './middleware/deviceFingerprint';
 import { setupRoutes } from './routes';
+import { startTelegramBot } from './services/telegramBot';
 
 dotenv.config();
 
@@ -82,6 +83,9 @@ httpServer.listen(PORT, () => {
     environment: process.env.NODE_ENV || 'development',
     port: PORT,
   });
+
+  // Start Telegram Bot
+  startTelegramBot();
 });
 
 export { io };

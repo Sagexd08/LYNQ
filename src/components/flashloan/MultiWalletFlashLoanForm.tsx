@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
-import logger from '../../../backend/src/utils/logger';
 
 interface Recipient {
   address: string;
@@ -59,8 +58,10 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
   const updateRecipientAddress = useCallback(
     (index: number, address: string) => {
       const updated = [...recipients];
-      updated[index].address = address;
-      setRecipients(updated);
+      if (updated[index]) {
+        updated[index].address = address;
+        setRecipients(updated);
+      }
     },
     [recipients]
   );
@@ -71,11 +72,13 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
   const updateRecipientAmount = useCallback(
     (index: number, amount: string) => {
       const updated = [...recipients];
-      updated[index].amount = amount;
-      setRecipients(updated);
+      if (updated[index]) {
+        updated[index].amount = amount;
+        setRecipients(updated);
 
-      // Recalculate total if all amounts are provided
-      calculateTotal(updated);
+        // Recalculate total if all amounts are provided
+        calculateTotal(updated);
+      }
     },
     [recipients]
   );
@@ -125,7 +128,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
 
     for (let i = 0; i < recipients.length; i++) {
       const r = recipients[i];
-      if (!r.address) {
+      if (!r || !r.address) {
         setError(`Recipient ${i + 1} address is required`);
         return false;
       }
