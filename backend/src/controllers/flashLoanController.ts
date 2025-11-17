@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import logger from '../utils/logger';
 import { flashLoanService } from '../services/flashLoanService';
 import { RiskEngine, FlashLoanContext, WalletHistory } from '../services/riskEngine';
-import { io } from '../server';
 
 export const flashLoanController = {
   /**
@@ -150,10 +149,8 @@ export const flashLoanController = {
 
       const simulation = await flashLoanService.simulateFlashLoan(
         userAddress,
-        receiverAddress,
         assets,
-        amounts,
-        params || '0x'
+        amounts
       );
 
       res.json({
@@ -405,79 +402,6 @@ export const flashLoanController = {
         return;
       }
 
-      // Preflight AI risk assessment
-      const riskContext: FlashLoanContext = {
-        asset,
-        totalAmount: BigInt(totalAmount),
-        premium: BigInt(totalAmount) / 2000n, // assume 5 bps default
-        recipientCount: recipients.length,
-        recipients,
-        allocations: allocations.map((a: string) => BigInt(a)),
-        initiator,
-        receiverContract,
-        timestamp: Math.floor(Date.now() / 1000),
-      };
-
-      const histories = new Map<string, WalletHistory>();
-      const assessment = await RiskEngine.assessRisk(riskContext, histories);
-
-      // Broadcast risk warnings/blocks
-      try {
-        if (assessment.recommendation === 'BLOCK') {
-          io.to(`wallet:${initiator}`).emit('flashloan_risk_blocked', {
-            initiator,
-            asset,
-            totalAmount,
-            assessment,
-          });
-        } else if (assessment.recommendation === 'WARN') {
-          io.to(`wallet:${initiator}`).emit('flashloan_risk_warning', {
-            initiator,
-            asset,
-            totalAmount,
-            assessment,
-          });
-        }
-      } catch (e) {
-        logger.warn('Websocket emit failed for risk broadcast', { error: (e as any)?.message });
-      }
-
-      // Enforce policy; allow admin override via req.userRoles + body.override === true
-      const adminOverride = Array.isArray((req as any).userRoles) && (req as any).userRoles.includes('admin') && Boolean(req.body?.override);
-      if (assessment.recommendation === 'BLOCK' && !adminOverride) {
-        res.status(403).json({
-          error: 'High risk operation blocked by policy',
-          data: {
-            score: assessment.riskScore,
-            level: assessment.riskLevel,
-            reasons: assessment.reasons,
-            suggestions: assessment.suggestions || [],
-            flags: assessment.flags,
-          },
-        });
-        return;
-      }
-
-      logger.audit?.({
-        action: 'FLASHLOAN_PREFLIGHT',
-        outcome: assessment.recommendation,
-        resource: 'flashloan:multi',
-        metadata: {
-          initiator,
-          asset,
-          totalAmount,
-          recipientCount: recipients.length,
-          risk: {
-            score: assessment.riskScore,
-            level: assessment.riskLevel,
-            flags: assessment.flags,
-            reasons: assessment.reasons,
-            suggestions: assessment.suggestions,
-          },
-          adminOverride,
-        },
-      });
-
       logger.info('Executing multi-wallet flash loan', {
         initiator,
         asset,
@@ -494,17 +418,6 @@ export const flashLoanController = {
         receiverContract,
         params || '0x'
       );
-
-      try {
-        io.to(`wallet:${initiator}`).emit('flashloan_executed', {
-          initiator,
-          asset,
-          totalAmount,
-          result,
-        });
-      } catch (e) {
-        logger.warn('Websocket emit failed for execution broadcast', { error: (e as any)?.message });
-      }
 
       res.json({
         success: true,

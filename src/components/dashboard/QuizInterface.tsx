@@ -43,7 +43,6 @@ export const QuizInterface: React.FC<QuizProps> = ({
   title,
   questions,
   passingScore,
-  rewards,
   onComplete
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -200,8 +199,10 @@ export const QuizInterface: React.FC<QuizProps> = ({
   }
 
   const question = questions[currentQuestion];
-  const isAnswered = userAnswers.has(question.id);
-  const maxScore = questions.reduce((sum, q) => sum + q.points, 0);
+
+  if (!question) {
+    return <div>No question available</div>;
+  }
 
   return (
     <motion.div

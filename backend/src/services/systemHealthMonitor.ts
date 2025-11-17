@@ -456,6 +456,20 @@ export class SystemHealthMonitor extends EventEmitter {
       metrics: latest?.metrics || AIValidationEngine.getSystemHealth(),
     };
   }
+
+  /**
+   * Get health status for admin
+   */
+  getHealthStatus(): {
+    status: string;
+    uptime: number;
+  } {
+    const summary = this.getSummary();
+    return {
+      status: summary.overall,
+      uptime: process.uptime() * 1000, // in ms
+    };
+  }
 }
 
 // Singleton instance

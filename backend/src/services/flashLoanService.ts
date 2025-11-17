@@ -265,10 +265,8 @@ class FlashLoanService {
    */
   async simulateFlashLoan(
     userAddress: string,
-    receiverAddress: string,
     assets: string[],
-    amounts: string[],
-    params: string
+    amounts: string[]
   ): Promise<FlashLoanSimulation> {
     try {
       if (!this.flashLoanContract) {

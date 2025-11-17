@@ -90,13 +90,11 @@ loanMgmtRouter.post('/calculate-emi', (req: Request, res: Response) => {
     const validatedData = CalculateEMISchema.parse(req.body);
     const { principal, annualRate, tenure } = validatedData;
 
-    const emi = LoanService.calculateEMI(principal, annualRate, tenure);
     const summary = LoanService.calculateLoanSummary(principal, annualRate, tenure, 0);
 
     res.json({
       success: true,
       data: {
-        emi: Math.round(emi * 100) / 100,
         ...summary
       }
     });
