@@ -4,7 +4,7 @@ import { flashLoanService } from '../../services/flashLoanService';
 import { toast } from 'react-hot-toast';
 
 export const UserStats: React.FC = () => {
-  const { walletAddress } = useWalletStore();
+  const { address: walletAddress } = useWalletStore();
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -220,3 +220,10 @@ export const UserStats: React.FC = () => {
     </div>
   );
 };
+
+
+
+
+
+
+

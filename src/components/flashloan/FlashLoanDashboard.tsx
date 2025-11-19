@@ -7,7 +7,6 @@ import { FlashLoanHistory } from './FlashLoanHistory';
 import { RiskAssessment } from './RiskAssessment';
 import { UserStats } from './UserStats';
 import { LiquidityPool } from './LiquidityPool';
-import { TransactionSimulator } from './TransactionSimulator';
 
 const FlashLoanDashboard: React.FC = () => {
   const { address: walletAddress } = useWalletStore();
@@ -106,7 +105,6 @@ const FlashLoanDashboard: React.FC = () => {
               </div>
               <div className="space-y-6">
                 <RiskAssessment />
-                <TransactionSimulator />
               </div>
             </div>
           </div>
