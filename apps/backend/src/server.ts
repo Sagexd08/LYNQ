@@ -9,7 +9,7 @@ import errorHandler from './middleware/errorHandler';
 import rateLimiter from './middleware/rateLimiter';
 import deviceFingerprint from './middleware/deviceFingerprint';
 import { setupRoutes } from './routes';
-import { startTelegramBot } from './services/telegramBot';
+// import { startTelegramBot } from './services/telegramBot'; // Temporarily disabled - needs type fixes
 
 dotenv.config();
 
@@ -84,8 +84,8 @@ httpServer.listen(PORT, () => {
     port: PORT,
   });
 
-  // Start Telegram Bot
-  startTelegramBot();
+  // Telegram bot temporarily disabled - needs type fixes
+  // startTelegramBot();
 });
 
 export { io };

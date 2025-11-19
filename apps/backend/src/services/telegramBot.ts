@@ -1,11 +1,11 @@
 import { Telegraf, Context, Scenes } from 'telegraf';
 import { PrismaClient } from '@prisma/client';
 import { ethers } from 'ethers';
-import { loanService } from './loanService';
+import { LoanService } from './loanService';
 import { flashLoanService } from './flashLoanService';
-import { riskEngine } from './riskEngine';
+import { RiskEngine } from './riskEngine';
 import { getSystemHealthMonitor } from './systemHealthMonitor';
-import { aiValidationEngine } from './aiValidationEngine';
+import { AIValidationEngine } from './aiValidationEngine';
 
 const prisma = new PrismaClient();
 
