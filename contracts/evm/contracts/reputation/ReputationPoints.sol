@@ -23,7 +23,7 @@ contract ReputationPoints is ERC721, Ownable {
 
     constructor() ERC721("LYNQ Reputation", "LREP") Ownable(msg.sender) {}
 
-    function awardPoints(address user, uint256 points) external onlyOwner {
+    function awardPoints(address user, uint256 points) public onlyOwner {
         UserReputation storage rep = reputations[user];
         rep.points += points;
 
