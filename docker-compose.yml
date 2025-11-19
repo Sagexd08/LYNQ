@@ -1,56 +1,149 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
+    container_name: lynq-postgres
     environment:
-      POSTGRES_USER: lynq
-      POSTGRES_PASSWORD: lynq_password
-      POSTGRES_DB: lynq
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-lynq}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - lynq-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lynq"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Redis Cache
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    container_name: lynq-redis
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - lynq-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Backend NestJS Application
   backend:
     build:
-      context: ./backend
+      context: ./apps/backend
       dockerfile: Dockerfile
+    container_name: lynq-backend
     environment:
-      NODE_ENV: production
-      PORT: 5000
-      DATABASE_URL: postgresql://lynq:lynq_password@postgres:5432/lynq?schema=public
-      REDIS_URL: redis://redis:6379
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-lynq}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: ${FRONTEND_URL}
+      PORT: 3000
     ports:
-      - "5000:5000"
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - lynq-network
     volumes:
-      - ./logs:/app/logs
+      - ./apps/backend/src:/app/src
+    command: npm run start:dev
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lynq-frontend
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_PARTICLE_PROJECT_ID: ${VITE_PARTICLE_PROJECT_ID}
+      VITE_PARTICLE_CLIENT_KEY: ${VITE_PARTICLE_CLIENT_KEY}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - lynq-network
+    volumes:
+      - ./frontend/src:/app/src
+
+  # Admin Dashboard
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: lynq-admin
+    environment:
+      VITE_API_URL: http://localhost:3000
+      ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+    networks:
+      - lynq-network
+    volumes:
+      - ./admin/src:/app/src
+
+  # PgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: lynq-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@lynq.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - lynq-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: lynq-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployments/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployments/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+      - admin
+    networks:
+      - lynq-network
+
+networks:
+  lynq-network:
+    driver: bridge
 
 volumes:
   postgres_data:
   redis_data:
-
+  pgadmin_data:

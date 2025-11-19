@@ -1,47 +1,36 @@
 {
-  "name": "defi-dashboard",
+  "name": "lynq-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "contracts/evm"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:analyze": "vite build --mode analyze",
-    "analyze:install": "node scripts/install-visualizer.js",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "optimize": "node scripts/update-dependencies.js",
-    "security:fix": "node scripts/fix-security.js",
-    "security:audit": "npm audit",
-    "strip:comments": "node scripts/strip-comments.js",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "deploy:flow:setup": "node contracts/scripts/deploy-flow-simple.js",
-    "deploy:flow:configure": "node contracts/scripts/setup-flow-deployment.js",
-    "deploy:flow": "node contracts/scripts/deploy-flow-terminal.js"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "backend:dev": "turbo run dev --filter=@lynq/backend",
+    "frontend:dev": "turbo run dev --filter=@lynq/frontend",
+    "admin:dev": "turbo run dev --filter=@lynq/admin",
+    "deploy:contracts": "bash deployments/scripts/deploy-contracts.sh",
+    "db:setup": "bash deployments/scripts/setup-db.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
     "@metamask/detect-provider": "^2.0.0",
     "@onflow/fcl": "^1.20.3",
     "@onflow/types": "^1.4.2",
-    "@splinetool/react-spline": "^4.0.0",
-    "@tanstack/react-query": "^5.61.7",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "ethers": "^6.15.0",
-    "framer-motion": "^12.23.0",
-    "lucide-react": "^0.525.0",
-    "react": "^19.1.0",
-    "react-chartjs-2": "^5.3.0",
-    "react-dom": "^19.1.0",
-    "react-hot-toast": "^2.5.2",
-    "react-icons": "^5.5.0",
-    "react-scroll": "^1.9.3",
-    "recharts": "^3.0.2",
-    "zod": "^3.24.1",
-    "zustand": "^5.0.3"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -66,8 +55,15 @@
     "postcss": "^8.5.6",
     "rollup": "3.29.4",
     "tailwindcss": "^3.4.17",
+    "turbo": "^2.0.0",
+    "turbo-windows-64": "^2.6.1",
     "typescript": "^5.8.3",
     "vite": "4.5.3",
     "vitest": "^3.2.1"
+  },
+  "packageManager": "npm@10.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   }
 }

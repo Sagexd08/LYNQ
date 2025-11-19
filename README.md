@@ -1,408 +1,379 @@
-# LYNQ - Decentralized Finance Platform
+# LYNQ Multi-Chain DeFi Lending Platform
 
-<div align="center">
-  <img src="public/logo.ico" alt="LYNQ Logo" width="100"/>
-  
-  **Borrow. Build. Belong.**
-  
-  *A comprehensive multi-chain DeFi platform*
+A production-grade, multi-chain DeFi lending platform with ML-enhanced credit scoring, fraud detection, and risk assessment.
 
-  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-  [![Multi-Chain](https://img.shields.io/badge/Built%20on-Multi--Chain-00D4AA.svg)](https://aptos.dev)
-  [![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB.svg)](https://react.dev)
-  [![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6.svg)](https://typescriptlang.org)
-</div>
-
----
-
-## Overview
-
-LYNQ is a revolutionary decentralized finance platform supporting multiple blockchain networks. Our mission is to democratize access to financial services while maintaining the highest standards of security, compliance, and user experience. We provide innovative lending solutions for both crypto-native users and Web3 newcomers across Ethereum, Aptos, and Flow networks.
-
-### Key Features
-
-- **Multi-Chain Support**: Ethereum, Aptos, and Flow blockchain integration
-- **Dual Loan System**: Collateral-based Big Loans & Real-money-backed Small Loans
-- **Web3 Onboarding**: Locked mainnet tokens for beginners
-- **Reputation System**: Build onchain trust and unlock better rates
-- **Telegram Notifications**: Real-time loan updates and alerts
-- **Multi-Wallet Integration**: MetaMask, Coinbase Wallet, and Flow-compatible wallets
-- **Compliance First**: MiCA Framework & RBI Digital Lending Guidelines compliant
-- **No-KYC Options**: Privacy-preserving financial services
-
----
-
-## Architecture
-
-### Big Loans (Collateral-Based)
-- **Collateral Types**: Digital assets, NFTs, staking positions
-- **Loan-to-Value Ratio**: 70-80% of collateral value
-- **Features**:
-  - Extended repayment windows
-  - Real-time collateral monitoring
-  - Automatic liquidation protection
-  - Reputation-based rewards
-- **Compliance**: MiCA collateral standards + RBI Digital Lending Guidelines (2022)
-
-### Small Loans (Real-Money Backed)
-- **Collateral**: Real-world money deposits
-- **Target Audience**: Web3 newcomers and micro-borrowers
-- **Features**:
-  - Short-term, low-value loans
-  - No-KYC required
-  - 10% late fee structure
-  - Onchain reputation building
-- **Use Case**: Perfect for exploring DeFi without prior crypto exposure
-
-### Web3 Onboarding Experience
-- **Locked Mainnet Tokens**: Non-withdrawable, platform-exclusive Aptos tokens
-- **Learning Environment**: Safe space to understand trading and staking
-- **Developer Friendly**: Test smart contracts with mainnet behavior
-- **Reputation Building**: Real onchain activity tracking
-- **Compliance**: FATF Guidance (2021) compliant
-
----
-
-## Quick Start
-
-### Prerequisites
-- Node.js 18+ 
-- npm, yarn, or pnpm
-- Compatible Web3 wallet (MetaMask, Coinbase Wallet, Flow-compatible, etc.)
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/lynq.git
-cd lynq
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### Environment Setup
-```bash
-cp .env.example .env
-# Configure your environment variables
-```
-
-Required environment variables:
-- `VITE_PARTICLE_PROJECT_ID` - Particle Network project ID
-- `VITE_PARTICLE_CLIENT_KEY` - Particle Network client key
-- `VITE_PARTICLE_APP_ID` - Particle Network app ID
-- `VITE_TELEGRAM_BOT_TOKEN` - Telegram bot token for notifications (optional)
-- `VITE_TELEGRAM_DEFAULT_CHAT_ID` - Default Telegram chat ID (optional)
-- `VITE_DEFAULT_NETWORK` - Default network (mainnet/testnet)
-
----
-
-## Multi-Chain Architecture
-
-### Supported Blockchains
-
-#### Ethereum (EVM)
-- **Mainnet**: Production Ethereum blockchain
-- **Sepolia Testnet**: Testing environment
-- **Wallets**: MetaMask, Coinbase Wallet, WalletConnect
-- **Smart Contracts**: Solidity-based lending contracts
-- **Features**: Full EVM compatibility, gas optimization
-
-#### Aptos
-- **Network**: High-performance Aptos blockchain
-- **Language**: Move smart contracts
-- **Wallets**: Petra, Martian, Aptos-compatible wallets
-- **Features**: 160K+ TPS capability, advanced resource management
-
-#### Flow
-- **Network**: Flow blockchain with FCL integration
-- **Language**: Cadence smart contracts
-- **Wallets**: Flow-compatible wallets via FCL
-- **Features**: Developer-friendly architecture, composability
-
-### Cross-Chain Features
-- **Unified Interface**: Single UI for all supported blockchains
-- **Multi-Wallet Support**: Connect with different wallets per chain
-- **Network Switching**: Seamless switching between supported networks
-- **Consistent UX**: Same lending experience across all chains
-
----
-
-## Smart Contract Information
-
-### Flow Blockchain (Cadence)
-
-**LoanPlatform Contract**
-- **Language**: Cadence
-- **Location**: `contracts/LoanPlatform.cdc`
-
-#### Contract Functions
-- `createLoan()` - Create a new loan with borrower, amount, interest, and duration
-- `getLoan()` - Retrieve loan details by ID
-- `applyRepayment()` - Apply payment to existing loan
-- `calculateTotalOwed()` - Calculate total amount owed including interest
-
-#### Events
-- `LoanCreated` - Emitted when a new loan is created
-- `LoanRepaid` - Emitted when a loan is repaid
-
-### Additional Smart Contract Platforms
-
-#### Ethereum (EVM)
-- **Status**: Integration ready
-- **Standards**: ERC-20, ERC-721 compatible
-- **Gas Optimization**: Advanced gas efficiency patterns
-
-#### Aptos (Move)
-- **Status**: Integration ready  
-- **Standards**: Aptos Coin Standard, Token Standard
-- **Resource Model**: Advanced resource safety
-
----
-
-## Technology Stack
-
-### Frontend
-- **React 18** - Modern UI framework with Suspense and code splitting
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling with custom design system
-- **Framer Motion** - Smooth animations and transitions
-- **Vite** - Lightning-fast build tool with HMR
-- **Axios** - HTTP client for API interactions
-- **React Hot Toast** - Toast notifications
-
-### Blockchain Infrastructure
-- **Multi-Chain SDKs**:
-  - `@onflow/fcl` - Flow blockchain integration
-  - `ethers` - Ethereum/EVM integration
-  - `@coinbase/wallet-sdk` - Coinbase Wallet integration
-  - `@metamask/detect-provider` - MetaMask integration
-- **Smart Contract Languages**:
-  - Cadence (Flow)
-  - Solidity (Ethereum)
-  - Move (Aptos)
-
-### Services & Integrations
-- **Telegram Bot API** - Real-time notifications
-- **CoinGecko API** - Market data and pricing
-- **Particle Network** - Wallet infrastructure
-- **Axios** - HTTP requests
-
-### Development Tools
-- **ESLint** - Code linting and quality
-- **PostCSS** - CSS processing and optimization
-- **pnpm/npm** - Package management
-- **Git** - Version control
-
----
-
-## Project Architecture
-
-### Directory Structure
+## 🏗️ Monorepo Structure
 
 ```
 LYNQ/
-├── contracts/           # Smart contracts
-│   ├── LoanPlatform.cdc # Flow/Cadence contract
-│   └── scripts/         # Deployment scripts
-├── src/
-│   ├── components/      # React components
-│   │   ├── card/        # Loan card components
-│   │   ├── dashboard/   # Dashboard views
-│   │   ├── landing/     # Landing page sections
-│   │   ├── loan/        # Loan management
-│   │   ├── marketplace/ # Trading interface
-│   │   ├── wallet/      # Wallet integration
-│   │   └── hooks/       # Custom React hooks
-│   ├── config/          # Configuration files
-│   ├── constants/       # Constants and types
-│   ├── services/        # Business logic & APIs
-│   │   ├── telegramService.ts      # Telegram notifications
-│   │   ├── loanRepaymentService.ts # Loan management
-│   │   ├── flowLoanService.ts      # Flow integration
-│   │   └── userTelegramService.ts  # User-Telegram mapping
-│   ├── types/           # TypeScript type definitions
-│   └── utils/           # Utility functions
-├── scripts/             # Build and deployment scripts
-├── dist/                # Production build output
-└── public/              # Static assets
+├── apps/
+│   ├── backend/          # NestJS API server
+│   ├── frontend/         # Next.js user application
+│   └── admin/           # Next.js admin dashboard
+├── packages/
+│   └── blockchain-adapter/  # Multi-chain abstraction layer
+├── contracts/
+│   └── evm/             # Ethereum/EVM smart contracts
+└── deployments/         # Docker & Kubernetes configs
 ```
 
-### Key Components
+## 🚀 Features
 
-#### Wallet Integration
-- **Multi-Wallet Support**: Automatic detection and connection
-- **Persistence**: Session management and auto-reconnect
-- **Network Switching**: Seamless chain switching
-- **Error Handling**: Comprehensive error boundaries
+### Backend Modules
 
-#### Notification System
-- **Telegram Bot**: Real-time notifications via Telegram Bot API
-- **User Mapping**: LocalStorage-based wallet-to-chat mapping
-- **Event Types**: Loan granted, payment received, overdue alerts
-- **Optional**: Graceful degradation when not configured
+#### 🔐 Authentication (`apps/backend/src/modules/auth`)
+- JWT-based authentication
+- Multi-chain wallet connection (Ethereum, Aptos, Flow)
+- Signature verification for wallet-based login
+- Passport strategies for protected routes
 
-#### Loan Management
-- **Dual System**: Big loans (collateral) and small loans (real-money)
-- **Repayment Tracking**: Real-time payment application
-- **State Management**: Custom hooks for loan state
-- **Credit Scoring**: Trust score calculation and tracking
+#### 👥 User Management (`apps/backend/src/modules/user`)
+- User profiles with reputation tracking
+- Tier system: BRONZE → SILVER → GOLD → PLATINUM
+- Point-based progression (100 → 1000 → 5000 → 15000)
+- Social graph and referral tracking
 
-### Security Features
-- **Input Validation**: Comprehensive validation patterns
-- **Rate Limiting**: API and transaction rate limits
-- **XSS Protection**: Content Security Policy
-- **Error Boundaries**: React error handling
-- **Audit Logging**: Security event tracking
+#### 💰 Loan Core (`apps/backend/src/modules/loan`)
+- Create, repay, and liquidate loans
+- Dynamic interest rates based on reputation:
+  - BRONZE: 15%
+  - SILVER: 10%
+  - GOLD: 7.5%
+  - PLATINUM: 5%
+- Loan statuses: PENDING, ACTIVE, REPAID, DEFAULTED, LIQUIDATED
 
----
+#### 🔒 Collateral Management (`apps/backend/src/modules/collateral`)
+- Lock/unlock collateral for loan security
+- Multi-token support (ERC20, native tokens)
+- Real-time collateral value tracking
+- Statuses: LOCKED, UNLOCKED, LIQUIDATED
 
-## Roadmap
+#### 🤖 ML Module (`apps/backend/src/modules/ml`)
 
-### Phase 1: Foundation (Q1 2025) ✅
-- [x] Core lending platform development
-- [x] Basic reputation system
-- [x] Collateral-based Big Loans
-- [x] Real-money Small Loans
-- [x] Web3 onboarding with locked tokens
-- [x] Initial compliance framework
-- [x] **Multi-Chain Integration**
-  - Ethereum/EVM support
-  - Flow blockchain integration
-  - Aptos blockchain support
-- [x] **Wallet Infrastructure**
-  - MetaMask integration
-  - Coinbase Wallet support
-  - Flow FCL integration
-  - Auto-detection and connection
-- [x] **Telegram Notifications**
-  - Real-time loan status updates
-  - Payment notifications
-  - Overdue alerts
+**Credit Scoring Service**
+- 5-factor weighted algorithm:
+  - Payment History (35%): On-time payment ratio
+  - Utilization Rate (25%): Debt-to-limit ratio
+  - Account Age (15%): Platform history
+  - Reputation Score (15%): Platform standing
+  - Diversification (10%): Asset variety
+- Credit grades: A+ (800+) to F (<500)
 
-### Phase 2: Enhanced Features (Q2 2025)
-- [ ] **No-Collateral Loans**
-  - High-reputation user loans
-  - Advanced credit scoring
-  - Dynamic interest rates
-- [ ] **Advanced Reputation System**
-  - Cross-platform reputation tracking
-  - Gamification elements
-  - Community governance tokens
-- [ ] **Mobile Application**
-  - iOS and Android apps
-  - Push notifications
-  - Biometric authentication
+**Fraud Detection Service**
+- Pattern analysis checks:
+  - Unusual loan amounts (>5x median)
+  - Velocity anomalies (>5 loans in 24h)
+  - New account risk (<30 days)
+  - Suspicious patterns (rapid borrow/repay cycles)
+  - Blacklist validation
+- Recommendations: APPROVE, REVIEW, REJECT
 
-### Phase 3: Financial Infrastructure (Q3 2025)
-- [ ] **Enhanced DeFi Features**
-  - Yield farming opportunities
-  - Liquidity mining programs
-  - Automated investment strategies
-- [ ] **Cross-Chain Integration**
-  - Ethereum bridge
-  - Polygon support
-  - Multi-chain collateral
-- [ ] **Trading & Swapping**
-  - DEX integration
-  - Token swapping functionality
-  - Automated market making
-- [ ] **Institutional Features**
-  - Corporate lending solutions
-  - Bulk transaction processing
-  - Advanced analytics dashboard
+**Risk Assessment Service**
+- Default probability calculation based on:
+  - Credit score
+  - Payment history
+  - Current debt ratio
+- Liquidation risk monitoring (120% threshold)
+- Collateral health tracking
+- Risk levels: LOW, MEDIUM, HIGH, CRITICAL
 
-### Phase 4: Banking Solutions (Q4 2025)
-- [ ] **Payment Infrastructure**
-  - Failed UPI settlement resolution
-  - Payment lag solutions
-  - Stablecoin alternatives
-- [ ] **Bridging Features**
-  - Cross-chain asset bridging
-  - Multi-network liquidity
-  - Seamless chain interactions
-- [ ] **Fiat Integration**
-  - Seamless fiat ramps
-  - Bank account linking
-  - Traditional payment methods
+## 📦 Smart Contracts (EVM)
 
-### Phase 5: Ultimate Financial Product (Q1 2026)
-- [ ] **Crypto-Native Credit Card System**
-  - Direct wallet integration
-  - Real-time spending limits
-  - Cashback in platform tokens
-  - Aptos-based transaction processing
-  - Complete DeFi credit solution
-- [ ] **Platform Optimization**
-  - Performance enhancements
-  - Advanced security features
-  - User experience refinements
+### LoanCore.sol
+- Loan lifecycle management
+- Interest calculation
+- Collateral integration
+- Liquidation logic
 
-### Platform Completion (2026)
-The LYNQ platform will reach its complete vision with the crypto-native credit card system, representing the ultimate integration of traditional finance convenience with decentralized finance innovation, all built natively on the Aptos blockchain.
+### CollateralVault.sol
+- Secure collateral storage
+- ERC20 token support
+- Lock/unlock mechanisms
+- Balance tracking
 
----
+### ReputationPoints.sol
+- ERC721 NFT badges for tiers
+- On-chain reputation tracking
+- Automated tier upgrades
+- Point award system
 
-## Market Impact
+## 🛠️ Tech Stack
 
-### Target Metrics
-- **100K+** Active users by end of 2025
-- **$50M+** Total value locked (TVL)
-- **25+** Countries supported
-- **99.9%** Platform uptime
-- **<2 seconds** Average transaction time
+### Backend
+- **Framework**: NestJS 10.x
+- **Database**: PostgreSQL 16 with TypeORM
+- **Authentication**: JWT + Passport
+- **API**: RESTful with Swagger docs
+- **Validation**: class-validator, class-transformer
 
-### Competitive Advantages
-- ✅ **Regulatory Compliance**: First-mover in MiCA compliance
-- ✅ **User Experience**: Web2-like experience with Web3 benefits
-- ✅ **Aptos Performance**: 160K+ TPS capability
-- ✅ **Innovation**: Unique locked mainnet token system
-- ✅ **Accessibility**: No-KYC options for privacy
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **State**: Zustand + React Query
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Wallet**: RainbowKit, Petra (Aptos), Flow Client Library
+- **Forms**: React Hook Form + Zod
 
----
+### Smart Contracts
+- **Language**: Solidity 0.8.20
+- **Framework**: Hardhat
+- **Libraries**: OpenZeppelin Contracts 5.0
+- **Networks**: Ethereum, Polygon, BSC
 
-## Contributing
+### Infrastructure
+- **Containerization**: Docker multi-stage builds
+- **Orchestration**: Kubernetes
+- **CI/CD**: GitHub Actions
+- **Monorepo**: Turborepo
 
-We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+## 🚦 Getting Started
 
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write tests
-5. Submit a pull request
+### Prerequisites
+```bash
+node >= 18.0.0
+pnpm >= 8.0.0
+docker >= 24.0.0
+postgresql >= 16.0.0
+```
 
----
+### Installation
 
-## Security & Compliance
+1. **Clone and install dependencies**
+```bash
+git clone <repository-url>
+cd LYNQ
+pnpm install
+```
 
-### Security Measures
-- Multi-signature wallet integration
-- Smart contract audits by leading firms
-- Real-time monitoring and alerts
-- Formal verification of critical functions
+2. **Setup environment variables**
+```bash
+cp .env.example .env
+# Edit .env with your configurations
+```
 
-### Regulatory Compliance
-- **MiCA Framework** compliance
-- **RBI Digital Lending Guidelines (2022)** adherence
-- **FATF Guidance (2021)** implementation
-- Regular compliance audits
+3. **Start PostgreSQL**
+```bash
+docker-compose up -d postgres
+```
 
----
+4. **Run database migrations**
+```bash
+cd apps/backend
+pnpm run migration:run
+```
 
-## Disclaimer
+5. **Start development servers**
+```bash
+# Start all apps
+pnpm run dev
 
-LYNQ is a DeFi platform that involves financial risk. Please ensure you understand the risks involved before using our services. This is not financial advice. Always do your own research and consider consulting with financial professionals.
+# Or individually:
+pnpm run dev:backend   # Port 3000
+pnpm run dev:frontend  # Port 3001
+pnpm run dev:admin     # Port 3002
+```
 
----
+### Deploy Smart Contracts
 
-<div align="center">
-  <p><strong>Built with ❤️ by the LYNQ Team</strong></p>
-  <p>Empowering the future of decentralized finance</p>
-</div>
+```bash
+cd contracts/evm
+pnpm install
+pnpm run compile
+
+# Deploy to local network
+pnpm run deploy
+
+# Deploy to Ethereum
+pnpm run deploy:ethereum
+
+# Deploy to Polygon
+pnpm run deploy:polygon
+```
+
+## 📊 API Endpoints
+
+### Authentication
+```
+POST /auth/register          - Register new user
+POST /auth/wallet-connect    - Connect wallet (EVM/Aptos/Flow)
+POST /auth/login             - Login with credentials
+GET  /auth/profile           - Get user profile (protected)
+```
+
+### Loans
+```
+POST /loans                  - Create new loan
+GET  /loans                  - List user loans
+GET  /loans/:id              - Get loan details
+POST /loans/:id/repay        - Repay loan
+POST /loans/:id/liquidate    - Liquidate defaulted loan
+```
+
+### Collateral
+```
+POST /collateral             - Lock collateral
+GET  /collateral             - List user collateral
+GET  /collateral/:id         - Get collateral details
+POST /collateral/:id/unlock  - Unlock collateral
+GET  /collateral/:id/value   - Get current value
+```
+
+### ML Services (Internal)
+```
+POST /ml/credit-score        - Calculate credit score
+POST /ml/fraud-check         - Run fraud detection
+POST /ml/risk-assessment     - Assess loan risk
+```
+
+## 🔧 Configuration
+
+### Backend Environment Variables
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=lynq
+
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+
+# Blockchain RPCs
+ETHEREUM_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/your-key
+POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/your-key
+BSC_RPC_URL=https://bsc-dataseed.binance.org
+
+# Aptos
+APTOS_NODE_URL=https://fullnode.mainnet.aptoslabs.com/v1
+APTOS_FAUCET_URL=https://faucet.mainnet.aptoslabs.com
+
+# Flow
+FLOW_ACCESS_NODE=https://rest-mainnet.onflow.org
+```
+
+### Frontend Environment Variables
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_CHAIN_ID=1
+NEXT_PUBLIC_ENABLE_APTOS=true
+NEXT_PUBLIC_ENABLE_FLOW=true
+```
+
+## 📈 ML Algorithm Details
+
+### Credit Score Calculation
+```
+Score = (PaymentHistory × 0.35) + 
+        (UtilizationRate × 0.25) + 
+        (AccountAge × 0.15) + 
+        (ReputationScore × 0.15) + 
+        (Diversification × 0.10)
+
+Grade Thresholds:
+A+ : 800-1000
+A  : 750-799
+B+ : 700-749
+B  : 650-699
+C+ : 600-649
+C  : 550-599
+D  : 500-549
+F  : 0-499
+```
+
+### Fraud Detection Rules
+```
+1. Unusual Amount: loan > 5 × median(user_loans)
+2. Velocity: >5 loans in 24 hours
+3. New Account: account_age < 30 days
+4. Suspicious Pattern: >3 rapid borrow-repay cycles
+5. Blacklist: address in fraud_addresses table
+
+Risk Score = Σ(triggered_flags × weight)
+Recommendation:
+- APPROVE: score < 30
+- REVIEW: 30 ≤ score < 70
+- REJECT: score ≥ 70
+```
+
+### Risk Assessment
+```
+Default Probability = f(credit_score, payment_history, debt_ratio)
+Liquidation Risk = current_collateral_value / loan_amount
+Collateral Health = (collateral_value - loan_value) / loan_value
+
+Risk Level:
+- LOW: default_prob < 10%, liquidation_risk > 150%
+- MEDIUM: 10% ≤ default_prob < 25%, 120% < liquidation_risk ≤ 150%
+- HIGH: 25% ≤ default_prob < 50%, liquidation_risk ≤ 120%
+- CRITICAL: default_prob ≥ 50%, liquidation_risk < 100%
+```
+
+## 🏗️ Architecture Diagrams
+
+### System Architecture
+```
+┌─────────────────────────────────────────────────────┐
+│                   Frontend (Next.js)                │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │ Landing  │  │Dashboard │  │ Wallet Connect   │  │
+│  └──────────┘  └──────────┘  └──────────────────┘  │
+└────────────────────┬────────────────────────────────┘
+                     │ REST API
+┌────────────────────┴────────────────────────────────┐
+│              Backend (NestJS)                       │
+│  ┌─────────┐ ┌─────────┐ ┌──────────┐ ┌─────────┐ │
+│  │  Auth   │ │  User   │ │  Loan    │ │   ML    │ │
+│  └─────────┘ └─────────┘ └──────────┘ └─────────┘ │
+│  ┌─────────────────┐  ┌──────────────────────────┐ │
+│  │  Collateral     │  │  Blockchain Adapter      │ │
+│  └─────────────────┘  └──────────────────────────┘ │
+└────────────┬───────────────────┬────────────────────┘
+             │                   │
+    ┌────────┴────────┐  ┌───────┴──────────┐
+    │   PostgreSQL    │  │  Smart Contracts │
+    │   (TypeORM)     │  │  EVM/Aptos/Flow  │
+    └─────────────────┘  └──────────────────┘
+```
+
+### Loan Lifecycle
+```
+1. User connects wallet
+2. ML Credit Scoring runs
+3. Fraud Detection analyzes
+4. Risk Assessment evaluates
+   ↓
+5. Loan terms calculated (interest rate based on reputation)
+6. User locks collateral
+7. Loan activated
+   ↓
+8. User makes payments
+9. Reputation points awarded
+10. Collateral unlocked on full repayment
+    OR
+11. Liquidation if defaulted
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+pnpm run test
+
+# Run backend tests
+cd apps/backend
+pnpm run test
+pnpm run test:e2e
+
+# Run contract tests
+cd contracts/evm
+pnpm run test
+```
+
+## 📝 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions welcome! Please read CONTRIBUTING.md for guidelines.
