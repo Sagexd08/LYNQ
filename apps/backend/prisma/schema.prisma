@@ -32,7 +32,6 @@ model Loan {
   lateFee             BigInt
   
   interestRateBps     Int
-  createdAt           DateTime @default(now())
   dueDate             DateTime
   
   status              String   @default("PENDING") // PENDING, ACTIVE, REPAID, DEFAULTED, CANCELLED
