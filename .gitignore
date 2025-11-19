@@ -1,62 +1,30 @@
-# Dependencies
 node_modules/
-pnpm-lock.yaml
-
-# Build outputs
 dist/
 build/
-
-# Environment variables
+.next/
+coverage/
+.turbo/
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE
+*.log
+.DS_Store
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
-# OS
-.DS_Store
-Thumbs.db
+apps/*/node_modules
+apps/*/dist
+apps/*/build
+apps/*/.next
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+packages/*/node_modules
+packages/*/dist
 
-# Testing
-coverage/
-.nyc_output/
+contracts/*/node_modules
+contracts/*/artifacts
+contracts/*/cache
+contracts/*/deployments
+contracts/*/typechain-types
 
-# Contract artifacts (can be regenerated)
-contracts/ethereum/artifacts/
-contracts/ethereum/cache/
-contracts/ethereum/typechain/
-
-# Flow
-flow.json
-contracts/deployments/
-
-# Prisma
-backend/prisma/migrations/
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-
-# Backend
-backend/.env
-backend/dist/
-
-# Docker
-docker-compose.override.yml
+*.tsbuildinfo
+pnpm-lock.yaml
+yarn.lock
