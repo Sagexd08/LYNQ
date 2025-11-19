@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
+import * as path from "path";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -11,6 +12,13 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+    root: "./",
   },
   networks: {
     hardhat: {},
