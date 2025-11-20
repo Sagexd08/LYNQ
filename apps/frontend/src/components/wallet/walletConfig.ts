@@ -1,16 +1,8 @@
 
 import { useState, useEffect } from 'react';
-// TODO: Install @metamask/detect-provider and @coinbase/wallet-sdk when ready
-// import detectEthereumProvider from '@metamask/detect-provider';
-// import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { configureFCL, fcl } from '../../config/flow';
-
-// Stub for missing dependencies
-const detectEthereumProvider = () => Promise.resolve((window as any).ethereum || null);
-const CoinbaseWalletSDK = class {
-  constructor(_options: any) {}
-  makeWeb3Provider() { return null; }
-};
 
 export interface WalletResponse {
   address: string;

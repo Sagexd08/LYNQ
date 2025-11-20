@@ -1,19 +1,14 @@
 import { useState, useCallback, useMemo } from "react";
 import { mlService, CreditScoreResult } from "../../services/mlService";
-// TODO: Install aptos SDK when ready to use Aptos features
-// import { AptosClient } from "aptos";
+import { AptosClient } from "aptos";
 // import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
-// Stub wallet hook for now
+// Stub wallet hook for now until wallet adapter is installed
 const useWallet = () => ({ 
   account: null as any, 
   connected: false,
   signAndSubmitTransaction: async (_tx: any) => ({ hash: '' })
 });
-const AptosClient = class {
-  constructor(_url: string) {}
-  waitForTransaction(_hash: string) { return Promise.resolve({}); }
-};
 
 // Configuration
 const NETWORK_CONFIG = {

@@ -1,15 +1,14 @@
 import React from 'react';
-// TODO: Install react-chartjs-2 and chart.js when ready to add charts
-// import { Line } from 'react-chartjs-2';
-// import {
-//   Chart as ChartJS,
-//   LineElement,
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   Tooltip,
-// } from 'chart.js';
-// ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip);
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+} from 'chart.js';
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip);
 import { TrendingUp, BarChart2, Coins, CircleDollarSign, Package } from 'lucide-react';
 
 interface Coin {
@@ -95,12 +94,44 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         </div>
       </div>
 
-      {/* Sparkline chart - temporarily disabled until chart.js is installed */}
-      <div className="h-24 mt-1 flex items-center justify-center bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg">
-        <div className="text-center text-white/40">
-          <BarChart2 className="w-8 h-8 mx-auto mb-1" />
-          <p className="text-xs">Chart placeholder</p>
-        </div>
+      {/* Sparkline chart */}
+      <div className="h-24 mt-1">
+        {coin.sparkline_in_7d?.price ? (
+          <Line
+            data={{
+              labels: coin.sparkline_in_7d.price.map((_, i) => i.toString()),
+              datasets: [
+                {
+                  data: coin.sparkline_in_7d.price,
+                  borderColor: coin.price_change_percentage_24h >= 0 ? '#10B981' : '#EF4444',
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  tension: 0.4,
+                  fill: false,
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+              },
+              scales: {
+                x: { display: false },
+                y: { display: false },
+              },
+            }}
+          />
+        ) : (
+          <div className="h-full flex items-center justify-center bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg">
+            <div className="text-center text-white/40">
+              <BarChart2 className="w-8 h-8 mx-auto mb-1" />
+              <p className="text-xs">No chart data</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {}

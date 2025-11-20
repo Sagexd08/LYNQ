@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Loan } from '../../loan/entities/loan.entity';
-import { SimpleNeuralNetwork } from '../../../services/advancedAIEngine';
+import { RiskModel } from '../../../services/advancedAIEngine';
 
 export interface CreditScoreResult {
   score: number;
@@ -20,8 +20,8 @@ export interface CreditScoreResult {
 }
 
 @Injectable()
-export class CreditScoringService {
-  private aiModel: SimpleNeuralNetwork;
+export class CreditScoringService implements OnModuleInit {
+  private riskModel: RiskModel;
 
   constructor(
     @InjectRepository(User)
@@ -29,14 +29,11 @@ export class CreditScoringService {
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
   ) {
-    // Initialize AI Model with 5 inputs, 2 hidden layers of 8 neurons, and 1 output
-    this.aiModel = new SimpleNeuralNetwork({
-      inputSize: 5,
-      hiddenLayers: [8, 8],
-      outputSize: 1,
-      learningRate: 0.01,
-      activationFunction: 'sigmoid'
-    });
+    this.riskModel = new RiskModel();
+  }
+
+  async onModuleInit() {
+    await this.riskModel.initialize();
   }
 
   async calculateScore(userId: string): Promise<CreditScoreResult> {
@@ -53,7 +50,7 @@ export class CreditScoringService {
     const reputationScore = this.normalizeReputationPoints(user.reputationPoints);
     const diversificationScore = this.calculateDiversification(loans);
 
-    // AI Adjustment
+    // AI Adjustment using embedded Risk Model
     const aiInput = [
       paymentHistoryScore / 100,
       utilizationScore / 100,
@@ -62,9 +59,9 @@ export class CreditScoringService {
       diversificationScore / 100
     ];
     
-    // In a real scenario, we would load pre-trained weights here
-    const aiPrediction = this.aiModel.forward(aiInput)[0];
-    const aiAdjustment = Math.round((aiPrediction - 0.5) * 50); // +/- 25 points adjustment
+    const aiPrediction = this.riskModel.predict(aiInput);
+    // Map 0-100 prediction to -25 to +25 adjustment
+    const aiAdjustment = Math.round((aiPrediction - 50) / 2); 
 
     let totalScore = Math.round(
       paymentHistoryScore * 0.35 +

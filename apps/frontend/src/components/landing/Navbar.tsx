@@ -1,15 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// TODO: Install react-scroll when ready to use smooth scrolling
-// import { Link as ScrollLink } from 'react-scroll';
+import { Link as ScrollLinkOriginal } from 'react-scroll';
 import { useWalletStore } from '../../store/walletStore';
 
-// Stub ScrollLink component
-const ScrollLink = ({ to, className, children, onClick }: any) => (
-  <a href={`#${to}`} className={className} onClick={onClick}>
-    {children}
-  </a>
-);
+// Cast to any to avoid React 18 type issues
+const ScrollLink = ScrollLinkOriginal as any;
 
 interface LandingNavbarProps {
   onShowWalletModal: () => void;

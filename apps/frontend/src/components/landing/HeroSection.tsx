@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-// TODO: Install @splinetool/react-spline when ready to use 3D models
-// import Spline from '@splinetool/react-spline';
+import Spline from '@splinetool/react-spline';
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -72,16 +71,12 @@ export default function Hero({ onGetStarted }: HeroProps) {
 
       {}
       <motion.div
-        className="w-full lg:w-1/2 h-[400px] md:h-[500px] lg:h-[600px] relative bg-gradient-to-br from-purple-900/20 to-cyan-900/20 rounded-2xl flex items-center justify-center"
+        className="w-full lg:w-1/2 h-[400px] md:h-[500px] lg:h-[600px] relative bg-gradient-to-br from-purple-900/20 to-cyan-900/20 rounded-2xl flex items-center justify-center overflow-hidden"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.6 }}
       >
-        {/* TODO: Add Spline 3D scene when @splinetool/react-spline is installed */}
-        <div className="text-center text-white/50">
-          <div className="text-6xl mb-4">🌐</div>
-          <p className="text-sm">3D Visualization Placeholder</p>
-        </div>
+        <Spline scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode" />
         <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-b from-transparent to-black z-10 pointer-events-none" />
       </motion.div>
     </section>
