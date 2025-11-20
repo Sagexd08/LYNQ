@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-  HandCoins,
-  Handshake,
+  Coins,
+  Users,
   ShieldAlert,
   Wallet,
   Banknote,
@@ -66,9 +66,9 @@ const TradeInterface: React.FC<TradeInterfaceProps> = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <h3 className="text-2xl font-bold text-white flex items-center gap-2">
           {tradeType === "borrow" ? (
-            <HandCoins className="w-5 h-5" />
+            <Coins className="w-5 h-5" />
           ) : (
-            <Handshake className="w-5 h-5" />
+            <Users className="w-5 h-5" />
           )}
           {tradeType === "borrow" ? "Borrowing" : "Lending"} Interface
         </h3>

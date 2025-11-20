@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "test": "echo \"(TODO) add adapter tests\""
   },
   "dependencies": {
     "@onflow/fcl": "^1.20.3",

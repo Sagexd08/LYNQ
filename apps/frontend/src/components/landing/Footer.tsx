@@ -1,4 +1,4 @@
-import { FaXTwitter, FaGithub, FaDiscord } from 'react-icons/fa6';
+import { Twitter, Github, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -29,19 +29,19 @@ export default function Footer() {
               href="https://twitter.com/yourproject" target="_blank" rel="noopener noreferrer"
               className="hover:text-accent transition"
             >
-              <FaXTwitter />
+              <Twitter className="w-5 h-5" />
             </a>
             <a
               href="https://github.com/yourproject" target="_blank" rel="noopener noreferrer"
               className="hover:text-accent transition"
             >
-              <FaGithub />
+              <Github className="w-5 h-5" />
             </a>
             <a
               href="https://discord.gg/yourproject" target="_blank" rel="noopener noreferrer"
               className="hover:text-accent transition"
             >
-              <FaDiscord />
+              <MessageCircle className="w-5 h-5" />
             </a>
           </div>
         </div>

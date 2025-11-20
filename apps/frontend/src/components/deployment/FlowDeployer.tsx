@@ -107,24 +107,24 @@ pub contract LoanPlatform {
 
       setDeploymentStatus('Preparing deployment transaction...');
 
-      const transaction = await fcl.transaction({
-        cadence: `
+      const cadenceCode = `
           transaction(name: String) {
             prepare(signer: AuthAccount) {
               signer.contracts.add(name: name, code: "CONTRACT_PLACEHOLDER".utf8)
             }
             log("Contract deployed successfully!")
           }
-        `.replace('CONTRACT_PLACEHOLDER', CONTRACT_CODE),
+        `.replace('CONTRACT_PLACEHOLDER', CONTRACT_CODE);
+
+      setDeploymentStatus('Signing transaction...');
+      const txId = await fcl.mutate({
+        cadence: cadenceCode,
         args: (arg: any, t: any) => [arg('LoanPlatform', t.String)],
         limit: 1000,
       });
 
-      setDeploymentStatus('Signing transaction...');
-      const txId = await fcl.mutate(transaction);
-
       setDeploymentStatus('Waiting for confirmation...');
-      const result = await fcl.tx(txId).onceSealed();
+      await fcl.tx(txId).onceSealed();
       
       setDeployedAddress(currentUser.addr);
       toast.success('Contract deployed successfully!');

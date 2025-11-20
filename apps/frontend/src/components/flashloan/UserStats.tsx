@@ -4,22 +4,22 @@ import { flashLoanService } from '../../services/flashLoanService';
 import { toast } from 'react-hot-toast';
 
 export const UserStats: React.FC = () => {
-  const { walletAddress } = useWalletStore();
+  const address = useWalletStore((state) => state.address);
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (walletAddress) {
+    if (address) {
       loadUserStats();
     }
-  }, [walletAddress]);
+  }, [address]);
 
   const loadUserStats = async () => {
-    if (!walletAddress) return;
+    if (!address) return;
     
     setIsLoading(true);
     try {
-      const data = await flashLoanService.getUserStats(walletAddress);
+      const data = await flashLoanService.getUserStats(address);
       setStats(data);
     } catch (error) {
       toast.error('Failed to load user statistics');

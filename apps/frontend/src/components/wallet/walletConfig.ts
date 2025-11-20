@@ -1,8 +1,16 @@
 
 import { useState, useEffect } from 'react';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
+// TODO: Install @metamask/detect-provider and @coinbase/wallet-sdk when ready
+// import detectEthereumProvider from '@metamask/detect-provider';
+// import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { configureFCL, fcl } from '../../config/flow';
+
+// Stub for missing dependencies
+const detectEthereumProvider = () => Promise.resolve((window as any).ethereum || null);
+const CoinbaseWalletSDK = class {
+  constructor(_options: any) {}
+  makeWeb3Provider() { return null; }
+};
 
 export interface WalletResponse {
   address: string;
@@ -67,7 +75,7 @@ export const walletProviders: WalletProvider[] = [
       }
       
       return {
-        address: accounts[0],
+        address: accounts[0] || '',
         walletName: 'MetaMask',
         chainId: chainId,
         networkName: getNetworkName(chainId)
@@ -83,15 +91,18 @@ export const walletProviders: WalletProvider[] = [
     detectMethod: () => !!(window.ethereum && window.ethereum.isCoinbaseWallet),
     connect: async (): Promise<WalletResponse> => {
       try {
-        const accounts = await coinbaseProvider.request({ method: 'eth_requestAccounts' }) as string[];
-        const chainId = await coinbaseProvider.request({ method: 'eth_chainId' }) as string;
+        if (!coinbaseProvider) {
+          throw new Error('Coinbase Wallet not initialized');
+        }
+        const accounts = await (coinbaseProvider as any).request({ method: 'eth_requestAccounts' }) as string[];
+        const chainId = await (coinbaseProvider as any).request({ method: 'eth_chainId' }) as string;
         
         if (!accounts || accounts.length === 0) {
           throw new Error('No accounts found');
         }
         
         return {
-          address: accounts[0],
+          address: accounts[0] || '',
           walletName: 'Coinbase Wallet',
           chainId: chainId,
           networkName: getNetworkName(chainId)

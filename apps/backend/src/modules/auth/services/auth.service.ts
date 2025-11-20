@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ethers } from 'ethers';
 import * as bcrypt from 'bcrypt';
-import { User } from '../../user/entities/user.entity';
+import { User, ReputationTier } from '../../user/entities/user.entity';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { WalletConnectDto } from '../dto/wallet-connect.dto';
@@ -34,7 +34,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       walletAddresses: walletAddress ? { evm: walletAddress } : {},
-      reputationTier: 'BRONZE',
+      reputationTier: ReputationTier.BRONZE,
       reputationPoints: 0,
     });
 
@@ -83,7 +83,7 @@ export class AuthService {
         user = this.userRepository.create({
           email: `${walletAddress.substring(0, 8)}@wallet.lynq`,
           walletAddresses: { [chain]: walletAddress },
-          reputationTier: 'BRONZE',
+          reputationTier: ReputationTier.BRONZE,
           reputationPoints: 0,
         });
         await this.userRepository.save(user);

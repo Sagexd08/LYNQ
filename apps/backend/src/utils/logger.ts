@@ -1,6 +1,7 @@
 import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 const logsDir = path.join(process.cwd(), 'logs');
 
@@ -18,8 +19,29 @@ export interface AuditLogEntry {
   metadata?: Record<string, unknown>;
 }
 
+let logLevel = 'info';
+let nodeEnv = 'development';
+
+export function initLogger(config: ConfigService): void {
+  logLevel = config.get<string>('LOG_LEVEL', 'info');
+  nodeEnv = config.get<string>('NODE_ENV', 'development');
+  
+  // Reconfigure logger with new level if needed
+  logger.level = logLevel;
+  
+  // Add console transport for non-production
+  if (nodeEnv !== 'production' && !logger.transports.some(t => t instanceof winston.transports.Console)) {
+    logger.add(new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    }));
+  }
+}
+
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: logLevel,
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
@@ -45,15 +67,6 @@ const logger = winston.createLogger({
 logger.audit = (entry: AuditLogEntry) => {
   logger.info('AUDIT', entry as any);
 };
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  }));
-}
 
 export default logger;
 

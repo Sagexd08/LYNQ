@@ -1,25 +1,30 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link as ScrollLink } from 'react-scroll';
+// TODO: Install react-scroll when ready to use smooth scrolling
+// import { Link as ScrollLink } from 'react-scroll';
+import { useWalletStore } from '../../store/walletStore';
+
+// Stub ScrollLink component
+const ScrollLink = ({ to, className, children, onClick }: any) => (
+  <a href={`#${to}`} className={className} onClick={onClick}>
+    {children}
+  </a>
+);
 
 interface LandingNavbarProps {
-  onWalletConnect: () => void;
-  walletAddress: string;
-  onWalletDisconnect: () => void;
+  onShowWalletModal: () => void;
 }
 
-export default function LandingNavbar({ onWalletConnect, walletAddress, onWalletDisconnect }: LandingNavbarProps) {
+export default function LandingNavbar({ onShowWalletModal }: LandingNavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const address = useWalletStore((state) => state.address);
+  const disconnect = useWalletStore((state) => state.disconnect);
 
   const handleWalletClick = () => {
-    if (walletAddress) {
-      
-      if (onWalletDisconnect) {
-        onWalletDisconnect();
-      }
+    if (address) {
+      disconnect();
     } else {
-      
-      onWalletConnect();
+      onShowWalletModal();
     }
   };
 
@@ -53,8 +58,8 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
                 onClick={handleWalletClick}
                 className="px-4 lg:px-6 py-2 text-sm lg:text-base rounded-full bg-gradient-to-r from-cyan-500/80 to-purple-500/80 hover:from-cyan-400 hover:to-purple-400 text-white transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105 border border-cyan-400/30 backdrop-blur-sm"
               >
-                {walletAddress 
-                  ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                {address 
+                  ? `${address.slice(0, 6)}...${address.slice(-4)}`
                   : 'Connect Wallet'
                 }
               </button>
@@ -103,8 +108,8 @@ export default function LandingNavbar({ onWalletConnect, walletAddress, onWallet
                     }}
                     className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 font-medium"
                   >
-                    {walletAddress 
-                      ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}`
+                    {address 
+                      ? `${address.slice(0, 8)}...${address.slice(-6)}`
                       : 'Connect Wallet'
                     }
                   </button>

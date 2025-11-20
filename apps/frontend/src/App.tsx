@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, Suspense, lazy } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -10,7 +11,9 @@ import CTASection from "./components/landing/CTASection";
 import Reputation from "./components/landing/Reputation";
 import Footer from "./components/landing/Footer";
 import BuiltOnEthereum from "./components/landing/BuiltOnEthereum";
-
+import { COIN_LIST, API_ENDPOINTS, REQUEST_TIMEOUT } from "./constants";
+import HealthIndicator from "./components/HealthIndicator";
+import { useWalletStore } from "./store/walletStore";
 
 import {
   LazyProfileDashboard,
@@ -56,45 +59,26 @@ interface Coin {
   sparkline_in_7d?: SparklineData;
 }
 
+function AppContent() {
+  const location = useLocation();
+  const isLanding = location.pathname === "/";
 
-const COIN_LIST = [
-  "bitcoin",
-  "ethereum", 
-  "uniswap",
-  "aave",
-  "curve-dao-token",
-  "chainlink",
-  "litecoin",
-  "maker",
-  "compound-governance-token",
-  "the-graph",
-  "optimism",
-  "arbitrum",
-  "avalanche-2",
-  "solana",
-  "toncoin"
-].join(",");
+  const [currentPage, setCurrentPage] = useState<
+    "landing" | "dashboard" | "marketplace" | "cards" | "flashloan"
+  >(isLanding ? "landing" : "marketplace");
 
-const API_ENDPOINTS = {
-  MAINNET: "https://mainnet.infura.io/v3/",
-  TESTNET: "https://sepolia.infura.io/v3/",
-  COINGECKO: "https://api.coingecko.com/api/v3/coins/markets"
-} as const;
+  // Get wallet data from store
+  const address = useWalletStore((state) => state.address);
+  const connect = useWalletStore((state) => state.connect);
+  const disconnect = useWalletStore((state) => state.disconnect);
+  const updateBalance = useWalletStore((state) => state.updateBalance);
+  const setLoadingBalance = useWalletStore((state) => state.setLoadingBalance);
+  const setBalanceError = useWalletStore((state) => state.setBalanceError);
+  const ethBalance = useWalletStore((state) => state.balance);
+  const isLoadingBalance = useWalletStore((state) => state.isLoadingBalance);
+  const balanceError = useWalletStore((state) => state.balanceError);
 
-const REQUEST_TIMEOUT = 10000;
-
-function App() {
-  
-  const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "marketplace" | "cards" | "flashloan">("landing");
-
-  
-  const [walletAddress, setWalletAddress] = useState<string>("");
-  const [walletType, setWalletType] = useState<string>("");
-  const [connectedAt, setConnectedAt] = useState<string | null>(null);
-  const [ethBalance, setEthBalance] = useState<number>(0);
   const [useTestnet, setUseTestnet] = useState<boolean>(false);
-  const [isLoadingBalance, setIsLoadingBalance] = useState<boolean>(false);
-  const [balanceError, setBalanceError] = useState<string | null>(null);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
   
@@ -128,11 +112,11 @@ function App() {
   const fetchEthBalance = useCallback(
     async (address: string): Promise<void> => {
       if (!address) {
-        setEthBalance(0);
+        updateBalance(0);
         return;
       }
 
-      setIsLoadingBalance(true);
+      setLoadingBalance(true);
       setBalanceError(null);
 
       const { timeout } = createAbortController();
@@ -140,17 +124,17 @@ function App() {
       try {
         
         
-        setEthBalance(1.5); 
+        updateBalance(1.5); 
       } catch (error) {
         const errorMessage = handleApiError(error);
         setBalanceError(errorMessage);
-        setEthBalance(0);
+        updateBalance(0);
       } finally {
         clearTimeout(timeout);
-        setIsLoadingBalance(false);
+        setLoadingBalance(false);
       }
     },
-    [useTestnet, createAbortController, handleApiError]
+    [useTestnet, createAbortController, handleApiError, updateBalance, setLoadingBalance, setBalanceError]
   );
 
   
@@ -190,39 +174,36 @@ function App() {
   const handleWalletConnect = useCallback(
     (walletData: any): void => {
       if (walletData?.address) {
-        setWalletAddress(walletData.address);
-        setWalletType(walletData.walletType || "");
-        setConnectedAt(walletData.connectedAt || new Date().toISOString());
+        connect({
+          address: walletData.address,
+          walletType: walletData.walletType || "",
+          chainId: walletData.chainId,
+          networkName: walletData.networkName,
+          publicKey: walletData.publicKey,
+          email: walletData.email,
+          name: walletData.name,
+          social: walletData.social,
+        });
         fetchEthBalance(walletData.address);
       } else {
         handleWalletDisconnect();
       }
       setShowWalletModal(false);
     },
-    [fetchEthBalance]
+    [connect, fetchEthBalance]
   );
 
   const handleWalletDisconnect = useCallback((): void => {
-    setWalletAddress("");
-    setWalletType("");
-    setConnectedAt(null);
-    setEthBalance(0);
+    disconnect();
     clearSavedWalletConnection();
-  }, []);
+  }, [disconnect]);
 
   const handleToggleNetwork = useCallback((): void => {
     setUseTestnet((prev) => !prev);
-    if (walletAddress) {
-      fetchEthBalance(walletAddress);
+    if (address) {
+      fetchEthBalance(address);
     }
-  }, [walletAddress, fetchEthBalance]);
-
-  const handleNavigationChange = useCallback((page: string): void => {
-    const validPages = ["landing", "dashboard", "marketplace", "cards", "flashloan"] as const;
-    if (validPages.includes(page as any)) {
-      setCurrentPage(page as typeof validPages[number]);
-    }
-  }, []);
+  }, [address, fetchEthBalance]);
 
   const handleTrade = useCallback((coin: Coin, isBuy: boolean): void => {
     alert(`${isBuy ? "Buying" : "Selling"} ${coin.name} (Coming soon)`);
@@ -232,12 +213,15 @@ function App() {
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection?.address) {
-      setWalletAddress(savedConnection.address);
-      setWalletType(savedConnection.walletType || "");
-      setConnectedAt(savedConnection.connectedAt || new Date().toISOString());
+      connect({
+        address: savedConnection.address,
+        walletType: savedConnection.walletType || "",
+        chainId: savedConnection.chainId,
+        networkName: savedConnection.networkName,
+      });
       fetchEthBalance(savedConnection.address);
     }
-  }, [fetchEthBalance]);
+  }, [connect, fetchEthBalance]);
 
   useEffect(() => {
     const dataRequiredPages = ["marketplace", "dashboard", "cards"];
@@ -273,14 +257,12 @@ function App() {
   
   const walletData = useMemo(
     () => ({
-      address: walletAddress,
+      address,
       ethBalance,
-      walletType,
-      connectedAt,
       isLoadingBalance,
       balanceError,
     }),
-    [walletAddress, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError]
+    [address, ethBalance, isLoadingBalance, balanceError]
   );
 
   const marketStats = useMemo(() => {
@@ -369,7 +351,6 @@ function App() {
                   <ErrorBoundary>
                     <Suspense fallback={<LoadingFallback minHeight="300px" />}>
                       <LazyProfileDashboard 
-                        walletAddress={walletAddress}
                         ethBalance={ethBalance}
                       />
                     </Suspense>
@@ -536,7 +517,7 @@ function App() {
           <div className="bg-black text-white font-sans relative">
             <main className="overflow-x-hidden">
               <HeroSection
-                onNavigateToApp={() => setCurrentPage("marketplace")}
+                onGetStarted={() => setCurrentPage("marketplace")}
               />
               <div className="bg-grid">
                 <Features />
@@ -548,7 +529,7 @@ function App() {
                   <BuiltOnEthereum />
                 </Suspense>
                 <CTASection
-                  onNavigateToApp={() => setCurrentPage("marketplace")}
+                  onGetStarted={() => setCurrentPage("marketplace")}
                 />
               </div>
             </main>
@@ -570,15 +551,10 @@ function App() {
         <div className="relative z-20">
           {currentPage === "landing" ? (
             <LandingNavbar
-              onWalletConnect={() => setShowWalletModal(true)}
-              onWalletDisconnect={handleWalletDisconnect}
-              walletAddress={walletAddress}
+              onShowWalletModal={() => setShowWalletModal(true)}
             />
           ) : (
             <NavBar
-              currentPage={currentPage}
-              setCurrentPage={handleNavigationChange}
-              walletAddress={walletAddress}
               onWalletConnect={handleWalletConnect}
               onShowWalletModal={() => setShowWalletModal(true)}
               useTestnet={useTestnet}
@@ -601,9 +577,14 @@ function App() {
             />
           </Suspense>
         )}
+        <HealthIndicator />
       </div>
     </ErrorBoundary>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;

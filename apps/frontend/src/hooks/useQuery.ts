@@ -1,5 +1,4 @@
 import { useQuery as useRQQuery, useMutation, UseQueryOptions, UseMutationOptions, QueryClient } from '@tanstack/react-query';
-import { APP_CONFIG } from '../config/env';
 
 export const queryClient = new QueryClient({
   defaultOptions: {

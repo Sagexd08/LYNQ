@@ -18,7 +18,7 @@ const SUPPORTED_ASSETS = [
 ];
 
 export const FlashLoanForm: React.FC = () => {
-  const { walletAddress } = useWalletStore();
+  const address = useWalletStore((state) => state.address);
   const [assets, setAssets] = useState<AssetInput[]>([{ id: Date.now().toString(), asset: '', amount: '' }]);
   const [receiverAddress, setReceiverAddress] = useState('');
   const [params, setParams] = useState('0x');
@@ -29,10 +29,10 @@ export const FlashLoanForm: React.FC = () => {
 
   // Set default receiver to wallet address
   useEffect(() => {
-    if (walletAddress) {
-      setReceiverAddress(walletAddress);
+    if (address) {
+      setReceiverAddress(address);
     }
-  }, [walletAddress]);
+  }, [address]);
 
   const addAsset = () => {
     setAssets([...assets, { id: Date.now().toString(), asset: '', amount: '' }]);
@@ -51,7 +51,7 @@ export const FlashLoanForm: React.FC = () => {
   };
 
   const getQuote = async () => {
-    if (!walletAddress) {
+    if (!address) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -68,7 +68,7 @@ export const FlashLoanForm: React.FC = () => {
 
       // Check eligibility first
       const eligibilityResult = await flashLoanService.checkEligibility(
-        walletAddress,
+        address,
         assetAddresses,
         amounts
       );
@@ -82,7 +82,7 @@ export const FlashLoanForm: React.FC = () => {
 
       // Get quote
       const quoteResult = await flashLoanService.getFlashLoanQuote(
-        walletAddress,
+        address,
         assetAddresses,
         amounts
       );
@@ -97,7 +97,7 @@ export const FlashLoanForm: React.FC = () => {
   };
 
   const executeFlashLoan = async () => {
-    if (!walletAddress) {
+    if (!address) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -118,7 +118,7 @@ export const FlashLoanForm: React.FC = () => {
       const amounts = assets.map(a => a.amount);
 
       const result = await flashLoanService.executeFlashLoan(
-        walletAddress,
+        address,
         receiverAddress,
         assetAddresses,
         amounts,
@@ -178,7 +178,7 @@ export const FlashLoanForm: React.FC = () => {
           </button>
         </div>
 
-        {assets.map((asset, index) => (
+        {assets.map((asset) => (
           <div key={asset.id} className="grid grid-cols-12 gap-4 mb-4">
             <div className="col-span-7">
               <select

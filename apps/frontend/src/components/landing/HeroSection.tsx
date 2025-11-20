@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import Spline from '@splinetool/react-spline';
+// TODO: Install @splinetool/react-spline when ready to use 3D models
+// import Spline from '@splinetool/react-spline';
 
 interface HeroProps {
-  onNavigateToApp: () => void;
+  onGetStarted: () => void;
 }
 
-export default function Hero({ onNavigateToApp }: HeroProps) {
+export default function Hero({ onGetStarted }: HeroProps) {
   return (
     <section
       id="hero"
@@ -42,7 +43,7 @@ export default function Hero({ onNavigateToApp }: HeroProps) {
 
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center lg:justify-start">
           <button 
-            onClick={onNavigateToApp}
+            onClick={onGetStarted}
             className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-cyan-400 hover:from-purple-500 hover:to-cyan-400 text-white px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105 border border-cyan-400/30 backdrop-blur-sm"
           >
             Launch App
@@ -71,12 +72,16 @@ export default function Hero({ onNavigateToApp }: HeroProps) {
 
       {}
       <motion.div
-        className="w-full lg:w-1/2 h-[400px] md:h-[500px] lg:h-[600px] relative"
+        className="w-full lg:w-1/2 h-[400px] md:h-[500px] lg:h-[600px] relative bg-gradient-to-br from-purple-900/20 to-cyan-900/20 rounded-2xl flex items-center justify-center"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.6 }}
       >
-        <Spline scene="https://prod.spline.design/fVI7osVNsN6xgxlO/scene.splinecode" />
+        {/* TODO: Add Spline 3D scene when @splinetool/react-spline is installed */}
+        <div className="text-center text-white/50">
+          <div className="text-6xl mb-4">🌐</div>
+          <p className="text-sm">3D Visualization Placeholder</p>
+        </div>
         <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-b from-transparent to-black z-10 pointer-events-none" />
       </motion.div>
     </section>

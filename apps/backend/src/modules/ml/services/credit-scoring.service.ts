@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Loan } from '../../loan/entities/loan.entity';
+import { SimpleNeuralNetwork } from '../../../services/advancedAIEngine';
 
 export interface CreditScoreResult {
   score: number;
@@ -13,18 +14,30 @@ export interface CreditScoreResult {
     accountAge: number;
     reputationPoints: number;
     diversification: number;
+    aiAdjustment: number;
   };
   recommendations: string[];
 }
 
 @Injectable()
 export class CreditScoringService {
+  private aiModel: SimpleNeuralNetwork;
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
-  ) {}
+  ) {
+    // Initialize AI Model with 5 inputs, 2 hidden layers of 8 neurons, and 1 output
+    this.aiModel = new SimpleNeuralNetwork({
+      inputSize: 5,
+      hiddenLayers: [8, 8],
+      outputSize: 1,
+      learningRate: 0.01,
+      activationFunction: 'sigmoid'
+    });
+  }
 
   async calculateScore(userId: string): Promise<CreditScoreResult> {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['loans'] });
@@ -40,34 +53,49 @@ export class CreditScoringService {
     const reputationScore = this.normalizeReputationPoints(user.reputationPoints);
     const diversificationScore = this.calculateDiversification(loans);
 
-    const totalScore = Math.round(
+    // AI Adjustment
+    const aiInput = [
+      paymentHistoryScore / 100,
+      utilizationScore / 100,
+      accountAgeScore / 100,
+      reputationScore / 100,
+      diversificationScore / 100
+    ];
+    
+    // In a real scenario, we would load pre-trained weights here
+    const aiPrediction = this.aiModel.forward(aiInput)[0];
+    const aiAdjustment = Math.round((aiPrediction - 0.5) * 50); // +/- 25 points adjustment
+
+    let totalScore = Math.round(
       paymentHistoryScore * 0.35 +
       utilizationScore * 0.25 +
       accountAgeScore * 0.15 +
       reputationScore * 0.15 +
-      diversificationScore * 0.10
+      diversificationScore * 0.10 +
+      aiAdjustment
     );
 
-    const grade = this.getGrade(totalScore);
-    const recommendations = this.generateRecommendations(totalScore, {
-      paymentHistory: paymentHistoryScore,
-      loanUtilization: utilizationScore,
-      accountAge: accountAgeScore,
-      reputationPoints: reputationScore,
-      diversification: diversificationScore,
-    });
+    // Clamp score between 300 and 850
+    totalScore = Math.max(300, Math.min(850, totalScore));
 
     return {
       score: totalScore,
-      grade,
+      grade: this.getGrade(totalScore),
       factors: {
         paymentHistory: paymentHistoryScore,
         loanUtilization: utilizationScore,
         accountAge: accountAgeScore,
         reputationPoints: reputationScore,
         diversification: diversificationScore,
+        aiAdjustment: aiAdjustment
       },
-      recommendations,
+      recommendations: this.generateRecommendations(totalScore, {
+        paymentHistory: paymentHistoryScore,
+        loanUtilization: utilizationScore,
+        accountAge: accountAgeScore,
+        reputationPoints: reputationScore,
+        diversification: diversificationScore
+      }),
     };
   }
 

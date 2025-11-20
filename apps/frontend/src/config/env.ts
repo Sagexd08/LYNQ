@@ -32,7 +32,7 @@ const DEFAULTS = {
   PARTICLE_PROJECT_ID: 'your_particle_project_id',
   PARTICLE_CLIENT_KEY: 'your_particle_client_key',
   PARTICLE_APP_ID: 'your_particle_app_id',
-  API_BASE_URL: 'https://api.coingecko.com/api/v3',
+  API_BASE_URL: 'http://localhost:3000/api/v1',
   ENABLE_ANALYTICS: 'false',
   VITE_TELEGRAM_BOT_TOKEN: '',
   VITE_TELEGRAM_DEFAULT_CHAT_ID: '',

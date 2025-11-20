@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 interface CTAandFAQProps {
-  onNavigateToApp: () => void;
+  onGetStarted: () => void;
 }
 
-export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
+export default function CTAandFAQ({ onGetStarted }: CTAandFAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggle = (index: number) => {
@@ -44,7 +44,7 @@ export default function CTAandFAQ({ onNavigateToApp }: CTAandFAQProps) {
           Start your on-chain journey today — reputation-first, beginner-friendly, and built to scale.
         </p>
         <button 
-          onClick={onNavigateToApp}
+          onClick={onGetStarted}
           className="w-full sm:w-auto px-6 py-3 mt-3 sm:mt-4 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-400 text-white font-semibold hover:shadow-glow transition-all"
         >
           Launch App

@@ -1,16 +1,16 @@
 import React from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-} from 'chart.js';
+// TODO: Install react-chartjs-2 and chart.js when ready to add charts
+// import { Line } from 'react-chartjs-2';
+// import {
+//   Chart as ChartJS,
+//   LineElement,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   Tooltip,
+// } from 'chart.js';
+// ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip);
 import { TrendingUp, BarChart2, Coins, CircleDollarSign, Package } from 'lucide-react';
-
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip);
 
 interface Coin {
   id: string;
@@ -95,26 +95,12 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         </div>
       </div>
 
-      {}
-      <div className="h-24 mt-1">
-        <Line
-          data={{
-            labels: Array(coin.sparkline_in_7d?.price?.length || 0).fill(''),
-            datasets: [
-              {
-                data: coin.sparkline_in_7d?.price || [],
-                borderColor: '#4F46E5',
-                borderWidth: 2,
-                pointRadius: 0,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { x: { display: false }, y: { display: false } },
-          }}
-        />
+      {/* Sparkline chart - temporarily disabled until chart.js is installed */}
+      <div className="h-24 mt-1 flex items-center justify-center bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg">
+        <div className="text-center text-white/40">
+          <BarChart2 className="w-8 h-8 mx-auto mb-1" />
+          <p className="text-xs">Chart placeholder</p>
+        </div>
       </div>
 
       {}

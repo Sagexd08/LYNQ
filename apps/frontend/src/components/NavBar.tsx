@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
+import { useWalletStore } from "../store/walletStore";
 
 interface NavBarProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-  walletAddress: string;
   onWalletConnect: (walletData: any) => void;
   onShowWalletModal?: () => void;
   useTestnet?: boolean;
@@ -12,26 +11,26 @@ interface NavBarProps {
 }
 
 function NavBar({
-  currentPage,
-  setCurrentPage,
-  walletAddress,
   onWalletConnect,
   onShowWalletModal,
   useTestnet,
   onToggleNetwork,
 }: NavBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const address = useWalletStore((state) => state.address);
 
   const navItems = [
-    { id: "landing", label: "HOME" },
-    { id: "marketplace", label: "MARKETPLACE" },
-    { id: "dashboard", label: "DASHBOARD" },
-    { id: "cards", label: "LOAN CARDS" },
-    { id: "flashloan", label: "FLASH LOANS" },
+    { path: "/", label: "HOME" },
+    { path: "/marketplace", label: "MARKETPLACE" },
+    { path: "/dashboard", label: "DASHBOARD" },
+    { path: "/cards", label: "LOAN CARDS" },
+    { path: "/flashloan", label: "FLASH LOANS" },
   ];
 
   const handleWalletClick = () => {
-    if (walletAddress) {
+    if (address) {
       onWalletConnect("");
     } else if (onShowWalletModal) {
       onShowWalletModal();
@@ -43,17 +42,17 @@ function NavBar({
       <header className="fixed top-0 left-0 right-0 z-10 md:top-4 md:left-4 md:right-4 lg:left-20 lg:right-20">
         <div className="backdrop-blur-md bg-white/5 border-b-[1px] shadow-[3px_2px_8px_rgba(0,255,255,0.4)] md:rounded-md">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-3 lg:py-4 flex items-center justify-between text-white font-medium">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-wide text-accent font-lynq z-10">
+            <Link to="/" className="text-xl sm:text-2xl font-bold tracking-wide text-accent font-lynq z-10">
               LYNQ
-            </h1>
+            </Link>
 
             <ul className="hidden md:flex gap-4 lg:gap-6 items-center">
               {navItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => setCurrentPage(item.id)}
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
                     className={`text-sm font-medium transition-all relative group px-3 py-2 rounded-lg ${
-                      currentPage === item.id
+                      currentPath === item.path
                         ? "text-cyan-400"
                         : "text-white/80 hover:text-cyan-300"
                     }`}
@@ -61,10 +60,10 @@ function NavBar({
                     {item.label}
                     <span
                       className={`absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300 ${
-                        currentPage === item.id ? "w-full" : ""
+                        currentPath === item.path ? "w-full" : ""
                       }`}
                     ></span>
-                  </button>
+                  </Link>
                 </li>
               ))}
               
@@ -85,8 +84,8 @@ function NavBar({
                   onClick={handleWalletClick}
                   className="px-4 lg:px-6 py-2 text-sm rounded-full bg-gradient-to-r from-cyan-500/80 to-purple-500/80 hover:from-cyan-400 hover:to-purple-400 text-white transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105 border border-cyan-400/30 backdrop-blur-sm"
                 >
-                  {walletAddress
-                    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(
+                  {address
+                    ? `${address.slice(0, 6)}...${address.slice(
                         -4
                       )}`
                     : "Connect Wallet"}
@@ -132,20 +131,18 @@ function NavBar({
               >
                 <div className="px-4 pb-6 pt-2 space-y-3 bg-gray-900/80 backdrop-blur-lg text-white border-t border-cyan-400/20">
                   {navItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setCurrentPage(item.id);
-                        setIsOpen(false);
-                      }}
-                      className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-300 border ${
-                        currentPage === item.id
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsOpen(false)}
+                      className={`block w-full text-left py-3 px-4 rounded-lg transition-all duration-300 border ${
+                        currentPath === item.path
                           ? "bg-cyan-400/20 text-cyan-400 border-cyan-400/30"
                           : "bg-white/5 hover:bg-white/10 text-white border-white/10 hover:border-cyan-400/20"
                       }`}
                     >
                       {item.label}
-                    </button>
+                    </Link>
                   ))}
 
                   {}
@@ -168,8 +165,8 @@ function NavBar({
                     }}
                     className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 font-medium"
                   >
-                    {walletAddress
-                      ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(
+                    {address
+                      ? `${address.slice(0, 8)}...${address.slice(
                           -6
                         )}`
                       : "Connect Wallet"}

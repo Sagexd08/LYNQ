@@ -214,7 +214,7 @@ export class AIValidationEngine {
 
       logger.audit?.({
         action: 'AI_VALIDATION',
-        outcome: result.isValid ? 'PASS' : 'FAIL',
+        outcome: result.isValid ? 'APPROVE' : 'BLOCK',
         resource: `transaction:${transactionType}`,
         metadata: {
           userId,

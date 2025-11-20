@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * AES-256-GCM encryption utility
@@ -16,20 +17,29 @@ export interface CipherPayload {
   ciphertext: string; // base64
 }
 
+let primaryKey: Buffer | null = null;
+let previousKey: Buffer | null = null;
+
+export function initCrypto(config: ConfigService): void {
+  const primary = config.get<string>('DATA_KEY');
+  if (!primary) throw new Error('Missing DATA_KEY configuration');
+  primaryKey = parseKey(primary);
+  if (primaryKey.length !== 32) throw new Error('DATA_KEY must be 32 bytes');
+  const prev = config.get<string>('DATA_KEY_PREV');
+  if (prev) {
+    previousKey = parseKey(prev);
+    if (previousKey.length !== 32) throw new Error('DATA_KEY_PREV must be 32 bytes');
+  }
+}
+
 function loadKey(): { key: Buffer; kid: 'primary' } {
-  const k = process.env.DATA_KEY || '';
-  if (!k) throw new Error('Missing DATA_KEY env');
-  const key = parseKey(k);
-  if (key.length !== 32) throw new Error('DATA_KEY must be 32 bytes');
-  return { key, kid: 'primary' };
+  if (!primaryKey) throw new Error('Crypto not initialized');
+  return { key: primaryKey, kid: 'primary' };
 }
 
 function loadPrevKey(): { key: Buffer; kid: 'previous' } | null {
-  const k = process.env.DATA_KEY_PREV || '';
-  if (!k) return null;
-  const key = parseKey(k);
-  if (key.length !== 32) throw new Error('DATA_KEY_PREV must be 32 bytes');
-  return { key, kid: 'previous' };
+  if (!previousKey) return null;
+  return { key: previousKey, kid: 'previous' };
 }
 
 function parseKey(v: string): Buffer {

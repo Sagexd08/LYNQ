@@ -52,6 +52,14 @@ export class EVMAdapter extends BaseAdapter {
     };
   }
 
+  async getTransactionCount(address: string): Promise<number> {
+    return this.provider.getTransactionCount(address);
+  }
+
+  async getCode(address: string): Promise<string> {
+    return this.provider.getCode(address);
+  }
+
   async getBlockNumber(): Promise<number> {
     return this.provider.getBlockNumber();
   }

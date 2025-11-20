@@ -132,15 +132,15 @@ const RepaymentSchedule: React.FC<RepaymentScheduleProps> = ({ walletAddress }) 
                   Next Payment Due
                 </div>
                 <div className="text-sm text-yellow-700 dark:text-yellow-300">
-                  {new Date(repayments[0]?.dueDate).toLocaleDateString()}
+                  {repayments[0]?.dueDate ? new Date(repayments[0].dueDate).toLocaleDateString() : 'N/A'}
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
-                  ${repayments[0]?.amount}
+                  ${repayments[0]?.amount || 0}
                 </div>
                 <div className="text-sm text-yellow-700 dark:text-yellow-300">
-                  {getDaysUntilDue(repayments[0]?.dueDate)} days
+                  {repayments[0]?.dueDate ? getDaysUntilDue(repayments[0].dueDate) : 0} days
                 </div>
               </div>
             </div>

@@ -33,7 +33,9 @@ export const UserTelegramService = {
     const mappings = load();
     const idx = mappings.findIndex(m => m.address.toLowerCase() === address.toLowerCase());
     if (idx >= 0) {
-      mappings[idx].chatId = chatId;
+      if (mappings[idx]) {
+        mappings[idx].chatId = chatId;
+      }
     } else {
       mappings.push({ address, chatId });
     }

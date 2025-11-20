@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { ActiveLoan, LoanRequest, RepaymentSchedule, TrustScore } from '../types/loan';
+import type { ActiveLoan, LoanRequest, TrustScore } from '../types/loan';
 
 export interface LoanState {
   activeLoans: ActiveLoan[];
@@ -37,7 +37,7 @@ const initialLoanState: LoanState = {
 
 export const useLoanStore = create<LoanState & LoanActions>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       ...initialLoanState,
       
       setActiveLoans: (loans) => set(

@@ -45,9 +45,9 @@ export const createLazyImageLoader = (
         if (entry.isIntersecting) {
           const image = entry.target as HTMLImageElement;
           const src = image.dataset.src;
-          
+
           if (src) {
-            
+
             const tempImg = new Image();
             tempImg.onload = () => {
               image.src = src;
@@ -63,12 +63,12 @@ export const createLazyImageLoader = (
             };
             tempImg.src = src;
           }
-          
+
           observer.unobserve(image);
         }
       });
     }, defaultOptions);
-    
+
     observer.observe(img);
     return () => observer.unobserve(img);
   };
@@ -76,7 +76,7 @@ export const createLazyImageLoader = (
 
 
 export const PerformanceMonitor = {
-  
+
   logMemoryUsage: () => {
     if (process.env.NODE_ENV === 'development' && 'memory' in performance) {
       const memInfo = (performance as any).memory;
@@ -90,7 +90,7 @@ export const PerformanceMonitor = {
     }
   },
 
-  
+
   measureAsync: async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
     const start = performance.now();
     try {
@@ -105,7 +105,7 @@ export const PerformanceMonitor = {
     }
   },
 
-  
+
   measureRender: (componentName: string) => {
     const start = performance.now();
     return () => {
@@ -125,17 +125,17 @@ export const useVirtualScroll = <T>(
   overscan = 5
 ) => {
   const [scrollTop, setScrollTop] = useState(0);
-  
+
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     items.length,
     startIndex + Math.ceil(containerHeight / itemHeight) + overscan * 2
   );
-  
+
   const visibleItems = items.slice(startIndex, endIndex);
   const offsetY = startIndex * itemHeight;
   const totalHeight = items.length * itemHeight;
-  
+
   return {
     visibleItems,
     offsetY,
@@ -219,9 +219,12 @@ export const useIntersectionObserver = (
     const element = elementRef.current;
     if (!element) return;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting);
-      setEntry(entry);
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setIsIntersecting(entry.isIntersecting);
+        setEntry(entry);
+      }
     }, options);
 
     observer.observe(element);
@@ -238,9 +241,9 @@ export const useIntersectionObserver = (
 export const useIdleCallback = (callback: () => void, deps: any[] = []) => {
   useEffect(() => {
     const hasRequestIdleCallback = typeof window !== 'undefined' && 'requestIdleCallback' in window;
-    
-    const handle = hasRequestIdleCallback ? 
-      requestIdleCallback(callback) : 
+
+    const handle = hasRequestIdleCallback ?
+      requestIdleCallback(callback) :
       setTimeout(callback, 0);
 
     return () => {

@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
 import * as path from "path";
+import "./tasks/health";
 
 const config: HardhatUserConfig = {
   solidity: {

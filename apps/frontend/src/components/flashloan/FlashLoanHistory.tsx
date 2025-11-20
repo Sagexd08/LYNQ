@@ -4,25 +4,25 @@ import { flashLoanService } from '../../services/flashLoanService';
 import { toast } from 'react-hot-toast';
 
 export const FlashLoanHistory: React.FC = () => {
-  const { walletAddress } = useWalletStore();
+  const address = useWalletStore((state) => state.address);
   const [history, setHistory] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
   useEffect(() => {
-    if (walletAddress) {
+    if (address) {
       loadHistory();
     }
-  }, [walletAddress, page]);
+  }, [address, page]);
 
   const loadHistory = async () => {
-    if (!walletAddress) return;
+    if (!address) return;
     
     setIsLoading(true);
     try {
       const data = await flashLoanService.getFlashLoanHistory(
-        walletAddress,
+        address,
         pageSize,
         (page - 1) * pageSize
       );

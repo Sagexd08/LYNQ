@@ -112,6 +112,9 @@ export default function FeaturesCarousel() {
     return (currentFeature + offset + features.length) % features.length;
   };
 
+  const getCurrentFeature = () => features[currentFeature] || features[0]!;
+  const getFeatureAt = (offset: number) => features[getFeatureIndex(offset)] || features[0]!;
+
   return (
     <section id="features" className="py-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -128,15 +131,15 @@ export default function FeaturesCarousel() {
               <Card className="w-full max-w-sm mx-auto bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
-                    className={`p-4 sm:p-6 rounded-full bg-gradient-to-r ${features[currentFeature].gradient} shadow-xl shadow-cyan-500/40`}
+                    className={`p-4 sm:p-6 rounded-full bg-gradient-to-r ${getCurrentFeature().gradient} shadow-xl shadow-cyan-500/40`}
                   >
-                    {features[currentFeature].icon}
+                    {getCurrentFeature().icon}
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    {features[currentFeature].title}
+                    {getCurrentFeature().title}
                   </h3>
                   <p className="text-gray-100 leading-relaxed font-medium text-sm sm:text-base">
-                    {features[currentFeature].description}
+                    {getCurrentFeature().description}
                   </p>
                 </CardContent>
               </Card>
@@ -188,15 +191,15 @@ export default function FeaturesCarousel() {
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform -rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
-                    className={`p-4 rounded-full bg-gradient-to-r ${features[getFeatureIndex(-1)].gradient} shadow-lg`}
+                    className={`p-4 rounded-full bg-gradient-to-r ${getFeatureAt(-1).gradient} shadow-lg`}
                   >
-                    {features[getFeatureIndex(-1)].icon}
+                    {getFeatureAt(-1).icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-white">
-                    {features[getFeatureIndex(-1)].title}
+                  <h3 className="text-lg font-bold text-white">
+                    {getFeatureAt(-1).title}
                   </h3>
                   <p className="text-gray-300 text-sm">
-                    {features[getFeatureIndex(-1)].description}
+                    {getFeatureAt(-1).description}
                   </p>
                 </CardContent>
               </Card>
@@ -205,15 +208,15 @@ export default function FeaturesCarousel() {
               <Card className="w-80 h-96 bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transform scale-110 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
                 <CardContent className="p-8 h-full flex flex-col justify-center items-center text-center space-y-6">
                   <div
-                    className={`p-6 rounded-full bg-gradient-to-r ${features[currentFeature].gradient} shadow-xl shadow-cyan-500/40`}
+                    className={`p-6 rounded-full bg-gradient-to-r ${getCurrentFeature().gradient} shadow-xl shadow-cyan-500/40`}
                   >
-                    {features[currentFeature].icon}
+                    {getCurrentFeature().icon}
                   </div>
                   <h3 className="text-2xl font-bold text-white">
-                    {features[currentFeature].title}
+                    {getCurrentFeature().title}
                   </h3>
-                  <p className="text-gray-100 leading-relaxed font-medium">
-                    {features[currentFeature].description}
+                  <p className="text-gray-100 leading-relaxed">
+                    {getCurrentFeature().description}
                   </p>
                 </CardContent>
               </Card>
@@ -222,15 +225,15 @@ export default function FeaturesCarousel() {
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
-                    className={`p-4 rounded-full bg-gradient-to-r ${features[getFeatureIndex(1)].gradient} shadow-lg`}
+                    className={`p-4 rounded-full bg-gradient-to-r ${getFeatureAt(1).gradient} shadow-lg`}
                   >
-                    {features[getFeatureIndex(1)].icon}
+                    {getFeatureAt(1).icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-white">
-                    {features[getFeatureIndex(1)].title}
+                  <h3 className="text-lg font-bold text-white">
+                    {getFeatureAt(1).title}
                   </h3>
                   <p className="text-gray-300 text-sm">
-                    {features[getFeatureIndex(1)].description}
+                    {getFeatureAt(1).description}
                   </p>
                 </CardContent>
               </Card>

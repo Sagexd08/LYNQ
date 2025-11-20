@@ -71,23 +71,28 @@ export class LoanRepaymentService {
   
   async getLoanDetails(loanId: string): Promise<LoanDetails> {
     try {
-      const [loanData, isOverdue] = await Promise.all([
-        this.contract.getLoanDetails(loanId),
-        this.contract.isLoanOverdue(loanId)
+      if (!this.contract) {
+        throw new Error('Contract not initialized');
+      }
+
+      const contract = this.contract!;
+      const [loanDetails, isOverdue] = await Promise.all([
+        (contract.getLoanDetails as any)(loanId),
+        (contract.isLoanOverdue as any)(loanId)
       ]);
 
       return {
         id: loanId,
-        borrower: loanData.borrower,
-        principal: loanData.principal.toString(),
-        principalRemaining: loanData.principalRemaining.toString(),
-        interestRate: loanData.interestRate.toString(),
-        interestAccrued: loanData.interestAccrued.toString(),
-        lateFine: loanData.lateFine.toString(),
-        dueDate: Number(loanData.dueDate),
+        borrower: loanDetails.borrower,
+        principal: loanDetails.principal.toString(),
+        principalRemaining: loanDetails.principalRemaining.toString(),
+        interestRate: loanDetails.interestRate.toString(),
+        interestAccrued: loanDetails.interestAccrued.toString(),
+        lateFine: loanDetails.lateFine.toString(),
+        dueDate: Number(loanDetails.dueDate),
         isOverdue,
-        status: this.getStatusFromNumber(loanData.status),
-        tokenAddress: loanData.tokenAddress
+        status: this.getStatusFromNumber(loanDetails.status),
+        tokenAddress: loanDetails.tokenAddress
       };
     } catch (error) {
       console.error('Error fetching loan details:', error);
@@ -98,9 +103,14 @@ export class LoanRepaymentService {
   
   async calculateRepaymentAmount(loanId: string): Promise<RepaymentCalculation> {
     try {
+      if (!this.contract) {
+        throw new Error('Contract not initialized');
+      }
+
+      const contract = this.contract!;
       const [repaymentData, maxLateFine] = await Promise.all([
-        this.contract.calculateRepaymentAmount(loanId),
-        this.contract.getMaxLateFine(loanId)
+        (contract.calculateRepaymentAmount as any)(loanId),
+        (contract.getMaxLateFine as any)(loanId)
       ]);
 
       const lateFine = BigInt(repaymentData.lateFine) > BigInt(maxLateFine) 
@@ -193,15 +203,21 @@ export class LoanRepaymentService {
       throw new Error('Signer not connected');
     }
 
+    if (!this.contract) {
+      throw new Error('Contract not initialized');
+    }
+
+    const contract = this.contract!;
+
     try {
       let tx: ethers.ContractTransactionResponse;
 
       if (tokenAddress && tokenAddress !== ethers.ZeroAddress) {
         
-        tx = await this.contract.repayLoanWithToken(loanId, amount, tokenAddress);
+        tx = await (contract.repayLoanWithToken as any)(loanId, amount, tokenAddress);
       } else {
         
-        tx = await this.contract.repayLoan(loanId, amount, {
+        tx = await (contract.repayLoan as any)(loanId, amount, {
           value: amount
         });
       }
@@ -219,9 +235,15 @@ export class LoanRepaymentService {
       throw new Error('Signer not connected');
     }
 
+    if (!this.contract) {
+      throw new Error('Contract not initialized');
+    }
+
+    const contract = this.contract!;
+
     try {
       const calculation = await this.calculateRepaymentAmount(loanId);
-      const tx = await this.contract.repayLoanFull(loanId, {
+      const tx = await (contract.repayLoanFull as any)(loanId, {
         value: calculation.totalPayable
       });
 
@@ -365,7 +387,7 @@ export const handleTokenDecimals = {
     );
 
     try {
-      return await tokenContract.decimals();
+      return await (tokenContract.decimals as any)();
     } catch {
       return 18; 
     }

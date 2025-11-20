@@ -4,22 +4,22 @@ import { flashLoanService } from '../../services/flashLoanService';
 import { toast } from 'react-hot-toast';
 
 export const RiskAssessment: React.FC = () => {
-  const { walletAddress } = useWalletStore();
+  const address = useWalletStore((state) => state.address);
   const [riskData, setRiskData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (walletAddress) {
+    if (address) {
       loadRiskAssessment();
     }
-  }, [walletAddress]);
+  }, [address]);
 
   const loadRiskAssessment = async () => {
-    if (!walletAddress) return;
+    if (!address) return;
     
     setIsLoading(true);
     try {
-      const data = await flashLoanService.getRiskAssessment(walletAddress);
+      const data = await flashLoanService.getRiskAssessment(address);
       setRiskData(data);
     } catch (error) {
       toast.error('Failed to load risk assessment');

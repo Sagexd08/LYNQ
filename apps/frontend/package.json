@@ -7,7 +7,8 @@
     "dev": "vite --port 3001",
     "build": "tsc && vite build",
     "preview": "vite preview --port 3001",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "echo \"(TODO) add vitest tests\""
   },
   "dependencies": {
     "@onflow/fcl": "^1.20.3",
@@ -19,6 +20,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.0",
+    "react-router-dom": "^7.9.6",
     "recharts": "^2.10.0",
     "zod": "^3.22.0",
     "zustand": "^4.4.0"

@@ -22,7 +22,6 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export class ApiClient {
   private client: AxiosInstance;
   private requestCount = 0;
-  private readonly MAX_CONCURRENT_REQUESTS = 10;
   private readonly REQUEST_TIMEOUT = 30000;
 
   constructor(baseURL: string) {
