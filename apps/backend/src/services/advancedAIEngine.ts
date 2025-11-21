@@ -903,6 +903,8 @@ export class AdvancedAIEngine {
   private ensembleClassifier: EnsembleClassifier;
   private nlpGenerator: NLPAlertGenerator;
   private fraudGraph: FraudDetectionGraph;
+  private anomalyDetector: AnomalyDetector;
+  private rlAgent: ReinforcementLearningAgent;
 
   constructor() {
     // Initialize neural network for risk prediction
@@ -919,6 +921,14 @@ export class AdvancedAIEngine {
     this.ensembleClassifier = new EnsembleClassifier();
     this.nlpGenerator = new NLPAlertGenerator();
     this.fraudGraph = new FraudDetectionGraph();
+    this.anomalyDetector = new AnomalyDetector(15);
+    this.rlAgent = new ReinforcementLearningAgent({
+      states: 10,
+      actions: 3,
+      alpha: 0.1,
+      gamma: 0.9,
+      epsilon: 0.2,
+    });
 
     // Setup ensemble models
     this.ensembleClassifier.addModel({
@@ -1142,75 +1152,105 @@ export class AdvancedAIEngine {
 }
 
 // ============================================================================
-// RISK MODEL WRAPPER
+// ANOMALY DETECTION (Autoencoder)
 // ============================================================================
 
-export class RiskModel {
-  private network: SimpleNeuralNetwork;
-  private isInitialized: boolean = false;
+export class AnomalyDetector {
+  private autoencoder: SimpleNeuralNetwork;
+  private threshold: number = 0.1;
 
-  constructor() {
-    // Default configuration
-    this.network = new SimpleNeuralNetwork({
-      inputSize: 5,
-      hiddenLayers: [16, 16],
-      outputSize: 1,
+  constructor(inputSize: number) {
+    // Autoencoder structure: Input -> Compressed -> Output (Reconstructed)
+    this.autoencoder = new SimpleNeuralNetwork({
+      inputSize: inputSize,
+      hiddenLayers: [Math.floor(inputSize / 2)], // Bottleneck layer
+      outputSize: inputSize,
       learningRate: 0.01,
-      activationFunction: 'relu'
+      activationFunction: 'sigmoid'
     });
   }
 
-  /**
-   * Initialize model (load weights or train)
-   */
-  async initialize(modelPath?: string): Promise<void> {
-    if (modelPath) {
-      try {
-        // In a real app, read from file system
-        // const data = fs.readFileSync(modelPath, 'utf-8');
-        // this.network = SimpleNeuralNetwork.fromJSON(data);
-        logger.info(`Loaded risk model from ${modelPath}`);
-      } catch (error) {
-        logger.error(`Failed to load model from ${modelPath}, using new model`);
-      }
-    } else {
-      // Train on dummy data if no model provided
-      await this.trainOnDummyData();
-    }
-    this.isInitialized = true;
-  }
-
-  private async trainOnDummyData() {
-    // Simulate training data
-    const trainingData = Array(100).fill(0).map(() => {
-      const input = Array(5).fill(0).map(() => Math.random());
-      // Simple rule: sum of inputs > 2.5 => high risk (0), else low risk (1)
-      const sum = input.reduce((a, b) => a + b, 0);
-      const output = [sum > 2.5 ? 0 : 1]; 
-      return { input, output };
-    });
-
-    logger.info('Training risk model on initial dataset...');
-    await this.network.train(trainingData, 50);
-    logger.info('Risk model training complete');
-  }
-
-  /**
-   * Predict risk score (0-100)
-   */
-  predict(features: number[]): number {
-    if (!this.isInitialized) {
-      logger.warn('Risk model not initialized, using default prediction');
-      return 50;
-    }
+  async train(data: number[][], epochs: number = 50) {
+    // For autoencoder, input is both input and target output
+    const trainingData = data.map(d => ({ input: d, output: d }));
+    await this.autoencoder.train(trainingData, epochs);
     
-    // Normalize features if needed (omitted for brevity)
-    const output = this.network.predict(features);
-    return Math.round(output[0] * 100);
+    // Calculate threshold based on training data reconstruction error
+    let maxError = 0;
+    for (const sample of data) {
+      const reconstruction = this.autoencoder.predict(sample);
+      const error = this.calculateMSE(sample, reconstruction);
+      if (error > maxError) maxError = error;
+    }
+    this.threshold = maxError * 1.2; // Set threshold slightly higher than max training error
+    logger.info(`[AnomalyDetector] Trained. Threshold set to: ${this.threshold}`);
   }
-  
-  getNetwork(): SimpleNeuralNetwork {
-    return this.network;
+
+  isAnomaly(data: number[]): { isAnomaly: boolean; score: number } {
+    const reconstruction = this.autoencoder.predict(data);
+    const error = this.calculateMSE(data, reconstruction);
+    return {
+      isAnomaly: error > this.threshold,
+      score: error
+    };
+  }
+
+  private calculateMSE(a: number[], b: number[]): number {
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) {
+      sum += Math.pow(a[i] - b[i], 2);
+    }
+    return sum / a.length;
+  }
+}
+
+// ============================================================================
+// REINFORCEMENT LEARNING (Q-Learning)
+// ============================================================================
+
+export interface RLConfig {
+  states: number;
+  actions: number;
+  alpha: number; // Learning rate
+  gamma: number; // Discount factor
+  epsilon: number; // Exploration rate
+}
+
+export class ReinforcementLearningAgent {
+  private qTable: number[][];
+  private config: RLConfig;
+
+  constructor(config: RLConfig) {
+    this.config = config;
+    this.qTable = Array(config.states).fill(0).map(() => Array(config.actions).fill(0));
+  }
+
+  getAction(state: number): number {
+    if (Math.random() < this.config.epsilon) {
+      // Explore
+      return Math.floor(Math.random() * this.config.actions);
+    } else {
+      // Exploit
+      return this.getBestAction(state);
+    }
+  }
+
+  learn(state: number, action: number, reward: number, nextState: number) {
+    const predict = this.qTable[state][action];
+    const target = reward + this.config.gamma * Math.max(...this.qTable[nextState]);
+    this.qTable[state][action] += this.config.alpha * (target - predict);
+  }
+
+  private getBestAction(state: number): number {
+    let bestAction = 0;
+    let maxValue = this.qTable[state][0];
+    for (let i = 1; i < this.config.actions; i++) {
+      if (this.qTable[state][i] > maxValue) {
+        maxValue = this.qTable[state][i];
+        bestAction = i;
+      }
+    }
+    return bestAction;
   }
 }
 
