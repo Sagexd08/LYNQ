@@ -14,3 +14,4 @@ coverage
 out
 artifacts
 .typechain
+.turbo
