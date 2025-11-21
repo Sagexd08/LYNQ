@@ -24,5 +24,8 @@
   },
   "dependencies": {
     "@chainlink/functions-toolkit": "^0.3.2"
+  },
+  "optionalDependencies": {
+    "utf-8-validate": "^5.0.7"
   }
 }
