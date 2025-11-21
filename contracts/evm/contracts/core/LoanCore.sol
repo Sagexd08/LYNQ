@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract LoanCore is Ownable, ReentrancyGuard {
     enum LoanStatus { PENDING, ACTIVE, REPAID, DEFAULTED, LIQUIDATED }
@@ -22,10 +23,11 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
     mapping(uint256 => Loan) public loans;
     mapping(address => uint256[]) public userLoans;
+    mapping(address => address) public tokenPriceFeed; // Token address => Chainlink Price Feed address
     uint256 public loanCounter;
     
     address public collateralVault;
-    uint256 public constant LIQUIDATION_THRESHOLD = 120;
+    uint256 public constant LIQUIDATION_THRESHOLD = 120; // 120%
 
     event LoanCreated(
         uint256 indexed loanId,
@@ -36,11 +38,41 @@ contract LoanCore is Ownable, ReentrancyGuard {
     
     event LoanRepaid(uint256 indexed loanId, uint256 amount);
     event LoanLiquidated(uint256 indexed loanId);
+    event PriceFeedUpdated(address indexed token, address indexed priceFeed);
 
     constructor() Ownable(msg.sender) {}
 
     function setCollateralVault(address _vault) external onlyOwner {
         collateralVault = _vault;
+    }
+
+    function setPriceFeed(address token, address priceFeed) external onlyOwner {
+        require(token != address(0), "Invalid token");
+        require(priceFeed != address(0), "Invalid price feed");
+        tokenPriceFeed[token] = priceFeed;
+        emit PriceFeedUpdated(token, priceFeed);
+    }
+
+    function getLatestPrice(address token) public view returns (uint256) {
+        address priceFeed = tokenPriceFeed[token];
+        require(priceFeed != address(0), "Price feed not found for token");
+        
+        AggregatorV3Interface aggregator = AggregatorV3Interface(priceFeed);
+        (
+            ,
+            int256 answer,
+            ,
+            ,
+            
+        ) = aggregator.latestRoundData();
+        
+        require(answer > 0, "Invalid price data");
+        return uint256(answer);
+    }
+
+    function getCollateralValue(address token, uint256 amount) public view returns (uint256) {
+        uint256 price = getLatestPrice(token);
+        return (amount * price) / 1e8; // Assuming 8 decimals from Chainlink
     }
 
     function createLoan(
@@ -100,14 +132,32 @@ contract LoanCore is Ownable, ReentrancyGuard {
     function liquidateLoan(uint256 loanId) external {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.ACTIVE, "Loan not active");
-        require(
-            block.timestamp > loan.startTime + loan.duration,
-            "Loan not overdue"
-        );
+        
+        // Check if loan is overdue OR collateral value has fallen below threshold
+        bool isOverdue = block.timestamp > loan.startTime + loan.duration;
+        bool isUndercollateralized = false;
+        
+        if (tokenPriceFeed[loan.collateralToken] != address(0)) {
+            uint256 collateralValue = getCollateralValue(loan.collateralToken, loan.collateralAmount);
+            uint256 loanValueWithMargin = (loan.outstandingAmount * LIQUIDATION_THRESHOLD) / 100;
+            isUndercollateralized = collateralValue < loanValueWithMargin;
+        }
+        
+        require(isOverdue || isUndercollateralized, "Loan cannot be liquidated");
 
         loan.status = LoanStatus.LIQUIDATED;
         
         emit LoanLiquidated(loanId);
+    }
+
+    function isLoanUndercollateralized(uint256 loanId) external view returns (bool) {
+        Loan storage loan = loans[loanId];
+        if (loan.status != LoanStatus.ACTIVE) return false;
+        if (tokenPriceFeed[loan.collateralToken] == address(0)) return false;
+        
+        uint256 collateralValue = getCollateralValue(loan.collateralToken, loan.collateralAmount);
+        uint256 loanValueWithMargin = (loan.outstandingAmount * LIQUIDATION_THRESHOLD) / 100;
+        return collateralValue < loanValueWithMargin;
     }
 
     function getLoan(uint256 loanId) external view returns (Loan memory) {

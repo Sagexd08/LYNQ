@@ -552,7 +552,35 @@ Reasons Generated For Each Anomaly:
 - Device/IP inconsistencies
 ```
 
+## 📊 ML Algorithm Details
 
+### Original Fraud Detection Rules
+```
+1. Unusual Amount: loan > 5 × median(user_loans)
+2. Velocity: >5 loans in 24 hours
+3. New Account: account_age < 30 days
+4. Suspicious Pattern: >3 rapid borrow-repay cycles
+5. Blacklist: address in fraud_addresses table
+
+Risk Score = Σ(triggered_flags × weight)
+Recommendation:
+- APPROVE: score < 30
+- REVIEW: 30 ≤ score < 70
+- REJECT: score ≥ 70
+```
+
+### Original Risk Assessment
+```
+Default Probability = f(credit_score, payment_history, debt_ratio)
+Liquidation Risk = current_collateral_value / loan_amount
+Collateral Health = (collateral_value - loan_value) / loan_value
+
+Risk Level:
+- LOW: default_prob < 10%, liquidation_risk > 150%
+- MEDIUM: 10% ≤ default_prob < 25%, 120% < liquidation_risk ≤ 150%
+- HIGH: 25% ≤ default_prob < 50%, liquidation_risk ≤ 120%
+- CRITICAL: default_prob ≥ 50%, liquidation_risk < 100%
+```
 
 ## 🏗️ Architecture Diagrams
 

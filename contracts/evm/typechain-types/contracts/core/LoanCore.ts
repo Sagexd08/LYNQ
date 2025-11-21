@@ -65,8 +65,11 @@ export interface LoanCoreInterface extends Interface {
       | "LIQUIDATION_THRESHOLD"
       | "collateralVault"
       | "createLoan"
+      | "getCollateralValue"
+      | "getLatestPrice"
       | "getLoan"
       | "getUserLoans"
+      | "isLoanUndercollateralized"
       | "liquidateLoan"
       | "loanCounter"
       | "loans"
@@ -74,6 +77,8 @@ export interface LoanCoreInterface extends Interface {
       | "renounceOwnership"
       | "repayLoan"
       | "setCollateralVault"
+      | "setPriceFeed"
+      | "tokenPriceFeed"
       | "transferOwnership"
       | "userLoans"
   ): FunctionFragment;
@@ -84,6 +89,7 @@ export interface LoanCoreInterface extends Interface {
       | "LoanLiquidated"
       | "LoanRepaid"
       | "OwnershipTransferred"
+      | "PriceFeedUpdated"
   ): EventFragment;
 
   encodeFunctionData(
@@ -105,12 +111,24 @@ export interface LoanCoreInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "getCollateralValue",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getLatestPrice",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getLoan",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getUserLoans",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isLoanUndercollateralized",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "liquidateLoan",
@@ -135,6 +153,14 @@ export interface LoanCoreInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPriceFeed",
+    values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tokenPriceFeed",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
@@ -152,9 +178,21 @@ export interface LoanCoreInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "createLoan", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getCollateralValue",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getLatestPrice",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "getLoan", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getUserLoans",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isLoanUndercollateralized",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -174,6 +212,14 @@ export interface LoanCoreInterface extends Interface {
   decodeFunctionResult(functionFragment: "repayLoan", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setCollateralVault",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPriceFeed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tokenPriceFeed",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -246,6 +292,19 @@ export namespace OwnershipTransferredEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace PriceFeedUpdatedEvent {
+  export type InputTuple = [token: AddressLike, priceFeed: AddressLike];
+  export type OutputTuple = [token: string, priceFeed: string];
+  export interface OutputObject {
+    token: string;
+    priceFeed: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface LoanCore extends BaseContract {
   connect(runner?: ContractRunner | null): LoanCore;
   waitForDeployment(): Promise<this>;
@@ -305,6 +364,14 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
 
+  getCollateralValue: TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  getLatestPrice: TypedContractMethod<[token: AddressLike], [bigint], "view">;
+
   getLoan: TypedContractMethod<
     [loanId: BigNumberish],
     [LoanCore.LoanStructOutput],
@@ -312,6 +379,12 @@ export interface LoanCore extends BaseContract {
   >;
 
   getUserLoans: TypedContractMethod<[user: AddressLike], [bigint[]], "view">;
+
+  isLoanUndercollateralized: TypedContractMethod<
+    [loanId: BigNumberish],
+    [boolean],
+    "view"
+  >;
 
   liquidateLoan: TypedContractMethod<
     [loanId: BigNumberish],
@@ -365,6 +438,14 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
 
+  setPriceFeed: TypedContractMethod<
+    [token: AddressLike, priceFeed: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  tokenPriceFeed: TypedContractMethod<[arg0: AddressLike], [string], "view">;
+
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
     [void],
@@ -401,6 +482,16 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "getCollateralValue"
+  ): TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getLatestPrice"
+  ): TypedContractMethod<[token: AddressLike], [bigint], "view">;
+  getFunction(
     nameOrSignature: "getLoan"
   ): TypedContractMethod<
     [loanId: BigNumberish],
@@ -410,6 +501,9 @@ export interface LoanCore extends BaseContract {
   getFunction(
     nameOrSignature: "getUserLoans"
   ): TypedContractMethod<[user: AddressLike], [bigint[]], "view">;
+  getFunction(
+    nameOrSignature: "isLoanUndercollateralized"
+  ): TypedContractMethod<[loanId: BigNumberish], [boolean], "view">;
   getFunction(
     nameOrSignature: "liquidateLoan"
   ): TypedContractMethod<[loanId: BigNumberish], [void], "nonpayable">;
@@ -462,6 +556,16 @@ export interface LoanCore extends BaseContract {
     nameOrSignature: "setCollateralVault"
   ): TypedContractMethod<[_vault: AddressLike], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "setPriceFeed"
+  ): TypedContractMethod<
+    [token: AddressLike, priceFeed: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "tokenPriceFeed"
+  ): TypedContractMethod<[arg0: AddressLike], [string], "view">;
+  getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
@@ -499,6 +603,13 @@ export interface LoanCore extends BaseContract {
     OwnershipTransferredEvent.InputTuple,
     OwnershipTransferredEvent.OutputTuple,
     OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "PriceFeedUpdated"
+  ): TypedContractEvent<
+    PriceFeedUpdatedEvent.InputTuple,
+    PriceFeedUpdatedEvent.OutputTuple,
+    PriceFeedUpdatedEvent.OutputObject
   >;
 
   filters: {
@@ -544,6 +655,17 @@ export interface LoanCore extends BaseContract {
       OwnershipTransferredEvent.InputTuple,
       OwnershipTransferredEvent.OutputTuple,
       OwnershipTransferredEvent.OutputObject
+    >;
+
+    "PriceFeedUpdated(address,address)": TypedContractEvent<
+      PriceFeedUpdatedEvent.InputTuple,
+      PriceFeedUpdatedEvent.OutputTuple,
+      PriceFeedUpdatedEvent.OutputObject
+    >;
+    PriceFeedUpdated: TypedContractEvent<
+      PriceFeedUpdatedEvent.InputTuple,
+      PriceFeedUpdatedEvent.OutputTuple,
+      PriceFeedUpdatedEvent.OutputObject
     >;
   };
 }

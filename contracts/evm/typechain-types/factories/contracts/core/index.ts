@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { CollateralVault__factory } from "./CollateralVault__factory";
+export { CreditScoreVerifier__factory } from "./CreditScoreVerifier__factory";
 export { LoanCore__factory } from "./LoanCore__factory";

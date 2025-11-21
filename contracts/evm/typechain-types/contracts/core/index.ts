@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { CollateralVault } from "./CollateralVault";
+export type { CreditScoreVerifier } from "./CreditScoreVerifier";
 export type { LoanCore } from "./LoanCore";
