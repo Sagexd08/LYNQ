@@ -56,7 +56,5 @@ export type { CreditScoreVerifier } from "./contracts/core/CreditScoreVerifier";
 export { CreditScoreVerifier__factory } from "./factories/contracts/core/CreditScoreVerifier__factory";
 export type { LoanCore } from "./contracts/core/LoanCore";
 export { LoanCore__factory } from "./factories/contracts/core/LoanCore__factory";
-export type { MockERC20 } from "./contracts/mocks/MockERC20";
-export { MockERC20__factory } from "./factories/contracts/mocks/MockERC20__factory";
 export type { ReputationPoints } from "./contracts/reputation/ReputationPoints";
 export { ReputationPoints__factory } from "./factories/contracts/reputation/ReputationPoints__factory";

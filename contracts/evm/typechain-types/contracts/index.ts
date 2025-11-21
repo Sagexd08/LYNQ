@@ -3,7 +3,5 @@
 /* eslint-disable */
 import type * as core from "./core";
 export type { core };
-import type * as mocks from "./mocks";
-export type { mocks };
 import type * as reputation from "./reputation";
 export type { reputation };

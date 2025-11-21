@@ -110,10 +110,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LoanCore__factory>;
     getContractFactory(
-      name: "MockERC20",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.MockERC20__factory>;
-    getContractFactory(
       name: "ReputationPoints",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ReputationPoints__factory>;
@@ -239,11 +235,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.LoanCore>;
     getContractAt(
-      name: "MockERC20",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.MockERC20>;
-    getContractAt(
       name: "ReputationPoints",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -345,10 +336,6 @@ declare module "hardhat/types/runtime" {
       name: "LoanCore",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LoanCore>;
-    deployContract(
-      name: "MockERC20",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MockERC20>;
     deployContract(
       name: "ReputationPoints",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -474,11 +461,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LoanCore>;
-    deployContract(
-      name: "MockERC20",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MockERC20>;
     deployContract(
       name: "ReputationPoints",
       args: any[],
