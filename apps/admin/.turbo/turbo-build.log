@@ -1,32 +1,13 @@
 
-> @lynq/admin@1.0.0 build C:\Users\sohom\OneDrive\Desktop\LYNQ\apps\admin
+> @lynq/admin@1.0.0 build /home/runner/work/LYNQ/LYNQ/apps/admin
 > next build
 
  ⚠ Disabling SWC Minifer will not be an option in the next major version. Please report any issues you may be experiencing to https://github.com/vercel/next.js/issues
+⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
   ▲ Next.js 14.2.33
-
-   Creating an optimized production build ...
- ✓ Compiled successfully
-   Linting and checking validity of types ...
-   Collecting page data ...
-   Generating static pages (0/6) ...
-   Generating static pages (1/6) 
-   Generating static pages (2/6) 
-   Generating static pages (4/6) 
- ✓ Generating static pages (6/6)
-   Finalizing page optimization ...
-   Collecting build traces ...
-
-Route (app)                              Size     First Load JS
-┌ ○ /                                    153 B            88 kB
-├ ○ /_not-found                          901 B          88.8 kB
-├ ○ /dashboard                           9.72 kB        97.6 kB
-└ ○ /login                               657 B          88.5 kB
-+ First Load JS shared by all            87.9 kB
-  ├ chunks/907-532aa29f334e1cbf.js       32 kB
-  ├ chunks/af56050b-9ba8bd193805fba0.js  54 kB
-  └ other shared chunks (total)          1.93 kB
-
-
-○  (Static)  prerendered as static content
 

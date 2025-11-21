@@ -1,0 +1,4 @@
+
+> @lynq/contracts-evm@1.0.0 lint /home/runner/work/LYNQ/LYNQ/contracts/evm
+> eslint . --ext .ts
+

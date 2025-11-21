@@ -1,6 +1,22 @@
 
-> @lynq/contracts-evm@1.0.0 build C:\Users\sohom\OneDrive\Desktop\LYNQ\contracts\evm
+> @lynq/contracts-evm@1.0.0 build /home/runner/work/LYNQ/LYNQ/contracts/evm
 > hardhat compile
 
-Nothing to compile
-No need to generate any newer typings.
+Downloading compiler 0.8.20
+[31m[1mError[22m[39m [31m[1mHH502:[22m[39m Couldn't download compiler version list. Please check your internet connection and try again.
+
+HardhatError: HH502: Couldn't download compiler version list. Please check your internet connection and try again.
+    at /home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/solidity/compiler/downloader.ts:177:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MultiProcessMutex._executeFunctionAndReleaseMutex (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/util/multi-process-mutex.ts:77:19)
+    at async CompilerDownloader.downloadCompiler (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/solidity/compiler/downloader.ts:162:5)
+    at async SimpleTaskDefinition.action (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/builtin-tasks/compile.ts:588:7)
+    at async Environment._runTaskDefinition (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async Environment.run (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+    at async SimpleTaskDefinition.action (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/builtin-tasks/compile.ts:740:36)
+    at async Environment._runTaskDefinition (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async Environment.run (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@20.19.25_typescript@5.9.3__typescr_67rqwhsax75lbo3mhadkgsd2qq/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+
+    Caused by: Error: getaddrinfo ENOTFOUND binaries.soliditylang.org
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)
+ ELIFECYCLE  Command failed with exit code 1.

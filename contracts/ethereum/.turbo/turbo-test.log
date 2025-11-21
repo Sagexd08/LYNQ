@@ -1,0 +1,22 @@
+
+> lynq-ethereum-contracts@1.0.0 test /home/runner/work/LYNQ/LYNQ/contracts/ethereum
+> hardhat test
+
+Downloading compiler 0.8.20
+
+[31m[1mError[22m[39m [31m[1mHH502:[22m[39m Couldn't download compiler version list. Please check your internet connection and try again.
+HardhatError: HH502: Couldn't download compiler version list. Please check your internet connection and try again.
+    at /home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/solidity/compiler/downloader.ts:177:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at MultiProcessMutex._executeFunctionAndReleaseMutex (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/util/multi-process-mutex.ts:77:19)
+    at CompilerDownloader.downloadCompiler (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/solidity/compiler/downloader.ts:162:5)
+    at SimpleTaskDefinition.action (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/builtin-tasks/compile.ts:588:7)
+    at Environment._runTaskDefinition (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at Environment.run (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+    at SimpleTaskDefinition.action (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/builtin-tasks/compile.ts:740:36)
+    at Environment._runTaskDefinition (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at Environment.run (/home/runner/work/LYNQ/LYNQ/node_modules/.pnpm/hardhat@2.27.0_bufferutil@4.0.7_ts-node@10.9.2_@types+node@22.19.1_typescript@5.9.3__typescri_66b5nhuebsbg6frrdqfinmw64y/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+
+    Caused by: Error: getaddrinfo ENOTFOUND binaries.soliditylang.org
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)
+ ELIFECYCLE  Test failed. See above for more details.
