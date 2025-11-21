@@ -1,4 +1,0 @@
-
-> @lynq/frontend@1.0.0 build /home/runner/work/LYNQ/LYNQ/apps/frontend
-> tsc && vite build
-
