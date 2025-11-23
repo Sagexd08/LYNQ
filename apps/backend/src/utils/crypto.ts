@@ -1,20 +1,12 @@
 import crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 
-/**
- * AES-256-GCM encryption utility
- * - Uses DATA_KEY (hex or base64) from env
- * - Generates per-record 12-byte IVs
- * - Returns { alg, kid, iv, tag, ciphertext } in base64 strings
- * - Supports basic key rotation via DATA_KEY and DATA_KEY_PREV
- */
-
 export interface CipherPayload {
   alg: 'AES-256-GCM';
   kid: 'primary' | 'previous';
-  iv: string; // base64
-  tag: string; // base64
-  ciphertext: string; // base64
+  iv: string;
+  tag: string;
+  ciphertext: string;
 }
 
 let primaryKey: Buffer | null = null;
@@ -52,7 +44,7 @@ function parseKey(v: string): Buffer {
 
 export function encryptJSON(obj: unknown): CipherPayload {
   const { key, kid } = loadKey();
-  const iv = crypto.randomBytes(12); // GCM nonce 12 bytes
+  const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
   const plaintext = Buffer.from(JSON.stringify(obj), 'utf8');
   const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
@@ -67,7 +59,6 @@ export function encryptJSON(obj: unknown): CipherPayload {
 }
 
 export function decryptJSON(payload: CipherPayload): any {
-  // Try primary, else previous key
   const primary = loadKey();
   const prev = loadPrevKey();
 
@@ -84,14 +75,12 @@ export function decryptJSON(payload: CipherPayload): any {
       const plain = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
       return JSON.parse(plain.toString('utf8'));
     } catch (e) {
-      // continue to next key
     }
   }
   throw new Error('Failed to decrypt with available keys');
 }
 
 export function reencrypt(payload: CipherPayload): CipherPayload {
-  // Decrypt with available keys, then re-encrypt with primary (for rotation)
   const data = decryptJSON(payload);
   return encryptJSON(data);
 }

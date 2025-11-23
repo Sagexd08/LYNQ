@@ -35,7 +35,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message: typeof message === 'string' ? message : (message as any).message || message,
     };
 
-    // Log the error
     this.logger.error(
       `${request.method} ${request.url}`,
       exception instanceof Error ? exception.stack : 'Unknown error',

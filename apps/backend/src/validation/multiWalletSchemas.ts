@@ -1,17 +1,11 @@
 import { z } from 'zod';
 
-/**
- * Ethereum address validation (0x followed by 40 hex chars)
- */
 const ethereumAddressSchema = z
   .string()
   .refine(addr => /^0x[a-fA-F0-9]{40}$/.test(addr), {
     message: 'Invalid Ethereum address',
   });
 
-/**
- * Execute Multi-Wallet Flash Loan Request Schema
- */
 export const executeMultiWalletFlashLoanSchema = z.object({
   initiator: ethereumAddressSchema.describe('Address initiating the flash loan'),
   asset: ethereumAddressSchema.describe('Token address to borrow'),
@@ -47,9 +41,6 @@ export type ExecuteMultiWalletFlashLoanRequest = z.infer<
   typeof executeMultiWalletFlashLoanSchema
 >;
 
-/**
- * Execute Multi-Wallet Flash Loan Response Schema
- */
 export const executeMultiWalletFlashLoanResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   data: z.object({
@@ -62,9 +53,6 @@ export type ExecuteMultiWalletFlashLoanResponse = z.infer<
   typeof executeMultiWalletFlashLoanResponseSchema
 >;
 
-/**
- * Get Multi-Wallet Batch Request Schema
- */
 export const getMultiWalletBatchSchema = z.object({
   batchId: z
     .string()
@@ -76,9 +64,6 @@ export const getMultiWalletBatchSchema = z.object({
 
 export type GetMultiWalletBatchRequest = z.infer<typeof getMultiWalletBatchSchema>;
 
-/**
- * Multi-Wallet Batch Response Schema
- */
 export const multiWalletBatchResponseSchema = z.object({
   asset: ethereumAddressSchema.describe('Token borrowed'),
   totalAmount: z.string().describe('Total amount distributed in wei'),
@@ -93,9 +78,6 @@ export const multiWalletBatchResponseSchema = z.object({
 
 export type MultiWalletBatchResponse = z.infer<typeof multiWalletBatchResponseSchema>;
 
-/**
- * Get User Multi-Wallet Batches Response Schema
- */
 export const getUserMultiWalletBatchesResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
@@ -109,9 +91,6 @@ export type GetUserMultiWalletBatchesResponse = z.infer<
   typeof getUserMultiWalletBatchesResponseSchema
 >;
 
-/**
- * Get Multi-Wallet Quote Request Schema
- */
 export const getMultiWalletQuoteSchema = z.object({
   asset: ethereumAddressSchema.describe('Token address'),
   totalAmount: z
@@ -129,9 +108,6 @@ export const getMultiWalletQuoteSchema = z.object({
 
 export type GetMultiWalletQuoteRequest = z.infer<typeof getMultiWalletQuoteSchema>;
 
-/**
- * Multi-Wallet Quote Response Schema
- */
 export const multiWalletQuoteResponseSchema = z.object({
   premium: z.string().describe('Premium to be paid in wei'),
   feeBps: z.number().describe('Fee in basis points'),
@@ -141,9 +117,6 @@ export const multiWalletQuoteResponseSchema = z.object({
 
 export type MultiWalletQuoteResponse = z.infer<typeof multiWalletQuoteResponseSchema>;
 
-/**
- * Error Response Schema
- */
 export const errorResponseSchema = z.object({
   error: z.string().describe('Error type'),
   message: z.string().optional().describe('Error message'),
@@ -151,9 +124,6 @@ export const errorResponseSchema = z.object({
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
-/**
- * Generic Success Response Schema
- */
 export const successResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
     success: z.literal(true),

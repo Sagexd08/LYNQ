@@ -1,25 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import logger from '../utils/logger';
 
-/**
- * Telegram Bot System for LYNQ
- * Provides conversational access to platform features via Telegram
- * 
- * Features:
- * - User onboarding and registration
- * - Loan status checking
- * - Repayment reminders
- * - Flash loan execution
- * - AI financial assistant
- * - Portfolio view
- * - Risk alerts
- * - Admin commands
- */
-
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
-
 export interface TelegramUserProfile {
   telegramId: string;
   username?: string;
@@ -68,10 +49,6 @@ export interface PortfolioSummary {
   flashLoansExecuted: number;
 }
 
-// ============================================================================
-// TELEGRAM BOT SERVICE
-// ============================================================================
-
 export class LynqTelegramBot {
   private bot: TelegramBot;
   private userSessions: Map<string, UserConversationContext> = new Map();
@@ -81,7 +58,6 @@ export class LynqTelegramBot {
   constructor(token: string, testMode: boolean = false) {
     this.inTestMode = testMode;
 
-    // Initialize bot with polling or webhook
     if (testMode) {
       this.bot = new TelegramBot(token, { polling: false });
     } else {
@@ -91,32 +67,21 @@ export class LynqTelegramBot {
     this.setupHandlers();
   }
 
-  /**
-   * Setup command and message handlers
-   */
   private setupHandlers(): void {
-    // Start command - onboarding
     this.bot.onText(/\/start/, (msg: any) => this.handleStart(msg));
 
-    // Help command
     this.bot.onText(/\/help/, (msg: any) => this.handleHelp(msg));
 
-    // Loan status
     this.bot.onText(/\/loans?/, (msg: any) => this.handleLoanStatus(msg));
 
-    // Portfolio
     this.bot.onText(/\/portfolio/, (msg: any) => this.handlePortfolio(msg));
 
-    // Flash loan
     this.bot.onText(/\/flashloan/, (msg: any) => this.handleFlashLoan(msg));
 
-    // Settings
     this.bot.onText(/\/settings/, (msg: any) => this.handleSettings(msg));
 
-    // Admin commands (restricted)
     this.bot.onText(/\/admin/, (msg: any) => this.handleAdminCommand(msg));
 
-    // General messages
     this.bot.on('message', (msg: any) => this.handleGeneralMessage(msg));
 
     // Callback queries (button clicks)
