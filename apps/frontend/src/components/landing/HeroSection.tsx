@@ -1,5 +1,10 @@
 import { motion } from 'framer-motion';
 import Spline from '@splinetool/react-spline';
+import ShinyText from '../reactbits/ShinyText';
+import BlurText from '../reactbits/BlurText';
+import Floating from '../reactbits/Floating';
+import ScaleIn from '../reactbits/ScaleIn';
+import Glow from '../reactbits/Glow';
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -18,14 +23,15 @@ export default function Hero({ onGetStarted }: HeroProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.2] sm:leading-[1.3] text-white">
+      <ScaleIn delay={0.2}>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.2] sm:leading-[1.3] text-white drop-shadow-lg">
         <span className="block mb-4">
           <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 text-transparent bg-clip-text mr-2">
-            Borrow.
+            <ShinyText text="Borrow." disabled={false} speed={3} className="inline-block" />
           </span>
           <span className="text-white mr-2">Build.</span>
           <span className="bg-gradient-to-r from-fuchsia-400 via-blue-400 to-teal-300 text-transparent bg-clip-text">
-            Belong.
+            <ShinyText text="Belong." disabled={false} speed={3} className="inline-block" />
           </span>
         </span>
         <span className="block">
@@ -35,18 +41,26 @@ export default function Hero({ onGetStarted }: HeroProps) {
           </span>
         </span>
       </h1>
+      </ScaleIn>
 
-        <p className="mt-4 sm:mt-6 text-base sm:text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
-          Unlock small and big loans using reputation or stake. Trade, bridge, and borrow — all on-chain.
-        </p>
+        <motion.div className="mt-4 sm:mt-6 text-base sm:text-lg text-white/80 max-w-xl mx-auto lg:mx-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}>
+          <BlurText 
+            text="Unlock small and big loans using reputation or stake. Trade, bridge, and borrow — all on-chain."
+            delay={0.05}
+            animateBy="words"
+            direction="bottom"
+          />
+        </motion.div>
 
-        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center lg:justify-start">
+        <motion.div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center lg:justify-start" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }}>
+          <Glow color="cyan" intensity="medium">
           <button 
             onClick={onGetStarted}
             className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-cyan-400 hover:from-purple-500 hover:to-cyan-400 text-white px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105 border border-cyan-400/30 backdrop-blur-sm"
           >
             Launch App
           </button>
+          </Glow>
           <button className="w-full sm:w-auto bg-white/10 backdrop-blur-sm border border-gray-500/30 text-white hover:bg-white/20 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-full transition-all duration-300 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/20">
             Build Reputation
           </button>

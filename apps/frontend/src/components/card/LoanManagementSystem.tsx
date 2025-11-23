@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { TelegramService } from "../../services/telegramService";
 
-const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000"; // Replace with actual address
+const LOAN_CORE_ADDRESS = import.meta.env.VITE_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
 const LOAN_CORE_ABI = [
   "function createLoan(uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 duration) external returns (uint256)",
   "function repayLoan(uint256 loanId, uint256 amount) external",
@@ -94,24 +94,23 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, provider);
       
-      const loanIds = await contract.getUserLoans(currentAccount);
+      const loanIds = await (contract as any).getUserLoans(currentAccount);
       const loadedLoans: Loan[] = [];
 
       for (const id of loanIds) {
-        const loanData = await contract.getLoan(id);
-        // LoanStatus: 0=PENDING, 1=ACTIVE, 2=REPAID, 3=DEFAULTED, 4=LIQUIDATED
+        const loanData = await (contract as any).getLoan(id);
         const statusMap = ["pending", "active", "repaid", "defaulted", "liquidated"];
         
         loadedLoans.push({
           id: id.toString(),
           borrower: loanData.borrower,
-          tokenType: "ETH", // Assuming ETH for now or fetch token symbol
+          tokenType: "ETH",
           amount: loanData.amount.toString(),
           interestRate: loanData.interestRate.toString(),
           interestAmount: (BigInt(loanData.amount) * BigInt(loanData.interestRate) / 10000n).toString(),
           dueDate: (BigInt(loanData.startTime) + BigInt(loanData.duration)).toString(),
-          status: statusMap[loanData.status],
-          reputation: "N/A", // Fetch from reputation contract if needed
+          status: statusMap[Number(loanData.status)] || "unknown",
+          reputation: "N/A",
           purpose: "Loan #" + id.toString()
         });
       }
@@ -141,12 +140,11 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
 
       const amountWei = ethers.parseEther(newLoanAmount);
       const durationSeconds = parseInt(newLoanDuration) * 24 * 60 * 60;
-      const interestBps = 1000; // 10%
+      const interestBps = 1000;
       
       const collateralAmountWei = ethers.parseEther(newCollateralAmount);
       const collateralTokenAddr = newCollateralAddress;
 
-      // Approve collateral
       const erc20Abi = [
         "function approve(address spender, uint256 amount) external returns (bool)",
         "function allowance(address owner, address spender) external view returns (uint256)"
@@ -154,11 +152,11 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       const collateralContract = new ethers.Contract(collateralTokenAddr, erc20Abi, signer);
       
       console.log("Approving collateral...");
-      const approveTx = await collateralContract.approve(LOAN_CORE_ADDRESS, collateralAmountWei);
+      const approveTx = await (collateralContract as any).approve(LOAN_CORE_ADDRESS, collateralAmountWei);
       await approveTx.wait();
       console.log("Collateral approved");
 
-      const tx = await contract.createLoan(
+      const tx = await (contract as any).createLoan(
         amountWei,
         collateralAmountWei,
         collateralTokenAddr,
@@ -173,7 +171,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
 
       const amountDisplay = newLoanAmount + ' ETH';
       void TelegramService.notifyLoanGranted({
-        loanId: "Pending", // We'd need to parse logs to get ID
+        loanId: "Pending",
         borrower: currentAccount,
         amountDisplay,
         aprBps: String(interestBps),
@@ -208,7 +206,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
       
       const amountWei = ethers.parseEther(repayAmount);
-      const tx = await contract.repayLoan(repayLoanId, amountWei);
+      const tx = await (contract as any).repayLoan(repayLoanId, amountWei);
       
       setTxHash(tx.hash);
       await tx.wait();

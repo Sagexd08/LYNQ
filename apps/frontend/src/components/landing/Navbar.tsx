@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link as ScrollLinkOriginal } from 'react-scroll';
 import { useWalletStore } from '../../store/walletStore';
 
-// Cast to any to avoid React 18 type issues
 const ScrollLink = ScrollLinkOriginal as any;
 
 interface LandingNavbarProps {

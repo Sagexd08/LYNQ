@@ -235,12 +235,21 @@ importers:
       '@onflow/fcl':
         specifier: ^1.20.3
         version: 1.20.5(@types/react@18.3.27)(bufferutil@4.0.7)(google-protobuf@3.21.4)(ioredis@5.8.2)(jiti@1.21.7)(postcss@8.5.6)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.7)(yaml@2.8.1)(zod@3.25.76)
+      '@reown/walletkit':
+        specifier: ^1.4.1
+        version: 1.4.1(bufferutil@4.0.7)(ioredis@5.8.2)(typescript@5.9.3)(utf-8-validate@5.0.7)(zod@3.25.76)
       '@splinetool/react-spline':
         specifier: ^4.1.0
         version: 4.1.0(@splinetool/runtime@1.11.9)(next@14.2.33(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.90.10(react@18.3.1)
+      '@walletconnect/core':
+        specifier: ^2.23.0
+        version: 2.23.0(bufferutil@4.0.7)(ioredis@5.8.2)(typescript@5.9.3)(utf-8-validate@5.0.7)(zod@3.25.76)
+      '@walletconnect/utils':
+        specifier: ^2.23.0
+        version: 2.23.0(ioredis@5.8.2)(typescript@5.9.3)(zod@3.25.76)
       aptos:
         specifier: ^1.21.0
         version: 1.22.1(got@11.8.6)
@@ -2252,6 +2261,9 @@ packages:
 
   '@prisma/instrumentation@5.22.0':
     resolution: {integrity: sha512-LxccF392NN37ISGxIurUljZSh1YWnphO34V5a0+T7FVQG2u9bhAXRTJpgmQ3483woVhkraQZFF7cbRrpbw/F4Q==}
+
+  '@reown/walletkit@1.4.1':
+    resolution: {integrity: sha512-ne0nnGDZ0vIYAT2HUwVKDHxTd8qsBBVqK7R1/AeJp8hVk+2QlnMgtXcEH+QecvSdjopi3hT49JqkuzleqmpXLw==}
 
   '@rolldown/pluginutils@1.0.0-beta.27':
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}
@@ -10727,6 +10739,40 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
+
+  '@reown/walletkit@1.4.1(bufferutil@4.0.7)(ioredis@5.8.2)(typescript@5.9.3)(utf-8-validate@5.0.7)(zod@3.25.76)':
+    dependencies:
+      '@walletconnect/core': 2.23.0(bufferutil@4.0.7)(ioredis@5.8.2)(typescript@5.9.3)(utf-8-validate@5.0.7)(zod@3.25.76)
+      '@walletconnect/jsonrpc-provider': 1.0.14
+      '@walletconnect/jsonrpc-utils': 1.0.8
+      '@walletconnect/logger': 3.0.0
+      '@walletconnect/sign-client': 2.23.0(bufferutil@4.0.7)(ioredis@5.8.2)(typescript@5.9.3)(utf-8-validate@5.0.7)(zod@3.25.76)
+      '@walletconnect/types': 2.23.0(ioredis@5.8.2)
+      '@walletconnect/utils': 2.23.0(ioredis@5.8.2)(typescript@5.9.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - bufferutil
+      - db0
+      - ioredis
+      - typescript
+      - uploadthing
+      - utf-8-validate
+      - zod
 
   '@rolldown/pluginutils@1.0.0-beta.27': {}
 

@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import LoanRequestForm from "./LoanRequestForm";
 import LoanManagementSystem from "./LoanManagementSystem";
+import CountUp from "../reactbits/CountUp";
+import ScaleIn from "../reactbits/ScaleIn";
+import { motion } from "framer-motion";
 
-const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
-const REPUTATION_POINTS_ADDRESS = process.env.REACT_APP_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
+const LOAN_CORE_ADDRESS = import.meta.env.VITE_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
+const REPUTATION_POINTS_ADDRESS = import.meta.env.VITE_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 const LOAN_CORE_ABI = [
   "function getUserLoans(address user) external view returns (uint256[])",
@@ -114,7 +117,7 @@ const LoanDashboard: React.FC = () => {
       }
 
       const reputationContract = new ethers.Contract(REPUTATION_POINTS_ADDRESS, REPUTATION_POINTS_ABI, provider);
-      const repData = await reputationContract.reputations(address);
+      const repData = await (reputationContract as any).reputations(address);
       
       const tiers = ["Bronze", "Silver", "Gold", "Platinum"];
       
@@ -122,9 +125,9 @@ const LoanDashboard: React.FC = () => {
         score: repData.points.toString(),
         tier: tiers[repData.tier] || "Bronze",
         loanCount: repData.loansCompleted.toString(),
-        totalBorrowed: "0", // Need to calculate from loans
-        totalRepaid: "0", // Need to calculate from loans
-        defaults: "0", // Need to calculate from loans
+        totalBorrowed: "0",
+        totalRepaid: "0",
+        defaults: "0",
         lastUpdated: Date.now().toString(),
         stakedAmount: "0",
         walletAge: "0",
@@ -134,7 +137,7 @@ const LoanDashboard: React.FC = () => {
       
       setIsContractInitialized(true);
       setHasTrustScore(true);
-      setMaxLoanAmount("100"); // Could be dynamic based on tier
+      setMaxLoanAmount("100");
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -153,17 +156,16 @@ const LoanDashboard: React.FC = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const loanContract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, provider);
       
-      const loanIds = await loanContract.getUserLoans(address);
+      const loanIds = await (loanContract as any).getUserLoans(address);
       const loadedLoans: any[] = [];
 
       for (const id of loanIds) {
-        const loanData = await loanContract.getLoan(id);
+        const loanData = await (loanContract as any).getLoan(id);
         loadedLoans.push({
           id: id.toString(),
           amount: loanData.amount.toString(),
           status: Number(loanData.status),
           createdAt: loanData.startTime.toString(),
-          // Add other fields if needed for dashboard stats
         });
       }
 
@@ -215,13 +217,14 @@ const LoanDashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <div className="max-w-7xl mx-auto p-6">
         {}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">🏦 Elegant DeFi Loan Platform</h1>
+        <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-2 drop-shadow-lg">🏦 Elegant DeFi Loan Platform</h1>
           <p className="text-white/70">Decentralized lending with trust-based scoring on Ethereum</p>
-        </div>
+        </motion.div>
 
         {}
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-white/10 mb-6">
+        <ScaleIn delay={0.1}>
+        <motion.div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-white/10 mb-6 hover:border-white/30 transition-all" whileHover={{ boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)" }}>
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-white font-semibold">Wallet Status</h3>
@@ -242,10 +245,11 @@ const LoanDashboard: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
+        </ScaleIn>
 
         {}
-        <div className="flex space-x-1 bg-white/5 rounded-lg p-1 mb-6">
+        <motion.div className="flex space-x-1 bg-white/5 rounded-lg p-1 mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
           {[
             { id: "overview", label: "📊 Overview", icon: "📊" },
             { id: "request", label: "💰 Request Loan", icon: "💰" },
@@ -263,7 +267,7 @@ const LoanDashboard: React.FC = () => {
               {tab.label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {}
         {isLoading && (
@@ -297,7 +301,9 @@ const LoanDashboard: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Score</p>
-                        <p className="text-2xl font-bold text-green-400">{trustScoreData.score}</p>
+                        <p className="text-2xl font-bold text-green-400">
+                          <CountUp to={parseInt(trustScoreData.score)} duration={2} />
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Tier</p>
@@ -305,11 +311,15 @@ const LoanDashboard: React.FC = () => {
                       </div>
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Max Loan</p>
-                        <p className="text-xl font-semibold text-purple-400">{maxLoanAmount} ETH</p>
+                        <p className="text-xl font-semibold text-purple-400">
+                          <CountUp to={parseFloat(maxLoanAmount)} decimals={2} suffix=" ETH" duration={2} />
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-white/70 text-sm">Loans</p>
-                        <p className="text-xl font-semibold text-yellow-400">{trustScoreData.loanCount}</p>
+                        <p className="text-xl font-semibold text-yellow-400">
+                          <CountUp to={parseInt(trustScoreData.loanCount)} duration={2} />
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -322,19 +332,27 @@ const LoanDashboard: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-white/70">Total Borrowed:</span>
-                        <span className="text-white font-semibold">{totalBorrowed.toFixed(2)} ETH</span>
+                        <span className="text-white font-semibold">
+                          <CountUp to={totalBorrowed} decimals={2} suffix=" ETH" duration={2} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/70">Total Repaid:</span>
-                        <span className="text-green-400 font-semibold">{totalRepaid.toFixed(2)} ETH</span>
+                        <span className="text-green-400 font-semibold">
+                          <CountUp to={totalRepaid} decimals={2} suffix=" ETH" duration={2} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/70">Active Loans:</span>
-                        <span className="text-yellow-400 font-semibold">{activeLoans.length}</span>
+                        <span className="text-yellow-400 font-semibold">
+                          <CountUp to={activeLoans.length} duration={2} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/70">Defaulted Loans:</span>
-                        <span className="text-red-400 font-semibold">{defaultedLoans.length}</span>
+                        <span className="text-red-400 font-semibold">
+                          <CountUp to={defaultedLoans.length} duration={2} />
+                        </span>
                       </div>
                     </div>
                   </div>

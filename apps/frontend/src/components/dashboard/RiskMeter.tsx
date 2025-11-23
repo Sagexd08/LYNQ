@@ -14,10 +14,10 @@ export enum RiskLevel {
 }
 
 export interface RiskMeterProps {
-  score: number; // 0-100
+  score: number;
   level: RiskLevel;
   recommendation: 'APPROVE' | 'WARN' | 'BLOCK';
-  confidence: number; // 0-100
+  confidence: number;
   flags?: string[];
   reasons?: string[];
   showDetails?: boolean;

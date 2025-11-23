@@ -27,7 +27,6 @@ export const FlashLoanForm: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [eligibility, setEligibility] = useState<any>(null);
 
-  // Set default receiver to wallet address
   useEffect(() => {
     if (address) {
       setReceiverAddress(address);
@@ -66,7 +65,6 @@ export const FlashLoanForm: React.FC = () => {
       const assetAddresses = assets.map(a => a.asset);
       const amounts = assets.map(a => a.amount);
 
-      // Check eligibility first
       const eligibilityResult = await flashLoanService.checkEligibility(
         address,
         assetAddresses,
@@ -80,7 +78,6 @@ export const FlashLoanForm: React.FC = () => {
         return;
       }
 
-      // Get quote
       const quoteResult = await flashLoanService.getFlashLoanQuote(
         address,
         assetAddresses,
@@ -127,7 +124,6 @@ export const FlashLoanForm: React.FC = () => {
 
       if (result.success) {
         toast.success('Flash loan executed successfully!');
-        // Reset form
         setAssets([{ id: Date.now().toString(), asset: '', amount: '' }]);
         setQuote(null);
         setEligibility(null);

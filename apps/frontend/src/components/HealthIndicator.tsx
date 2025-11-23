@@ -1,14 +1,14 @@
 import { useHealthCheck } from '../hooks/useHealthCheck';
 
 export default function HealthIndicator() {
-  const health = useHealthCheck(60000); // Check every 60s
+  const health = useHealthCheck(60000);
 
   if (health.status === 'loading') {
-    return null; // Don't show during initial load
+    return null;
   }
 
   if (health.status === 'ok') {
-    return null; // Don't show when healthy
+    return null;
   }
 
   return (

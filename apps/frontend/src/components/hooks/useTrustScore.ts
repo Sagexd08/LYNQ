@@ -16,8 +16,8 @@ const NETWORK_CONFIG = {
   mainnet: "https://fullnode.mainnet.aptoslabs.com",
 } as const;
 
-const MODULE_ADDRESS = process.env.REACT_APP_MODULE_ADDRESS || "0x<your_module_address>";
-const NETWORK = (process.env.REACT_APP_NETWORK as keyof typeof NETWORK_CONFIG) || "testnet";
+const MODULE_ADDRESS = import.meta.env.VITE_MODULE_ADDRESS || "0x<your_module_address>";
+const NETWORK = (import.meta.env.VITE_NETWORK as keyof typeof NETWORK_CONFIG) || "testnet";
 
 // Types
 interface TrustScoreState {

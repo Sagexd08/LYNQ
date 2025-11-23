@@ -9,6 +9,7 @@ import {
   ArrowLeftRight,
   Repeat
 } from 'lucide-react';
+import FadeIn from '../reactbits/FadeIn';
 
 
 interface ButtonProps {
@@ -42,9 +43,9 @@ interface CardProps {
 
 function Card({ children, className = '' }: CardProps) {
   return (
-    <div className={`rounded-xl shadow-md ${className}`}>
+    <FadeIn className={`rounded-xl shadow-md ${className}`} delay={0.1}>
       {children}
-    </div>
+    </FadeIn>
   );
 }
 

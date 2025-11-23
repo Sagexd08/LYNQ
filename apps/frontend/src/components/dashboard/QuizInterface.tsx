@@ -49,7 +49,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
   const [userAnswers, setUserAnswers] = useState<Map<string, any>>(new Map());
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

@@ -26,7 +26,7 @@ export interface AlertsPanelProps {
   alerts: Alert[];
   onDismiss?: (alertId: string) => void;
   maxVisibleAlerts?: number;
-  autoHideDuration?: number; // ms, 0 = never auto-hide
+  autoHideDuration?: number;
 }
 
 export const AlertsPanel: React.FC<AlertsPanelProps> = ({

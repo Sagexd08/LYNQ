@@ -8,9 +8,7 @@ const HealthCheck: React.FC = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        // Assuming the backend is proxied or configured to be at /api/v1
-        // Adjust the URL if necessary based on environment config
-        const response = await axios.get('/api/v1/health');
+      const response = await axios.get('/api/v1/health');
         if (response.data.status === 'ok') {
           setStatus('ok');
           setDbStatus(response.data.database);
@@ -24,11 +22,11 @@ const HealthCheck: React.FC = () => {
     };
 
     checkHealth();
-    const interval = setInterval(checkHealth, 30000); // Check every 30s
+    const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  if (process.env.NODE_ENV === 'production') return null; // Hide in prod if desired, or keep it.
+  if (process.env.NODE_ENV === 'production') return null;
 
   return (
     <div className="fixed bottom-4 right-4 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-75 hover:opacity-100 transition-opacity z-50">

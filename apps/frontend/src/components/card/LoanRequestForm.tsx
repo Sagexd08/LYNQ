@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { TelegramService } from "../../services/telegramService";
 
-const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
-const REPUTATION_POINTS_ADDRESS = process.env.REACT_APP_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
+const LOAN_CORE_ADDRESS = import.meta.env.VITE_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
+const REPUTATION_POINTS_ADDRESS = import.meta.env.VITE_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 const LOAN_CORE_ABI = [
   "function createLoan(uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 duration) external returns (uint256)",
@@ -103,7 +103,6 @@ const LoanRequestForm: React.FC = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       
-      // Check if contracts are deployed
       const code = await provider.getCode(REPUTATION_POINTS_ADDRESS);
       if (code === "0x") {
         console.warn("Reputation contract not deployed");
@@ -112,18 +111,17 @@ const LoanRequestForm: React.FC = () => {
       }
 
       const reputationContract = new ethers.Contract(REPUTATION_POINTS_ADDRESS, REPUTATION_POINTS_ABI, provider);
-      const repData = await reputationContract.reputations(address);
+      const repData = await (reputationContract as any).reputations(address);
       
       setIsContractInitialized(true);
       
       if (repData.points > 0) {
         setHasTrustScore(true);
         setTrustScoreData({ score: repData.points.toString() });
-        // Calculate max loan based on score/tier (mock logic for now as it's not in contract view)
         setMaxLoanAmount("100"); 
       } else {
         setHasTrustScore(false);
-        setMaxLoanAmount("10"); // Default low limit
+        setMaxLoanAmount("10");
       }
       
     } catch (error: any) {
@@ -143,7 +141,7 @@ const LoanRequestForm: React.FC = () => {
 
     try {
       if (!window.ethereum) throw new Error("Wallet not connected");
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const accounts = await (window.ethereum as any).request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
       }
@@ -163,13 +161,9 @@ const LoanRequestForm: React.FC = () => {
     setValidationErrors({});
 
     try {
-      // In a real scenario, this would call the backend to calculate and mint the score
-      // await fetch('/api/reputation/calculate', { method: 'POST', body: JSON.stringify({ address: userAddress }) });
-      
-      // For now, we'll just re-check status, assuming the backend/cron job might have updated it
-      // or show a message that this requires backend processing.
       console.log("Requesting trust score calculation...");
       
+      if (!window.ethereum) throw new Error("Wallet not connected");
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
@@ -246,8 +240,8 @@ const LoanRequestForm: React.FC = () => {
       const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
 
       const amountWei = ethers.parseEther(amount);
-      const durationSeconds = 30 * 24 * 60 * 60; // Default 30 days
-      const interestBps = 1000; // 10%
+      const durationSeconds = 30 * 24 * 60 * 60;
+      const interestBps = 1000;
       
       let collateralAmountWei = 0n;
       let collateralTokenAddr = "0x0000000000000000000000000000000000000000";
@@ -256,7 +250,6 @@ const LoanRequestForm: React.FC = () => {
         collateralTokenAddr = collateralAddress;
         collateralAmountWei = ethers.parseEther(collateralAmount);
 
-        // Approve collateral
         const erc20Abi = [
           "function approve(address spender, uint256 amount) external returns (bool)",
           "function allowance(address owner, address spender) external view returns (uint256)"
@@ -264,12 +257,12 @@ const LoanRequestForm: React.FC = () => {
         const collateralContract = new ethers.Contract(collateralTokenAddr, erc20Abi, signer);
         
         console.log("Approving collateral...");
-        const approveTx = await collateralContract.approve(LOAN_CORE_ADDRESS, collateralAmountWei);
+        const approveTx = await (collateralContract as any).approve(LOAN_CORE_ADDRESS, collateralAmountWei);
         await approveTx.wait();
         console.log("Collateral approved");
       }
 
-      const tx = await contract.createLoan(
+      const tx = await (contract as any).createLoan(
         amountWei,
         collateralAmountWei,
         collateralTokenAddr,
@@ -304,17 +297,6 @@ const LoanRequestForm: React.FC = () => {
         } else if (err.message.includes("invalid address")) {
           errorMessage = "Invalid collateral address provided.";
         } else if (err.message.includes("simulation failed")) {
-          errorMessage = "Transaction simulation failed. Please check your inputs and try again.";
-        } else {
-          errorMessage = err.message;
-        }
-      }
-      
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
           errorMessage = "Transaction simulation failed. Please check your inputs and try again.";
         } else {
           errorMessage = err.message;

@@ -1,3 +1,6 @@
+import CountUp from '../reactbits/CountUp';
+import ScaleIn from '../reactbits/ScaleIn';
+import { motion } from 'framer-motion';
 
 interface CardProps {
   children: React.ReactNode;
@@ -35,37 +38,47 @@ export default function Reputation() {
         </div>
 
         {}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+        <motion.div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
           {}
           <div className="space-y-6 sm:space-y-8">
-            <Card className="bg-white/10 backdrop-blur-xl border border-green-400/30 p-6 sm:p-8 shadow-lg shadow-green-500/20">
+            <ScaleIn delay={0.2}>
+            <Card className="bg-white/10 backdrop-blur-xl border border-green-400/30 p-6 sm:p-8 shadow-lg shadow-green-500/20 hover:shadow-2xl hover:shadow-green-500/40 transition-all duration-300">
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between">
                   <span className="text-base sm:text-lg font-semibold text-white">Reputation Score</span>
-                  <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">850</span>
+                  <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    <CountUp to={850} duration={2.5} />
+                  </span>
                 </div>
                 <div className="w-full bg-gray-700/50 rounded-full h-2 sm:h-3 backdrop-blur-sm border border-gray-600/30">
                   <div className="bg-gradient-to-r from-green-400 to-emerald-400 h-2 sm:h-3 rounded-full w-[85%] shadow-lg shadow-green-400/30"></div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                   <div>
-                    <div className="text-xl sm:text-2xl font-bold text-cyan-400">12</div>
+                    <div className="text-xl sm:text-2xl font-bold text-cyan-400">
+                      <CountUp to={12} duration={2} />
+                    </div>
                     <div className="text-xs sm:text-sm text-gray-400">Loans Repaid</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-purple-400">100%</div>
+                    <div className="text-2xl font-bold text-purple-400">
+                      <CountUp to={100} suffix="%" duration={2} />
+                    </div>
                     <div className="text-sm text-gray-400">On-Time Rate</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-pink-400">$50K</div>
+                    <div className="text-2xl font-bold text-pink-400">
+                      <CountUp to={50} prefix="$" suffix="K" duration={2} />
+                    </div>
                     <div className="text-sm text-gray-400">Credit Limit</div>
                   </div>
                 </div>
               </div>
             </Card>
+            </ScaleIn>
 
             {}
-            <div className="space-y-4">
+            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }} viewport={{ once: true }}>
               {[
                 "On-chain repayment history builds reputation",
                 "Higher scores unlock larger loan amounts",
@@ -75,12 +88,12 @@ export default function Reputation() {
                   <CheckCircle className="w-6 h-6 text-green-400" />
                   <span className="text-gray-200">{text}</span>
                 </div>
-              ))}
-            </div>
+                ))}
+            </motion.div>
           </div>
 
           {}
-          <div className="space-y-8">
+          <motion.div className="space-y-8" initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.3 }} viewport={{ once: true }}>
             <div className="text-center space-y-4">
               <h3 className="text-2xl font-bold text-white">How It Works</h3>
               <div className="space-y-6">

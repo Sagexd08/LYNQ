@@ -76,7 +76,6 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         updated[index].amount = amount;
         setRecipients(updated);
 
-        // Recalculate total if all amounts are provided
         calculateTotal(updated);
       }
     },
@@ -96,7 +95,6 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
       }, 0n);
       setTotalAmount(ethers.formatEther(total));
     } catch (err) {
-      // Ignore parsing errors
     }
   };
 
@@ -193,7 +191,6 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
       const data = await response.json();
       setRiskScore(data.data.riskScore);
 
-      // Show risk level warning if needed
       if (data.data.recommendation === 'BLOCK') {
         setError(`⚠️ Transaction blocked: ${data.data.reasons?.[0] || 'High risk detected'}`);
       } else if (data.data.recommendation === 'WARN') {
@@ -232,7 +229,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
 
       const data = await response.json();
       setQuote(data.data);
-      setRiskScore(Math.floor(Math.random() * 100)); // Placeholder - would come from risk engine
+      setRiskScore(Math.floor(Math.random() * 100));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
