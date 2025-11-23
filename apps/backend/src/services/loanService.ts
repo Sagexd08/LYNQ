@@ -15,7 +15,6 @@ export enum LoanProduct {
   EMERGENCY = 'EMERGENCY'
 }
 
-// Core Data Models
 export interface LoanProduct_Details {
   id: string;
   name: string;

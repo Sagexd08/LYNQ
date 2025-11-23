@@ -60,59 +60,34 @@ export interface FlashLoanContext {
   initiator: string;
   receiverContract: string;
   timestamp: number;
-  // Added risk features
-  availableLiquidity?: bigint; // pool liquidity
-  expectedSlippageBps?: number; // 0..10000
-  gasGwei?: number; // current gas price
-  gasVolatilityIndex?: number; // 0..100
-  counterpartyAlerts?: string[]; // external intel flags
-  walletHealth?: number; // 0..100 health of initiator
+  availableLiquidity?: bigint;
+  expectedSlippageBps?: number;
+  gasGwei?: number;
+  gasVolatilityIndex?: number;
+  counterpartyAlerts?: string[];
+  walletHealth?: number;
 }
 
-/**
- * Loan credit risk input
- */
 export interface CreditRiskInput {
-  monthlyIncome: number; // in fiat units
-  proposedEmi: number; // proposed monthly payment
-  onTimeRepaymentRatio?: number; // 0..1
-  priorDefaults?: number; // count
+  monthlyIncome: number;
+  proposedEmi: number;
+  onTimeRepaymentRatio?: number;
+  priorDefaults?: number;
   behaviorAnomalies?: string[];
-  existingDebtToIncome?: number; // 0..1
-  tenureMonths?: number; // requested tenure
-  userTrustScore?: number; // optional trust score
+  existingDebtToIncome?: number;
+  tenureMonths?: number;
+  userTrustScore?: number;
 }
 
-/**
- * Phase 1.2: AI Validation Engine
- * Heuristic-based risk scoring and anomaly detection
- *
- * Scoring methodology (0-100):
- * - Base score: 20 (neutral baseline)
- * - Wallet history risk: ±30 points
- * - Transaction pattern risk: ±20 points
- * - Amount anomaly risk: ±15 points
- * - Recipient risk: ±15 points
- *
- * Examples:
- * - Established wallet, normal activity: 15-35 (Low)
- * - New wallet, moderate activity: 40-60 (Medium)
- * - Suspicious pattern, unusual amounts: 65-80 (High)
- * - Clear indicators of attack: 85-100 (Critical)
- */
 export class RiskEngine {
-  /**
-   * Perform comprehensive risk assessment
-   */
   static async assessRisk(
     context: FlashLoanContext,
     walletHistories: Map<string, WalletHistory>
   ): Promise<RiskAssessment> {
     const reasons: string[] = [];
     const flags: string[] = [];
-    let riskScore = 20; // Base score
+    let riskScore = 20;
 
-    // 1. Assess initiator wallet history risk
     const initiatorHistory = walletHistories.get(context.initiator);
     if (initiatorHistory) {
       const historyRisk = this.assessWalletHistoryRisk(initiatorHistory);
