@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export { ReputationPoints__factory } from "./ReputationPoints__factory";
+export { SocialStaking__factory } from "./SocialStaking__factory";

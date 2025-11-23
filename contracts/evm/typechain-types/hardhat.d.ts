@@ -110,9 +110,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LoanCore__factory>;
     getContractFactory(
+      name: "MockToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockToken__factory>;
+    getContractFactory(
       name: "ReputationPoints",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ReputationPoints__factory>;
+    getContractFactory(
+      name: "SocialStaking",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SocialStaking__factory>;
 
     getContractAt(
       name: "AggregatorV3Interface",
@@ -235,10 +243,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.LoanCore>;
     getContractAt(
+      name: "MockToken",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockToken>;
+    getContractAt(
       name: "ReputationPoints",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ReputationPoints>;
+    getContractAt(
+      name: "SocialStaking",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SocialStaking>;
 
     deployContract(
       name: "AggregatorV3Interface",
@@ -337,9 +355,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LoanCore>;
     deployContract(
+      name: "MockToken",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockToken>;
+    deployContract(
       name: "ReputationPoints",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ReputationPoints>;
+    deployContract(
+      name: "SocialStaking",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SocialStaking>;
 
     deployContract(
       name: "AggregatorV3Interface",
@@ -462,10 +488,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LoanCore>;
     deployContract(
+      name: "MockToken",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockToken>;
+    deployContract(
       name: "ReputationPoints",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ReputationPoints>;
+    deployContract(
+      name: "SocialStaking",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SocialStaking>;
 
     // default types
     getContractFactory(

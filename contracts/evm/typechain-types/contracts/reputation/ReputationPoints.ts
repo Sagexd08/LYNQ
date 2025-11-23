@@ -47,6 +47,9 @@ export declare namespace ReputationPoints {
 export interface ReputationPointsInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "ACHIEVEMENT_EARLY_ADOPTER"
+      | "ACHIEVEMENT_PERFECT_PAYER"
+      | "ACHIEVEMENT_SOCIAL_PILLAR"
       | "approve"
       | "awardPoints"
       | "balanceOf"
@@ -69,10 +72,13 @@ export interface ReputationPointsInterface extends Interface {
       | "tokenURI"
       | "transferFrom"
       | "transferOwnership"
+      | "unlockAchievement"
+      | "userAchievements"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "AchievementUnlocked"
       | "Approval"
       | "ApprovalForAll"
       | "BadgeMinted"
@@ -82,6 +88,18 @@ export interface ReputationPointsInterface extends Interface {
       | "Transfer"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "ACHIEVEMENT_EARLY_ADOPTER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ACHIEVEMENT_PERFECT_PAYER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ACHIEVEMENT_SOCIAL_PILLAR",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "approve",
     values: [AddressLike, BigNumberish]
@@ -161,7 +179,27 @@ export interface ReputationPointsInterface extends Interface {
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "unlockAchievement",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "userAchievements",
+    values: [AddressLike, BigNumberish]
+  ): string;
 
+  decodeFunctionResult(
+    functionFragment: "ACHIEVEMENT_EARLY_ADOPTER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ACHIEVEMENT_PERFECT_PAYER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ACHIEVEMENT_SOCIAL_PILLAR",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "awardPoints",
@@ -229,6 +267,27 @@ export interface ReputationPointsInterface extends Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "unlockAchievement",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "userAchievements",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace AchievementUnlockedEvent {
+  export type InputTuple = [user: AddressLike, achievementId: BigNumberish];
+  export type OutputTuple = [user: string, achievementId: bigint];
+  export interface OutputObject {
+    user: string;
+    achievementId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace ApprovalEvent {
@@ -389,6 +448,12 @@ export interface ReputationPoints extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  ACHIEVEMENT_EARLY_ADOPTER: TypedContractMethod<[], [bigint], "view">;
+
+  ACHIEVEMENT_PERFECT_PAYER: TypedContractMethod<[], [bigint], "view">;
+
+  ACHIEVEMENT_SOCIAL_PILLAR: TypedContractMethod<[], [bigint], "view">;
+
   approve: TypedContractMethod<
     [to: AddressLike, tokenId: BigNumberish],
     [void],
@@ -453,14 +518,9 @@ export interface ReputationPoints extends BaseContract {
   >;
 
   "safeTransferFrom(address,address,uint256,bytes)": TypedContractMethod<
-    [
-      from: AddressLike,
-      to: AddressLike,
-      tokenId: BigNumberish,
-      data: BytesLike
-    ],
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish, arg3: BytesLike],
     [void],
-    "nonpayable"
+    "view"
   >;
 
   setApprovalForAll: TypedContractMethod<
@@ -482,9 +542,9 @@ export interface ReputationPoints extends BaseContract {
   tokenURI: TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
 
   transferFrom: TypedContractMethod<
-    [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish],
     [void],
-    "nonpayable"
+    "view"
   >;
 
   transferOwnership: TypedContractMethod<
@@ -493,10 +553,31 @@ export interface ReputationPoints extends BaseContract {
     "nonpayable"
   >;
 
+  unlockAchievement: TypedContractMethod<
+    [user: AddressLike, achievementId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  userAchievements: TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "ACHIEVEMENT_EARLY_ADOPTER"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ACHIEVEMENT_PERFECT_PAYER"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ACHIEVEMENT_SOCIAL_PILLAR"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "approve"
   ): TypedContractMethod<
@@ -577,14 +658,9 @@ export interface ReputationPoints extends BaseContract {
   getFunction(
     nameOrSignature: "safeTransferFrom(address,address,uint256,bytes)"
   ): TypedContractMethod<
-    [
-      from: AddressLike,
-      to: AddressLike,
-      tokenId: BigNumberish,
-      data: BytesLike
-    ],
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish, arg3: BytesLike],
     [void],
-    "nonpayable"
+    "view"
   >;
   getFunction(
     nameOrSignature: "setApprovalForAll"
@@ -608,14 +684,35 @@ export interface ReputationPoints extends BaseContract {
   getFunction(
     nameOrSignature: "transferFrom"
   ): TypedContractMethod<
-    [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish],
     [void],
-    "nonpayable"
+    "view"
   >;
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "unlockAchievement"
+  ): TypedContractMethod<
+    [user: AddressLike, achievementId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "userAchievements"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [boolean],
+    "view"
+  >;
 
+  getEvent(
+    key: "AchievementUnlocked"
+  ): TypedContractEvent<
+    AchievementUnlockedEvent.InputTuple,
+    AchievementUnlockedEvent.OutputTuple,
+    AchievementUnlockedEvent.OutputObject
+  >;
   getEvent(
     key: "Approval"
   ): TypedContractEvent<
@@ -667,6 +764,17 @@ export interface ReputationPoints extends BaseContract {
   >;
 
   filters: {
+    "AchievementUnlocked(address,uint256)": TypedContractEvent<
+      AchievementUnlockedEvent.InputTuple,
+      AchievementUnlockedEvent.OutputTuple,
+      AchievementUnlockedEvent.OutputObject
+    >;
+    AchievementUnlocked: TypedContractEvent<
+      AchievementUnlockedEvent.InputTuple,
+      AchievementUnlockedEvent.OutputTuple,
+      AchievementUnlockedEvent.OutputObject
+    >;
+
     "Approval(address,address,uint256)": TypedContractEvent<
       ApprovalEvent.InputTuple,
       ApprovalEvent.OutputTuple,

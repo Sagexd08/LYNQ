@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { FlowLoanService } from "../../services/flowLoanService";
 import { TelegramService } from "../../services/telegramService";
+
+const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000"; // Replace with actual address
+const LOAN_CORE_ABI = [
+  "function createLoan(uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 duration) external returns (uint256)",
+  "function repayLoan(uint256 loanId, uint256 amount) external",
+  "function getLoan(uint256 loanId) external view returns (tuple(address borrower, uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 startTime, uint256 duration, uint256 outstandingAmount, uint8 status))",
+  "function getUserLoans(address user) external view returns (uint256[])",
+  "event LoanCreated(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 collateralAmount)",
+  "event LoanRepaid(uint256 indexed loanId, uint256 amount)"
+];
 
 const formatAmount = (wei: string): string => {
   return ethers.formatEther(wei);
@@ -38,6 +47,8 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
   const [newLoanAmount, setNewLoanAmount] = useState<string>("");
   const [newLoanDuration, setNewLoanDuration] = useState<string>("30");
   const [newLoanPurpose, setNewLoanPurpose] = useState<string>("");
+  const [newCollateralAddress, setNewCollateralAddress] = useState<string>("");
+  const [newCollateralAmount, setNewCollateralAmount] = useState<string>("");
   const [repayLoanId, setRepayLoanId] = useState<string>("");
   const [repayAmount, setRepayAmount] = useState<string>("");
 
@@ -79,24 +90,33 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
     
     setIsLoading(true);
     try {
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, provider);
       
+      const loanIds = await contract.getUserLoans(currentAccount);
+      const loadedLoans: Loan[] = [];
+
+      for (const id of loanIds) {
+        const loanData = await contract.getLoan(id);
+        // LoanStatus: 0=PENDING, 1=ACTIVE, 2=REPAID, 3=DEFAULTED, 4=LIQUIDATED
+        const statusMap = ["pending", "active", "repaid", "defaulted", "liquidated"];
+        
+        loadedLoans.push({
+          id: id.toString(),
+          borrower: loanData.borrower,
+          tokenType: "ETH", // Assuming ETH for now or fetch token symbol
+          amount: loanData.amount.toString(),
+          interestRate: loanData.interestRate.toString(),
+          interestAmount: (BigInt(loanData.amount) * BigInt(loanData.interestRate) / 10000n).toString(),
+          dueDate: (BigInt(loanData.startTime) + BigInt(loanData.duration)).toString(),
+          status: statusMap[loanData.status],
+          reputation: "N/A", // Fetch from reputation contract if needed
+          purpose: "Loan #" + id.toString()
+        });
+      }
       
-      const mockLoans: Loan[] = [
-        {
-          id: "1",
-          borrower: currentAccount,
-          amount: ethers.parseEther("1.0").toString(),
-          interestRate: "10",
-          interestAmount: ethers.parseEther("0.1").toString(),
-          dueDate: (Math.floor(Date.now() / 1000) + 2592000).toString(), 
-          status: "active",
-          reputation: "85",
-          purpose: "Business expansion",
-          tokenType: "ETH"
-        }
-      ];
-      
-      setLoans(mockLoans);
+      setLoans(loadedLoans);
       setError(null);
     } catch (error) {
       console.error("Failed to fetch loans:", error);
@@ -107,54 +127,63 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
   };
 
   const createLoan = async () => {
-    if (!currentAccount || !newLoanAmount || !newLoanDuration || !newLoanPurpose) {
+    if (!currentAccount || !newLoanAmount || !newLoanDuration || !newLoanPurpose || !newCollateralAddress || !newCollateralAmount) {
       setError("Please fill in all required fields");
       return;
     }
 
     setIsLoading(true);
     try {
-      
-      const amountUFix = `${parseFloat(newLoanAmount).toFixed(2)}`; 
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
+
+      const amountWei = ethers.parseEther(newLoanAmount);
       const durationSeconds = parseInt(newLoanDuration) * 24 * 60 * 60;
-      const interestBps = 1000; 
-      const txId = await FlowLoanService.createLoan({
-        amount: amountUFix,
+      const interestBps = 1000; // 10%
+      
+      const collateralAmountWei = ethers.parseEther(newCollateralAmount);
+      const collateralTokenAddr = newCollateralAddress;
+
+      // Approve collateral
+      const erc20Abi = [
+        "function approve(address spender, uint256 amount) external returns (bool)",
+        "function allowance(address owner, address spender) external view returns (uint256)"
+      ];
+      const collateralContract = new ethers.Contract(collateralTokenAddr, erc20Abi, signer);
+      
+      console.log("Approving collateral...");
+      const approveTx = await collateralContract.approve(LOAN_CORE_ADDRESS, collateralAmountWei);
+      await approveTx.wait();
+      console.log("Collateral approved");
+
+      const tx = await contract.createLoan(
+        amountWei,
+        collateralAmountWei,
+        collateralTokenAddr,
         interestBps,
-        durationSeconds,
-        purpose: newLoanPurpose
-      });
-
-      setTxHash(String(txId));
-
+        durationSeconds
+      );
       
-      const newLoan: Loan = {
-        id: Date.now().toString(),
-        borrower: currentAccount,
-        tokenType: "FLOW",
-        amount: ethers.parseEther(newLoanAmount).toString(),
-        interestRate: String(interestBps / 100),
-        interestAmount: ethers.parseEther((parseFloat(newLoanAmount) * (interestBps / 10000)).toString()).toString(),
-        dueDate: (Math.floor(Date.now() / 1000) + durationSeconds).toString(),
-        status: "active",
-        reputation: "85",
-        purpose: newLoanPurpose
-      };
+      setTxHash(tx.hash);
+      await tx.wait();
 
-      setLoans([...loans, newLoan]);
+      await fetchLoans(); // Refresh list
 
-      
-      const amountDisplay = newLoanAmount + ' FLOW';
+      const amountDisplay = newLoanAmount + ' ETH';
       void TelegramService.notifyLoanGranted({
-        loanId: newLoan.id,
+        loanId: "Pending", // We'd need to parse logs to get ID
         borrower: currentAccount,
         amountDisplay,
         aprBps: String(interestBps),
-        dueDate: new Date(parseInt(newLoan.dueDate) * 1000).toLocaleString()
+        dueDate: new Date(Date.now() + durationSeconds * 1000).toLocaleString()
       });
       setNewLoanAmount("");
       setNewLoanDuration("30");
       setNewLoanPurpose("");
+      setNewCollateralAddress("");
+      setNewCollateralAmount("");
       setError(null);
     } catch (error) {
       console.error("Failed to create loan:", error);
@@ -175,24 +204,16 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner();
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
       
+      const amountWei = ethers.parseEther(repayAmount);
+      const tx = await contract.repayLoan(repayLoanId, amountWei);
       
-      
-      
-      
-      
+      setTxHash(tx.hash);
+      await tx.wait();
 
-      
-      const mockTxHash = "0x" + Math.random().toString(16).substring(2, 66);
-      setTxHash(mockTxHash);
-
-      
-      setLoans(loans.map(loan => 
-        loan.id === repayLoanId 
-          ? { ...loan, status: "repaid" }
-          : loan
-      ));
+      await fetchLoans(); // Refresh list
 
       setRepayLoanId("");
       setRepayAmount("");
@@ -321,7 +342,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
           {}
           <div className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4">Create New Loan</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <input
                 type="number"
                 step="0.01"
@@ -347,9 +368,24 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
                 placeholder="Loan purpose"
                 className="px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-cyan-400"
               />
+              <input
+                type="text"
+                value={newCollateralAddress}
+                onChange={(e) => setNewCollateralAddress(e.target.value)}
+                placeholder="Collateral Address (0x...)"
+                className="px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-cyan-400"
+              />
+              <input
+                type="number"
+                step="0.000001"
+                value={newCollateralAmount}
+                onChange={(e) => setNewCollateralAmount(e.target.value)}
+                placeholder="Collateral Amount"
+                className="px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-cyan-400"
+              />
               <button
                 onClick={createLoan}
-                disabled={isLoading || !newLoanAmount || !newLoanDuration || !newLoanPurpose}
+                disabled={isLoading || !newLoanAmount || !newLoanDuration || !newLoanPurpose || !newCollateralAddress || !newCollateralAmount}
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all"
               >
                 {isLoading ? "Creating..." : "Create Loan"}

@@ -26,6 +26,11 @@ contract CreditScoreVerifier is EIP712 {
             "RiskParameters(uint256 anomalyScore,uint256 defaultProbability,uint256 recoveryRate,uint256 timestamp,uint256 nonce)"
         );
 
+    bytes32 public constant REFINANCE_PROPOSAL_TYPEHASH =
+        keccak256(
+            "RefinanceProposal(uint256 loanId,uint256 newInterestRate,uint256 newDuration,uint256 timestamp,uint256 nonce)"
+        );
+
     address public trustedSigner;
     mapping(address => uint256) public nonces;
 
@@ -40,6 +45,12 @@ contract CreditScoreVerifier is EIP712 {
         address indexed borrower,
         uint256 loanAmount,
         uint256 collateralAmount,
+        uint256 timestamp
+    );
+    event RefinanceProposalVerified(
+        uint256 indexed loanId,
+        uint256 newInterestRate,
+        uint256 newDuration,
         uint256 timestamp
     );
 
@@ -157,6 +168,41 @@ contract CreditScoreVerifier is EIP712 {
         require(recovered == trustedSigner, "Invalid signature");
 
         nonces[user]++;
+        return true;
+    }
+
+    /**
+     * Verify a signed refinance proposal
+     */
+    function verifyRefinanceProposal(
+        address borrower,
+        uint256 loanId,
+        uint256 newInterestRate,
+        uint256 newDuration,
+        uint256 timestamp,
+        bytes calldata signature
+    ) external returns (bool) {
+        require(block.timestamp <= timestamp + 1 hours, "Signature expired");
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                REFINANCE_PROPOSAL_TYPEHASH,
+                loanId,
+                newInterestRate,
+                newDuration,
+                timestamp,
+                nonces[borrower]
+            )
+        );
+
+        bytes32 digest = _hashTypedDataV4(structHash);
+        address recovered = ECDSA.recover(digest, signature);
+
+        require(recovered == trustedSigner, "Invalid signature");
+
+        nonces[borrower]++;
+        emit RefinanceProposalVerified(loanId, newInterestRate, newDuration, timestamp);
+
         return true;
     }
 

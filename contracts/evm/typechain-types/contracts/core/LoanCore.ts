@@ -65,6 +65,7 @@ export interface LoanCoreInterface extends Interface {
       | "LIQUIDATION_THRESHOLD"
       | "collateralVault"
       | "createLoan"
+      | "creditScoreVerifier"
       | "getCollateralValue"
       | "getLatestPrice"
       | "getLoan"
@@ -74,10 +75,16 @@ export interface LoanCoreInterface extends Interface {
       | "loanCounter"
       | "loans"
       | "owner"
+      | "refinanceLoan"
       | "renounceOwnership"
       | "repayLoan"
+      | "reputationPoints"
       | "setCollateralVault"
+      | "setCreditScoreVerifier"
       | "setPriceFeed"
+      | "setReputationPoints"
+      | "setSocialStaking"
+      | "socialStaking"
       | "tokenPriceFeed"
       | "transferOwnership"
       | "userLoans"
@@ -87,6 +94,7 @@ export interface LoanCoreInterface extends Interface {
     nameOrSignatureOrTopic:
       | "LoanCreated"
       | "LoanLiquidated"
+      | "LoanRefinanced"
       | "LoanRepaid"
       | "OwnershipTransferred"
       | "PriceFeedUpdated"
@@ -109,6 +117,10 @@ export interface LoanCoreInterface extends Interface {
       BigNumberish,
       BigNumberish
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "creditScoreVerifier",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getCollateralValue",
@@ -141,6 +153,10 @@ export interface LoanCoreInterface extends Interface {
   encodeFunctionData(functionFragment: "loans", values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "refinanceLoan",
+    values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
@@ -149,12 +165,32 @@ export interface LoanCoreInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "reputationPoints",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "setCollateralVault",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setCreditScoreVerifier",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setPriceFeed",
     values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setReputationPoints",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSocialStaking",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "socialStaking",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "tokenPriceFeed",
@@ -178,6 +214,10 @@ export interface LoanCoreInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "createLoan", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "creditScoreVerifier",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getCollateralValue",
     data: BytesLike
@@ -206,16 +246,40 @@ export interface LoanCoreInterface extends Interface {
   decodeFunctionResult(functionFragment: "loans", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "refinanceLoan",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "repayLoan", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "reputationPoints",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setCollateralVault",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setCreditScoreVerifier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setPriceFeed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setReputationPoints",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSocialStaking",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "socialStaking",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -259,6 +323,31 @@ export namespace LoanLiquidatedEvent {
   export type OutputTuple = [loanId: bigint];
   export interface OutputObject {
     loanId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace LoanRefinancedEvent {
+  export type InputTuple = [
+    loanId: BigNumberish,
+    newAmount: BigNumberish,
+    newInterestRate: BigNumberish,
+    newDuration: BigNumberish
+  ];
+  export type OutputTuple = [
+    loanId: bigint,
+    newAmount: bigint,
+    newInterestRate: bigint,
+    newDuration: bigint
+  ];
+  export interface OutputObject {
+    loanId: bigint;
+    newAmount: bigint;
+    newInterestRate: bigint;
+    newDuration: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -364,6 +453,8 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
 
+  creditScoreVerifier: TypedContractMethod<[], [string], "view">;
+
   getCollateralValue: TypedContractMethod<
     [token: AddressLike, amount: BigNumberish],
     [bigint],
@@ -424,6 +515,18 @@ export interface LoanCore extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
+  refinanceLoan: TypedContractMethod<
+    [
+      loanId: BigNumberish,
+      newInterestRate: BigNumberish,
+      newDuration: BigNumberish,
+      timestamp: BigNumberish,
+      signature: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   repayLoan: TypedContractMethod<
@@ -432,8 +535,16 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
 
+  reputationPoints: TypedContractMethod<[], [string], "view">;
+
   setCollateralVault: TypedContractMethod<
     [_vault: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setCreditScoreVerifier: TypedContractMethod<
+    [_verifier: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -443,6 +554,20 @@ export interface LoanCore extends BaseContract {
     [void],
     "nonpayable"
   >;
+
+  setReputationPoints: TypedContractMethod<
+    [_reputationPoints: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setSocialStaking: TypedContractMethod<
+    [_socialStaking: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  socialStaking: TypedContractMethod<[], [string], "view">;
 
   tokenPriceFeed: TypedContractMethod<[arg0: AddressLike], [string], "view">;
 
@@ -481,6 +606,9 @@ export interface LoanCore extends BaseContract {
     [bigint],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "creditScoreVerifier"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getCollateralValue"
   ): TypedContractMethod<
@@ -543,6 +671,19 @@ export interface LoanCore extends BaseContract {
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "refinanceLoan"
+  ): TypedContractMethod<
+    [
+      loanId: BigNumberish,
+      newInterestRate: BigNumberish,
+      newDuration: BigNumberish,
+      timestamp: BigNumberish,
+      signature: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -553,8 +694,14 @@ export interface LoanCore extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "reputationPoints"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "setCollateralVault"
   ): TypedContractMethod<[_vault: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setCreditScoreVerifier"
+  ): TypedContractMethod<[_verifier: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setPriceFeed"
   ): TypedContractMethod<
@@ -562,6 +709,19 @@ export interface LoanCore extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "setReputationPoints"
+  ): TypedContractMethod<
+    [_reputationPoints: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setSocialStaking"
+  ): TypedContractMethod<[_socialStaking: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "socialStaking"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "tokenPriceFeed"
   ): TypedContractMethod<[arg0: AddressLike], [string], "view">;
@@ -589,6 +749,13 @@ export interface LoanCore extends BaseContract {
     LoanLiquidatedEvent.InputTuple,
     LoanLiquidatedEvent.OutputTuple,
     LoanLiquidatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "LoanRefinanced"
+  ): TypedContractEvent<
+    LoanRefinancedEvent.InputTuple,
+    LoanRefinancedEvent.OutputTuple,
+    LoanRefinancedEvent.OutputObject
   >;
   getEvent(
     key: "LoanRepaid"
@@ -633,6 +800,17 @@ export interface LoanCore extends BaseContract {
       LoanLiquidatedEvent.InputTuple,
       LoanLiquidatedEvent.OutputTuple,
       LoanLiquidatedEvent.OutputObject
+    >;
+
+    "LoanRefinanced(uint256,uint256,uint256,uint256)": TypedContractEvent<
+      LoanRefinancedEvent.InputTuple,
+      LoanRefinancedEvent.OutputTuple,
+      LoanRefinancedEvent.OutputObject
+    >;
+    LoanRefinanced: TypedContractEvent<
+      LoanRefinancedEvent.InputTuple,
+      LoanRefinancedEvent.OutputTuple,
+      LoanRefinancedEvent.OutputObject
     >;
 
     "LoanRepaid(uint256,uint256)": TypedContractEvent<

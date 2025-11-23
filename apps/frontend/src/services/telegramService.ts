@@ -9,9 +9,7 @@ export interface TelegramMessageOptions {
 
 const getBotToken = (): string => {
   
-  const token = (ENV_CONFIG as any).VITE_TELEGRAM_BOT_TOKEN || (import.meta.env as any).VITE_TELEGRAM_BOT_TOKEN ||
-    
-    '8081365044:AAHWyJWuvNGM2xn9MkgALiT35rJNSc17o8U';
+  const token = (ENV_CONFIG as any).VITE_TELEGRAM_BOT_TOKEN || (import.meta.env as any).VITE_TELEGRAM_BOT_TOKEN;
   return token || '';
 };
 

@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { FlowLoanService } from "../../services/flowLoanService";
 import { TelegramService } from "../../services/telegramService";
 
+const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
+const REPUTATION_POINTS_ADDRESS = process.env.REACT_APP_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
+
+const LOAN_CORE_ABI = [
+  "function createLoan(uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 duration) external returns (uint256)",
+  "event LoanCreated(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 collateralAmount)"
+];
+
+const REPUTATION_POINTS_ABI = [
+  "function reputations(address user) external view returns (uint256 points, uint8 tier, uint256 loansCompleted, uint256 onTimePayments)"
+];
 
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
@@ -38,6 +48,7 @@ const LoanRequestForm: React.FC = () => {
   const [amount, setAmount] = useState<string>("");
   const [tokenType, setTokenType] = useState<string>("ETH");
   const [collateralAddress, setCollateralAddress] = useState<string>("");
+  const [collateralAmount, setCollateralAmount] = useState<string>("");
   const [purpose, setPurpose] = useState<string>("");
   const [loanType, setLoanType] = useState<string>("standard"); 
   const [flashLoanData, setFlashLoanData] = useState<string>(""); 
@@ -82,21 +93,38 @@ const LoanRequestForm: React.FC = () => {
   
   const checkContractAndUserStatus = async (address: string) => {
     try {
-      
       if (!isValidHexAddress(address)) {
         console.error("Invalid address format:", address);
         return;
       }
 
-      
-      
       console.log("Checking contract status for address:", address);
       
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      
+      // Check if contracts are deployed
+      const code = await provider.getCode(REPUTATION_POINTS_ADDRESS);
+      if (code === "0x") {
+        console.warn("Reputation contract not deployed");
+        setHasTrustScore(false);
+        return;
+      }
+
+      const reputationContract = new ethers.Contract(REPUTATION_POINTS_ADDRESS, REPUTATION_POINTS_ABI, provider);
+      const repData = await reputationContract.reputations(address);
       
       setIsContractInitialized(true);
-      setHasTrustScore(true);
-      setTrustScoreData({ score: 750 }); 
-      setMaxLoanAmount("100"); 
+      
+      if (repData.points > 0) {
+        setHasTrustScore(true);
+        setTrustScoreData({ score: repData.points.toString() });
+        // Calculate max loan based on score/tier (mock logic for now as it's not in contract view)
+        setMaxLoanAmount("100"); 
+      } else {
+        setHasTrustScore(false);
+        setMaxLoanAmount("10"); // Default low limit
+      }
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -115,41 +143,13 @@ const LoanRequestForm: React.FC = () => {
 
     try {
       if (!window.ethereum) throw new Error("Wallet not connected");
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); 
-      
-      
-      
-      console.log("Initializing contract...");
-      
-      
-      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
-      
-      setIsContractInitialized(true);
-      setTxHash(mockTxHash);
-      
-      
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
       }
-      
     } catch (err: any) {
       console.error("Initialization error:", err);
-      let errorMessage = "Initialization failed.";
-      
-      if (err.message) {
-        if (err.message.includes("insufficient")) {
-          errorMessage = "Insufficient balance to initialize contract.";
-        } else if (err.message.includes("already initialized")) {
-          errorMessage = "Contract is already initialized.";
-        } else {
-          errorMessage = err.message;
-        }
-      }
-      
-      setError(errorMessage);
+      setError(err.message || "Initialization failed.");
     } finally {
       setIsInitializing(false);
     }
@@ -163,41 +163,25 @@ const LoanRequestForm: React.FC = () => {
     setValidationErrors({});
 
     try {
-      if (!window.ethereum) throw new Error("Wallet not connected");
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.getSigner(); 
+      // In a real scenario, this would call the backend to calculate and mint the score
+      // await fetch('/api/reputation/calculate', { method: 'POST', body: JSON.stringify({ address: userAddress }) });
       
-      
-      console.log("Creating trust score...");
-      
-      
-      const mockTxHash = "0x" + Math.random().toString(16).substr(2, 8);
-
-      setHasTrustScore(true);
-      setTxHash(mockTxHash);
-      
+      // For now, we'll just re-check status, assuming the backend/cron job might have updated it
+      // or show a message that this requires backend processing.
+      console.log("Requesting trust score calculation...");
       
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length > 0) {
         await checkContractAndUserStatus(accounts[0]);
       }
       
+      if (!hasTrustScore) {
+        setError("Trust score calculation pending or failed. Please try again later.");
+      }
+
     } catch (err: any) {
       console.error("Trust score creation error:", err);
-      let errorMessage = "Trust score creation failed.";
-      
-      if (err.message) {
-        if (err.message.includes("already exists")) {
-          errorMessage = "Trust score already exists for this account.";
-        } else if (err.message.includes("insufficient")) {
-          errorMessage = "Insufficient balance to create trust score.";
-        } else {
-          errorMessage = err.message;
-        }
-      }
-      
-      setError(errorMessage);
+      setError(err.message || "Trust score creation failed.");
     } finally {
       setIsCreatingTrustScore(false);
     }
@@ -221,6 +205,9 @@ const LoanRequestForm: React.FC = () => {
         if (!isValidHexAddress(formattedAddress)) {
           errors.collateralAddress = "Invalid collateral address format. Must be a valid Ethereum address.";
         }
+        if (!collateralAmount || parseFloat(collateralAmount) <= 0) {
+          errors.collateralAmount = "Collateral amount must be greater than 0.";
+        }
       }
     } else if (loanType === "flash") {
       
@@ -242,12 +229,10 @@ const LoanRequestForm: React.FC = () => {
   const handleLoanRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    
     setError(null);
     setTxHash(null);
     setValidationErrors({});
 
-    
     if (!validateForm()) {
       return;
     }
@@ -255,36 +240,57 @@ const LoanRequestForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!isContractInitialized) throw new Error("Contract not initialized");
-      if (!hasTrustScore) throw new Error("Trust score required");
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
 
+      const amountWei = ethers.parseEther(amount);
+      const durationSeconds = 30 * 24 * 60 * 60; // Default 30 days
+      const interestBps = 1000; // 10%
       
-      const interestBps = 1000; 
-      const durationSeconds = parseInt(maxLoanAmount) ? parseInt(maxLoanAmount) : 30 * 24 * 60 * 60; 
-      const txId = await FlowLoanService.createLoan({
-        amount: `${parseFloat(amount).toFixed(2)}`,
+      let collateralAmountWei = 0n;
+      let collateralTokenAddr = "0x0000000000000000000000000000000000000000";
+
+      if (collateralAddress && collateralAmount) {
+        collateralTokenAddr = collateralAddress;
+        collateralAmountWei = ethers.parseEther(collateralAmount);
+
+        // Approve collateral
+        const erc20Abi = [
+          "function approve(address spender, uint256 amount) external returns (bool)",
+          "function allowance(address owner, address spender) external view returns (uint256)"
+        ];
+        const collateralContract = new ethers.Contract(collateralTokenAddr, erc20Abi, signer);
+        
+        console.log("Approving collateral...");
+        const approveTx = await collateralContract.approve(LOAN_CORE_ADDRESS, collateralAmountWei);
+        await approveTx.wait();
+        console.log("Collateral approved");
+      }
+
+      const tx = await contract.createLoan(
+        amountWei,
+        collateralAmountWei,
+        collateralTokenAddr,
         interestBps,
-        durationSeconds,
-        purpose: purpose || tokenType
-      });
+        durationSeconds
+      );
 
-      setTxHash(String(txId));
+      setTxHash(tx.hash);
+      await tx.wait();
 
-      
       void TelegramService.notifyLoanGranted({
-        loanId: String(Date.now()),
+        loanId: "Pending",
         borrower: userAddress,
-        amountDisplay: `${amount} FLOW`,
+        amountDisplay: `${amount} ETH`,
         aprBps: String(interestBps),
         dueDate: new Date(Date.now() + durationSeconds * 1000).toLocaleString()
       });
       
-      
       setAmount("");
       setPurpose("");
       setCollateralAddress("");
-      
-      
       
     } catch (err: any) {
       console.error("Loan request error:", err);
@@ -298,6 +304,17 @@ const LoanRequestForm: React.FC = () => {
         } else if (err.message.includes("invalid address")) {
           errorMessage = "Invalid collateral address provided.";
         } else if (err.message.includes("simulation failed")) {
+          errorMessage = "Transaction simulation failed. Please check your inputs and try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
           errorMessage = "Transaction simulation failed. Please check your inputs and try again.";
         } else {
           errorMessage = err.message;
@@ -659,28 +676,52 @@ const LoanRequestForm: React.FC = () => {
 
             {}
             {loanType === "standard" && (
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">
-                  Collateral Address (Optional)
-                </label>
-                <input
-                  type="text"
-                  className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/50 focus:outline-none transition-colors font-mono text-xs ${
-                    validationErrors.collateralAddress 
-                      ? 'border-red-400 focus:border-red-400' 
-                      : 'border-white/20 focus:border-blue-400'
-                  }`}
-                  value={collateralAddress}
-                  onChange={handleCollateralAddressChange}
-                  placeholder="0x... (leave empty for default)"
-                />
-                {validationErrors.collateralAddress && (
-                  <p className="text-red-400 text-xs mt-1">{validationErrors.collateralAddress}</p>
+              <>
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Collateral Address (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/50 focus:outline-none transition-colors font-mono text-xs ${
+                      validationErrors.collateralAddress 
+                        ? 'border-red-400 focus:border-red-400' 
+                        : 'border-white/20 focus:border-blue-400'
+                    }`}
+                    value={collateralAddress}
+                    onChange={handleCollateralAddressChange}
+                    placeholder="0x... (leave empty for default)"
+                  />
+                  {validationErrors.collateralAddress && (
+                    <p className="text-red-400 text-xs mt-1">{validationErrors.collateralAddress}</p>
+                  )}
+                  <p className="text-xs text-white/50 mt-1">
+                    Address of collateral asset or NFT (optional)
+                  </p>
+                </div>
+                {collateralAddress && (
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      Collateral Amount
+                    </label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/50 focus:outline-none transition-colors ${
+                        validationErrors.collateralAmount 
+                          ? 'border-red-400 focus:border-red-400' 
+                          : 'border-white/20 focus:border-blue-400'
+                      }`}
+                      value={collateralAmount}
+                      onChange={(e) => setCollateralAmount(e.target.value)}
+                      placeholder="Amount of collateral"
+                    />
+                    {validationErrors.collateralAmount && (
+                      <p className="text-red-400 text-xs mt-1">{validationErrors.collateralAmount}</p>
+                    )}
+                  </div>
                 )}
-                <p className="text-xs text-white/50 mt-1">
-                  Address of collateral asset or NFT (optional)
-                </p>
-              </div>
+              </>
             )}
 
             <button

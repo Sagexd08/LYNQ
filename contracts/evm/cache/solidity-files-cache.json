@@ -189,8 +189,8 @@
       ]
     },
     "C:\\Users\\sohom\\OneDrive\\Desktop\\LYNQ\\contracts\\evm\\contracts\\core\\LoanCore.sol": {
-      "lastModificationDate": 1763685459670,
-      "contentHash": "d24d4e0d30005bce0d1b07e32e393452",
+      "lastModificationDate": 1763757006318,
+      "contentHash": "3f83e9a83cdb68064e4eda3a38bba822",
       "sourceName": "contracts/core/LoanCore.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -221,7 +221,10 @@
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol"
+        "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol",
+        "../reputation/SocialStaking.sol",
+        "../reputation/ReputationPoints.sol",
+        "./CreditScoreVerifier.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
@@ -727,8 +730,8 @@
       ]
     },
     "C:\\Users\\sohom\\OneDrive\\Desktop\\LYNQ\\contracts\\evm\\contracts\\reputation\\ReputationPoints.sol": {
-      "lastModificationDate": 1763540166246,
-      "contentHash": "df0c7653e712ddb531d6caef79b4e632",
+      "lastModificationDate": 1763756961690,
+      "contentHash": "0c66763c571880ef7e5255dcb18e43ff",
       "sourceName": "contracts/reputation/ReputationPoints.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1656,8 +1659,8 @@
       ]
     },
     "C:\\Users\\sohom\\OneDrive\\Desktop\\LYNQ\\contracts\\evm\\contracts\\core\\CreditScoreVerifier.sol": {
-      "lastModificationDate": 1763685490108,
-      "contentHash": "2abe31c06be2f02245ecc95e06dfe3c2",
+      "lastModificationDate": 1763703983722,
+      "contentHash": "ffe00f2a2bb578d7b0c71f30bd15b7e5",
       "sourceName": "contracts/core/CreditScoreVerifier.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1885,6 +1888,86 @@
       ],
       "artifacts": [
         "AggregatorV3Interface"
+      ]
+    },
+    "C:\\Users\\sohom\\OneDrive\\Desktop\\LYNQ\\contracts\\evm\\contracts\\reputation\\SocialStaking.sol": {
+      "lastModificationDate": 1763703849155,
+      "contentHash": "9e859e2c2175b955b93a21aa4fdd121b",
+      "sourceName": "contracts/reputation/SocialStaking.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SocialStaking"
+      ]
+    },
+    "C:\\Users\\sohom\\OneDrive\\Desktop\\LYNQ\\contracts\\evm\\contracts\\mocks\\MockToken.sol": {
+      "lastModificationDate": 1763703784745,
+      "contentHash": "f88127afc899da7d457560436c19059d",
+      "sourceName": "contracts/mocks/MockToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "MockToken"
       ]
     }
   }

@@ -28,6 +28,7 @@ export interface CreditScoreVerifierInterface extends Interface {
     nameOrSignature:
       | "CREDIT_ASSESSMENT_TYPEHASH"
       | "LOAN_PROPOSAL_TYPEHASH"
+      | "REFINANCE_PROPOSAL_TYPEHASH"
       | "RISK_PARAMETERS_TYPEHASH"
       | "eip712Domain"
       | "getNonce"
@@ -36,6 +37,7 @@ export interface CreditScoreVerifierInterface extends Interface {
       | "trustedSigner"
       | "verifyCreditAssessment"
       | "verifyLoanProposal"
+      | "verifyRefinanceProposal"
       | "verifyRiskParameters"
   ): FunctionFragment;
 
@@ -44,6 +46,7 @@ export interface CreditScoreVerifierInterface extends Interface {
       | "CreditAssessmentVerified"
       | "EIP712DomainChanged"
       | "LoanProposalVerified"
+      | "RefinanceProposalVerified"
       | "TrustedSignerUpdated"
   ): EventFragment;
 
@@ -53,6 +56,10 @@ export interface CreditScoreVerifierInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "LOAN_PROPOSAL_TYPEHASH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "REFINANCE_PROPOSAL_TYPEHASH",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -93,6 +100,17 @@ export interface CreditScoreVerifierInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "verifyRefinanceProposal",
+    values: [
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "verifyRiskParameters",
     values: [
       AddressLike,
@@ -110,6 +128,10 @@ export interface CreditScoreVerifierInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "LOAN_PROPOSAL_TYPEHASH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "REFINANCE_PROPOSAL_TYPEHASH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -136,6 +158,10 @@ export interface CreditScoreVerifierInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "verifyLoanProposal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "verifyRefinanceProposal",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -204,6 +230,31 @@ export namespace LoanProposalVerifiedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace RefinanceProposalVerifiedEvent {
+  export type InputTuple = [
+    loanId: BigNumberish,
+    newInterestRate: BigNumberish,
+    newDuration: BigNumberish,
+    timestamp: BigNumberish
+  ];
+  export type OutputTuple = [
+    loanId: bigint,
+    newInterestRate: bigint,
+    newDuration: bigint,
+    timestamp: bigint
+  ];
+  export interface OutputObject {
+    loanId: bigint;
+    newInterestRate: bigint;
+    newDuration: bigint;
+    timestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace TrustedSignerUpdatedEvent {
   export type InputTuple = [oldSigner: AddressLike, newSigner: AddressLike];
   export type OutputTuple = [oldSigner: string, newSigner: string];
@@ -264,6 +315,8 @@ export interface CreditScoreVerifier extends BaseContract {
 
   LOAN_PROPOSAL_TYPEHASH: TypedContractMethod<[], [string], "view">;
 
+  REFINANCE_PROPOSAL_TYPEHASH: TypedContractMethod<[], [string], "view">;
+
   RISK_PARAMETERS_TYPEHASH: TypedContractMethod<[], [string], "view">;
 
   eip712Domain: TypedContractMethod<
@@ -320,6 +373,19 @@ export interface CreditScoreVerifier extends BaseContract {
     "nonpayable"
   >;
 
+  verifyRefinanceProposal: TypedContractMethod<
+    [
+      borrower: AddressLike,
+      loanId: BigNumberish,
+      newInterestRate: BigNumberish,
+      newDuration: BigNumberish,
+      timestamp: BigNumberish,
+      signature: BytesLike
+    ],
+    [boolean],
+    "nonpayable"
+  >;
+
   verifyRiskParameters: TypedContractMethod<
     [
       user: AddressLike,
@@ -342,6 +408,9 @@ export interface CreditScoreVerifier extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "LOAN_PROPOSAL_TYPEHASH"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "REFINANCE_PROPOSAL_TYPEHASH"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "RISK_PARAMETERS_TYPEHASH"
@@ -404,6 +473,20 @@ export interface CreditScoreVerifier extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "verifyRefinanceProposal"
+  ): TypedContractMethod<
+    [
+      borrower: AddressLike,
+      loanId: BigNumberish,
+      newInterestRate: BigNumberish,
+      newDuration: BigNumberish,
+      timestamp: BigNumberish,
+      signature: BytesLike
+    ],
+    [boolean],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "verifyRiskParameters"
   ): TypedContractMethod<
     [
@@ -438,6 +521,13 @@ export interface CreditScoreVerifier extends BaseContract {
     LoanProposalVerifiedEvent.InputTuple,
     LoanProposalVerifiedEvent.OutputTuple,
     LoanProposalVerifiedEvent.OutputObject
+  >;
+  getEvent(
+    key: "RefinanceProposalVerified"
+  ): TypedContractEvent<
+    RefinanceProposalVerifiedEvent.InputTuple,
+    RefinanceProposalVerifiedEvent.OutputTuple,
+    RefinanceProposalVerifiedEvent.OutputObject
   >;
   getEvent(
     key: "TrustedSignerUpdated"
@@ -479,6 +569,17 @@ export interface CreditScoreVerifier extends BaseContract {
       LoanProposalVerifiedEvent.InputTuple,
       LoanProposalVerifiedEvent.OutputTuple,
       LoanProposalVerifiedEvent.OutputObject
+    >;
+
+    "RefinanceProposalVerified(uint256,uint256,uint256,uint256)": TypedContractEvent<
+      RefinanceProposalVerifiedEvent.InputTuple,
+      RefinanceProposalVerifiedEvent.OutputTuple,
+      RefinanceProposalVerifiedEvent.OutputObject
+    >;
+    RefinanceProposalVerified: TypedContractEvent<
+      RefinanceProposalVerifiedEvent.InputTuple,
+      RefinanceProposalVerifiedEvent.OutputTuple,
+      RefinanceProposalVerifiedEvent.OutputObject
     >;
 
     "TrustedSignerUpdated(address,address)": TypedContractEvent<

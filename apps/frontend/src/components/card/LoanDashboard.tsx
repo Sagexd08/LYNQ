@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
-
-
+import { ethers } from "ethers";
 import LoanRequestForm from "./LoanRequestForm";
 import LoanManagementSystem from "./LoanManagementSystem";
 
+const LOAN_CORE_ADDRESS = process.env.REACT_APP_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
+const REPUTATION_POINTS_ADDRESS = process.env.REACT_APP_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
+
+const LOAN_CORE_ABI = [
+  "function getUserLoans(address user) external view returns (uint256[])",
+  "function getLoan(uint256 loanId) external view returns (tuple(address borrower, uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 startTime, uint256 duration, uint256 outstandingAmount, uint8 status))"
+];
+
+const REPUTATION_POINTS_ABI = [
+  "function reputations(address user) external view returns (uint256 points, uint8 tier, uint256 loansCompleted, uint256 onTimePayments)"
+];
 
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
@@ -89,26 +99,42 @@ const LoanDashboard: React.FC = () => {
   
   const checkContractAndTrustScore = async (address: string) => {
     try {
-      
       console.log("Checking contract and trust score for:", address);
       
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
       
-      setIsContractInitialized(true);
-      setHasTrustScore(true);
+      // Check if contracts are deployed (basic check if code exists)
+      const code = await provider.getCode(REPUTATION_POINTS_ADDRESS);
+      if (code === "0x") {
+        console.warn("Reputation contract not deployed at address");
+        // Fallback to mock or empty if contract not found
+        setHasTrustScore(false);
+        return;
+      }
+
+      const reputationContract = new ethers.Contract(REPUTATION_POINTS_ADDRESS, REPUTATION_POINTS_ABI, provider);
+      const repData = await reputationContract.reputations(address);
+      
+      const tiers = ["Bronze", "Silver", "Gold", "Platinum"];
+      
       setTrustScoreData({
-        score: "750",
-        tier: "Good",
-        loanCount: "0",
-        totalBorrowed: "0",
-        totalRepaid: "0",
-        defaults: "0",
+        score: repData.points.toString(),
+        tier: tiers[repData.tier] || "Bronze",
+        loanCount: repData.loansCompleted.toString(),
+        totalBorrowed: "0", // Need to calculate from loans
+        totalRepaid: "0", // Need to calculate from loans
+        defaults: "0", // Need to calculate from loans
         lastUpdated: Date.now().toString(),
         stakedAmount: "0",
         walletAge: "0",
-        earlyRepayments: "0",
+        earlyRepayments: repData.onTimePayments.toString(),
         refinanceCount: "0",
       });
-      setMaxLoanAmount("100");
+      
+      setIsContractInitialized(true);
+      setHasTrustScore(true);
+      setMaxLoanAmount("100"); // Could be dynamic based on tier
       
     } catch (error: any) {
       console.log("Error checking contract status:", error);
@@ -121,12 +147,27 @@ const LoanDashboard: React.FC = () => {
   
   const loadUserLoans = async (address: string) => {
     try {
-      
       console.log("Loading user loans for:", address);
       
+      if (!window.ethereum) throw new Error("Wallet not connected");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const loanContract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, provider);
       
-      const mockLoans: any[] = [];
-      setUserLoans(mockLoans);
+      const loanIds = await loanContract.getUserLoans(address);
+      const loadedLoans: any[] = [];
+
+      for (const id of loanIds) {
+        const loanData = await loanContract.getLoan(id);
+        loadedLoans.push({
+          id: id.toString(),
+          amount: loanData.amount.toString(),
+          status: Number(loanData.status),
+          createdAt: loanData.startTime.toString(),
+          // Add other fields if needed for dashboard stats
+        });
+      }
+
+      setUserLoans(loadedLoans);
       
     } catch (error: any) {
       console.error("Error loading user loans:", error);

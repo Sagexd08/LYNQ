@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import "../reputation/SocialStaking.sol";
+import "../reputation/ReputationPoints.sol";
+import "./CreditScoreVerifier.sol";
 
 contract LoanCore is Ownable, ReentrancyGuard {
     enum LoanStatus { PENDING, ACTIVE, REPAID, DEFAULTED, LIQUIDATED }
@@ -27,6 +30,9 @@ contract LoanCore is Ownable, ReentrancyGuard {
     uint256 public loanCounter;
     
     address public collateralVault;
+    SocialStaking public socialStaking;
+    CreditScoreVerifier public creditScoreVerifier;
+    ReputationPoints public reputationPoints;
     uint256 public constant LIQUIDATION_THRESHOLD = 120; // 120%
 
     event LoanCreated(
@@ -38,12 +44,25 @@ contract LoanCore is Ownable, ReentrancyGuard {
     
     event LoanRepaid(uint256 indexed loanId, uint256 amount);
     event LoanLiquidated(uint256 indexed loanId);
+    event LoanRefinanced(uint256 indexed loanId, uint256 newAmount, uint256 newInterestRate, uint256 newDuration);
     event PriceFeedUpdated(address indexed token, address indexed priceFeed);
 
     constructor() Ownable(msg.sender) {}
 
     function setCollateralVault(address _vault) external onlyOwner {
         collateralVault = _vault;
+    }
+
+    function setSocialStaking(address _socialStaking) external onlyOwner {
+        socialStaking = SocialStaking(_socialStaking);
+    }
+
+    function setCreditScoreVerifier(address _verifier) external onlyOwner {
+        creditScoreVerifier = CreditScoreVerifier(_verifier);
+    }
+
+    function setReputationPoints(address _reputationPoints) external onlyOwner {
+        reputationPoints = ReputationPoints(_reputationPoints);
     }
 
     function setPriceFeed(address token, address priceFeed) external onlyOwner {
@@ -124,6 +143,13 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
         if (loan.outstandingAmount == 0) {
             loan.status = LoanStatus.REPAID;
+            if (address(socialStaking) != address(0)) {
+                socialStaking.notifyRepayment(loanId);
+            }
+            if (address(reputationPoints) != address(0)) {
+                bool onTime = block.timestamp <= loan.startTime + loan.duration;
+                reputationPoints.recordLoanCompletion(msg.sender, onTime);
+            }
         }
 
         emit LoanRepaid(loanId, amount);
@@ -147,6 +173,14 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
         loan.status = LoanStatus.LIQUIDATED;
         
+        if (address(socialStaking) != address(0)) {
+            socialStaking.notifyDefault(loanId);
+        }
+        
+        if (address(reputationPoints) != address(0)) {
+            reputationPoints.recordLoanCompletion(loan.borrower, false);
+        }
+
         emit LoanLiquidated(loanId);
     }
 
@@ -166,5 +200,52 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
     function getUserLoans(address user) external view returns (uint256[] memory) {
         return userLoans[user];
+    }
+
+    function refinanceLoan(
+        uint256 loanId,
+        uint256 newInterestRate,
+        uint256 newDuration,
+        uint256 timestamp,
+        bytes calldata signature
+    ) external nonReentrant {
+        Loan storage loan = loans[loanId];
+        require(loan.borrower == msg.sender, "Not loan owner");
+        require(loan.status == LoanStatus.ACTIVE, "Loan not active");
+        require(address(creditScoreVerifier) != address(0), "Verifier not set");
+
+        // Verify signature
+        require(
+            creditScoreVerifier.verifyRefinanceProposal(
+                msg.sender,
+                loanId,
+                newInterestRate,
+                newDuration,
+                timestamp,
+                signature
+            ),
+            "Invalid refinance signature"
+        );
+
+        // Calculate accrued interest
+        uint256 timePassed = block.timestamp - loan.startTime;
+        if (timePassed > loan.duration) timePassed = loan.duration;
+        
+        uint256 oldTotalInterest = (loan.amount * loan.interestRate) / 10000;
+        uint256 accruedInterest = (oldTotalInterest * timePassed) / loan.duration;
+        
+        // Capitalize interest into new principal
+        loan.amount += accruedInterest;
+        
+        // Update terms
+        loan.interestRate = newInterestRate;
+        loan.duration = newDuration;
+        loan.startTime = block.timestamp;
+        
+        // Recalculate outstanding amount
+        uint256 newTotalInterest = (loan.amount * newInterestRate) / 10000;
+        loan.outstandingAmount = loan.amount + newTotalInterest;
+        
+        emit LoanRefinanced(loanId, loan.amount, newInterestRate, newDuration);
     }
 }
