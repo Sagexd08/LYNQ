@@ -10,7 +10,6 @@ export class LiquidationService implements OnModuleInit {
   private wallet: ethers.Wallet;
   private loanCoreContract: ethers.Contract;
 
-  // Minimal ABI for LoanCore
   private readonly abi = [
     "function loanCounter() view returns (uint256)",
     "function getLoan(uint256 loanId) view returns (tuple(address borrower, uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 startTime, uint256 duration, uint256 outstandingAmount, uint8 status))",
@@ -47,7 +46,6 @@ export class LiquidationService implements OnModuleInit {
     try {
       const loanCount = await this.loanCoreContract.loanCounter();
       
-      // Iterate through all loans (in production, this should be optimized, e.g., by indexing active loans in DB)
       for (let i = 0; i < loanCount; i++) {
         await this.checkLoan(i);
       }
@@ -60,7 +58,6 @@ export class LiquidationService implements OnModuleInit {
     try {
       const loan = await this.loanCoreContract.getLoan(loanId);
       
-      // LoanStatus: 0=PENDING, 1=ACTIVE, 2=REPAID, 3=DEFAULTED, 4=LIQUIDATED
       if (loan.status !== 1) return;
 
       const isUndercollateralized = await this.loanCoreContract.isLoanUndercollateralized(loanId);

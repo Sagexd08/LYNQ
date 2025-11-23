@@ -26,7 +26,6 @@ export function initLogger(config: ConfigService): void {
   logLevel = config.get<string>('LOG_LEVEL', 'info');
   nodeEnv = config.get<string>('NODE_ENV', 'development');
   
-  // Reconfigure logger with new level if needed
   logger.level = logLevel;
   
   // Add console transport for non-production

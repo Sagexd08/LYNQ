@@ -43,7 +43,6 @@ function loadPrevKey(): { key: Buffer; kid: 'previous' } | null {
 }
 
 function parseKey(v: string): Buffer {
-  // Accept base64 or hex
   const s = v.trim();
   if (/^[A-Fa-f0-9]+$/.test(s) && (s.length === 64)) {
     return Buffer.from(s, 'hex');

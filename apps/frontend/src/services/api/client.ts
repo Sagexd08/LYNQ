@@ -16,7 +16,6 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -26,7 +25,6 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -34,7 +32,6 @@ apiClient.interceptors.response.use(
       const status = error.response.status;
       const data = error.response.data as any;
       
-      // Handle specific error codes
       if (status === 401) {
         localStorage.removeItem('authToken');
         toast.error('Session expired. Please reconnect your wallet.');

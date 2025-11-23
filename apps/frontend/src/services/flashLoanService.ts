@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { APP_CONFIG } from '../config/env';
 
-// Types
 export interface FlashLoanQuote {
   assets: string[];
   amounts: string[];

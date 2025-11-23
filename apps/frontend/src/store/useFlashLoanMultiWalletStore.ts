@@ -16,7 +16,6 @@ export interface MultiWalletBatchData {
 }
 
 export interface MultiWalletFlashLoanState {
-  // Form state
   formData: {
     asset: string;
     totalAmount: string;
@@ -24,7 +23,6 @@ export interface MultiWalletFlashLoanState {
     receiverContract: string;
   };
 
-  // Execution state
   isExecuting: boolean;
   currentBatchId: string | null;
   lastError: string | null;
@@ -85,7 +83,6 @@ const initialFormState = {
  */
 export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
   (set, get) => ({
-    // Initial state
     formData: initialFormState,
     isExecuting: false,
     currentBatchId: null,
@@ -95,7 +92,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
     userBatches: [],
     isLoadingHistory: false,
 
-    // Form actions
     setAsset: (asset: string) => {
       set(state => ({
         formData: { ...state.formData, asset },
