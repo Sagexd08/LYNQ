@@ -14,7 +14,6 @@ export interface UserState {
   error: string | null;
   authToken: string | null;
 
-  // Actions
   setProfile: (profile: UserProfile) => void;
   setAuthToken: (token: string) => void;
   clearUser: () => void;

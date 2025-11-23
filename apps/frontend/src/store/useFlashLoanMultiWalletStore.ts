@@ -29,11 +29,9 @@ export interface MultiWalletFlashLoanState {
   quote: any | null;
   riskScore: number | null;
 
-  // History state
   userBatches: MultiWalletBatchData[];
   isLoadingHistory: boolean;
 
-  // Form actions
   setAsset: (asset: string) => void;
   setTotalAmount: (amount: string) => void;
   setReceiverContract: (address: string) => void;
@@ -42,19 +40,16 @@ export interface MultiWalletFlashLoanState {
   removeRecipient: (index: number) => void;
   resetForm: () => void;
 
-  // Execution actions
   setIsExecuting: (executing: boolean) => void;
   setCurrentBatchId: (batchId: string | null) => void;
   setLastError: (error: string | null) => void;
   setQuote: (quote: any | null) => void;
   setRiskScore: (score: number | null) => void;
 
-  // History actions
   setUserBatches: (batches: MultiWalletBatchData[]) => void;
   setIsLoadingHistory: (loading: boolean) => void;
   addBatchToHistory: (batch: MultiWalletBatchData) => void;
 
-  // Async actions
   fetchUserBatches: (userAddress: string) => Promise<void>;
   getQuote: (
     asset: string,
@@ -77,10 +72,6 @@ const initialFormState = {
   receiverContract: '',
 };
 
-/**
- * Zustand store for multi-wallet flash loan state management
- * Handles form data, execution state, and batch history
- */
 export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
   (set, get) => ({
     formData: initialFormState,
@@ -154,7 +145,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
       set({ formData: initialFormState });
     },
 
-    // Execution actions
     setIsExecuting: (executing: boolean) => {
       set({ isExecuting: executing });
     },
@@ -175,7 +165,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
       set({ riskScore });
     },
 
-    // History actions
     setUserBatches: (userBatches: MultiWalletBatchData[]) => {
       set({ userBatches });
     },
@@ -190,7 +179,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
       }));
     },
 
-    // Async actions
     fetchUserBatches: async (userAddress: string) => {
       set({ isLoadingHistory: true, lastError: null });
       try {
@@ -234,7 +222,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
         const data = await response.json();
         set({ quote: data.data });
 
-        // Simulate risk scoring (would be from backend AI engine in Phase 1.2)
         const mockRiskScore = Math.floor(Math.random() * 100);
         set({ riskScore: mockRiskScore });
       } catch (error) {
@@ -248,7 +235,6 @@ export const useFlashLoanMultiWalletStore = create<MultiWalletFlashLoanState>(
       const state = get();
       const { formData } = state;
 
-      // Validate form
       if (!formData.asset || !formData.totalAmount || !formData.receiverContract) {
         set({ lastError: 'Please fill in all required fields' });
         return null;

@@ -86,13 +86,9 @@ export interface LiquidityInfo {
   }>;
 }
 
-// Flash Loan Service
 class FlashLoanService {
   private baseURL = `${APP_CONFIG.backendUrl}/api/v1/flash-loans`;
 
-  /**
-   * Get flash loan quote
-   */
   async getFlashLoanQuote(
     userAddress: string,
     assets: string[],
@@ -118,9 +114,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Check eligibility
-   */
   async checkEligibility(
     userAddress: string,
     assets: string[],
@@ -146,9 +139,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Get user statistics
-   */
   async getUserStats(userAddress: string): Promise<UserStats> {
     try {
       const response = await axios.get(`${this.baseURL}/user/${userAddress}/stats`);
@@ -166,9 +156,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Get available liquidity
-   */
   async getAvailableLiquidity(): Promise<LiquidityInfo> {
     try {
       const response = await axios.get(`${this.baseURL}/liquidity`);
@@ -186,9 +173,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Simulate flash loan execution
-   */
   async simulateFlashLoan(
     userAddress: string,
     receiverAddress: string,
@@ -218,9 +202,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Execute flash loan
-   */
   async executeFlashLoan(
     userAddress: string,
     receiverAddress: string,
@@ -250,9 +231,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Get flash loan history
-   */
   async getFlashLoanHistory(
     userAddress: string,
     limit: number = 10,
@@ -276,9 +254,6 @@ class FlashLoanService {
     }
   }
 
-  /**
-   * Get risk assessment
-   */
   async getRiskAssessment(userAddress: string): Promise<RiskAssessment> {
     try {
       const response = await axios.get(`${this.baseURL}/user/${userAddress}/risk-assessment`);

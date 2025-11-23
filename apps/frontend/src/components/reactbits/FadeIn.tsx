@@ -1,4 +1,4 @@
-import { motion, useInView, Variants } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 
 interface FadeInProps {
