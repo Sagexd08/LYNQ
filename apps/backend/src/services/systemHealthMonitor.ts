@@ -2,11 +2,6 @@ import { EventEmitter } from 'events';
 import logger from '../utils/logger';
 import AIValidationEngine, { SystemHealthMetrics, AlertSeverity } from './aiValidationEngine';
 
-/**
- * System Health Monitor
- * Continuously monitors platform health and alerts on degradation
- */
-
 export interface HealthCheckResult {
   status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL';
   timestamp: number;
@@ -26,8 +21,8 @@ export interface HealthAlert {
 export interface ServiceStatus {
   service: string;
   status: 'UP' | 'DOWN' | 'DEGRADED';
-  latency: number; // ms
-  errorRate: number; // 0-100
+  latency: number;
+  errorRate: number;
   lastCheck: number;
   details?: string;
 }
@@ -38,7 +33,6 @@ export class SystemHealthMonitor extends EventEmitter {
   private maxHistorySize: number = 100;
   private serviceStatuses = new Map<string, ServiceStatus>();
 
-  // Thresholds
   private readonly LATENCY_WARNING_MS = 200;
   private readonly LATENCY_CRITICAL_MS = 1000;
   private readonly GAS_VOLATILITY_WARNING = 70;
@@ -51,9 +45,6 @@ export class SystemHealthMonitor extends EventEmitter {
     this.initializeServices();
   }
 
-  /**
-   * Start health monitoring
-   */
   start(intervalMs: number = 10000): void {
     if (this.healthCheckInterval) {
       logger.warn('Health monitor already running');
@@ -66,13 +57,9 @@ export class SystemHealthMonitor extends EventEmitter {
       this.performHealthCheck();
     }, intervalMs);
 
-    // Perform initial check
     this.performHealthCheck();
   }
 
-  /**
-   * Stop health monitoring
-   */
   stop(): void {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
@@ -81,38 +68,28 @@ export class SystemHealthMonitor extends EventEmitter {
     }
   }
 
-  /**
-   * Perform comprehensive health check
-   */
   private async performHealthCheck(): Promise<HealthCheckResult> {
     const timestamp = Date.now();
     const alerts: HealthAlert[] = [];
 
     try {
-      // Get current metrics
       const metrics = AIValidationEngine.getSystemHealth();
 
-      // Check service statuses
       const serviceIssues = this.checkServiceStatuses();
       alerts.push(...serviceIssues);
 
-      // Check network health
       const networkAlerts = this.checkNetworkHealth(metrics);
       alerts.push(...networkAlerts);
 
-      // Check gas conditions
       const gasAlerts = this.checkGasConditions(metrics);
       alerts.push(...gasAlerts);
 
-      // Check system resources
       const resourceAlerts = this.checkSystemResources();
       alerts.push(...resourceAlerts);
 
-      // Check error rates
       const errorAlerts = this.checkErrorRates();
       alerts.push(...errorAlerts);
 
-      // Determine overall status
       const status = this.determineOverallStatus(alerts, metrics);
 
       const result: HealthCheckResult = {
@@ -122,13 +99,11 @@ export class SystemHealthMonitor extends EventEmitter {
         alerts,
       };
 
-      // Store in history
       this.healthHistory.push(result);
       if (this.healthHistory.length > this.maxHistorySize) {
         this.healthHistory.shift();
       }
 
-      // Emit events for significant issues
       if (alerts.length > 0) {
         this.emit('health-alert', {
           status,
@@ -138,7 +113,6 @@ export class SystemHealthMonitor extends EventEmitter {
           alerts,
         });
 
-        // Log critical issues
         const criticalAlerts = alerts.filter(
           (a) => a.severity === AlertSeverity.CRITICAL
         );
@@ -153,7 +127,6 @@ export class SystemHealthMonitor extends EventEmitter {
         }
       }
 
-      // Emit status change
       if (status !== 'HEALTHY') {
         this.emit('health-degraded', result);
       }

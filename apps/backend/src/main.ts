@@ -15,14 +15,11 @@ async function bootstrap(): Promise<void> {
 
   const configService = app.get(ConfigService);
   
-  // Initialize crypto keys and logger from config
   initCrypto(configService);
   initLogger(configService);
 
-  // Security
   app.use(helmet());
 
-  // CORS
   const frontendUrl = configService.get<string>('FRONTEND_URL', 'http://localhost:3001');
   const adminUrl = configService.get<string>('ADMIN_URL', 'http://localhost:3002');
   
@@ -31,10 +28,8 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // Global pipes
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -43,13 +38,10 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Global filters
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global interceptors
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  // Swagger
   const config = new DocumentBuilder()
     .setTitle('LYNQ API')
     .setDescription('Multi-Chain DeFi Lending Platform')

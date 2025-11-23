@@ -1,7 +1,3 @@
-/**
- * Type declarations for node-telegram-bot-api
- */
-
 declare module 'node-telegram-bot-api' {
   interface BotOptions {
     polling?: boolean | { interval: number; params?: Record<string, any> };
