@@ -1,16 +1,13 @@
 import { useState, useCallback, useMemo } from "react";
 import { mlService, CreditScoreResult } from "../../services/mlService";
 import { AptosClient } from "aptos";
-// import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
-// Stub wallet hook for now until wallet adapter is installed
 const useWallet = () => ({ 
   account: null as any, 
   connected: false,
   signAndSubmitTransaction: async (_tx: any) => ({ hash: '' })
 });
 
-// Configuration
 const NETWORK_CONFIG = {
   testnet: "https://fullnode.testnet.aptoslabs.com",
   mainnet: "https://fullnode.mainnet.aptoslabs.com",
@@ -19,7 +16,6 @@ const NETWORK_CONFIG = {
 const MODULE_ADDRESS = import.meta.env.VITE_MODULE_ADDRESS || "0x<your_module_address>";
 const NETWORK = (import.meta.env.VITE_NETWORK as keyof typeof NETWORK_CONFIG) || "testnet";
 
-// Types
 interface TrustScoreState {
   isLoading: boolean;
   error: string | null;
@@ -39,9 +35,6 @@ interface TrustScoreHook {
   clearError: () => void;
 }
 
-/**
- * Custom hook for managing trust score initialization and fetching
- */
 export const useTrustScore = (): TrustScoreHook => {
   const { account, signAndSubmitTransaction } = useWallet();
   
@@ -53,7 +46,6 @@ export const useTrustScore = (): TrustScoreHook => {
     details: null,
   });
 
-  // Memoize the Aptos client
   const client = useMemo(() => {
     return new AptosClient(NETWORK_CONFIG[NETWORK]);
   }, []);
@@ -63,7 +55,6 @@ export const useTrustScore = (): TrustScoreHook => {
   }, []);
 
   const getTrustScore = useCallback(async (): Promise<void> => {
-    // In a real app, we'd use the connected wallet address or user ID
     const userId = account?.address || 'demo-user-id';
     
     setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -107,7 +98,6 @@ export const useTrustScore = (): TrustScoreHook => {
         },
       });
       
-      // Wait for transaction to be confirmed
       await client.waitForTransaction(transaction.hash);
       
       setState(prev => ({ 
@@ -121,7 +111,6 @@ export const useTrustScore = (): TrustScoreHook => {
       let errorMessage = "Failed to initialize trust score";
       
       if (error instanceof Error) {
-        // Check for specific error conditions
         if (error.message.includes("already exists") || 
             error.message.includes("RESOURCE_ALREADY_EXISTS")) {
           setState(prev => ({ 

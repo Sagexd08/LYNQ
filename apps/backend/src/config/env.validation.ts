@@ -16,7 +16,6 @@ export class EnvironmentVariables {
   @IsOptional()
   PORT: number = 3000;
 
-  // Database
   @IsString()
   DB_HOST!: string;
 
@@ -33,7 +32,6 @@ export class EnvironmentVariables {
   @IsString()
   DB_NAME!: string;
 
-  // JWT
   @IsString()
   JWT_SECRET!: string;
 
@@ -41,7 +39,6 @@ export class EnvironmentVariables {
   @IsOptional()
   JWT_EXPIRATION: string = '7d';
 
-  // CORS
   @IsString()
   @IsOptional()
   FRONTEND_URL: string = 'http://localhost:3001';
@@ -50,7 +47,6 @@ export class EnvironmentVariables {
   @IsOptional()
   ADMIN_URL: string = 'http://localhost:3002';
 
-  // Blockchain
   @IsString()
   @IsOptional()
   ETHEREUM_RPC_URL: string = '';
@@ -67,12 +63,10 @@ export class EnvironmentVariables {
   @IsOptional()
   PRIVATE_KEY: string = '';
 
-  // Logging
   @IsString()
   @IsOptional()
   LOG_LEVEL: string = 'info';
 
-  // Data encryption
   @IsString()
   @IsOptional()
   DATA_KEY: string = '';
@@ -81,12 +75,10 @@ export class EnvironmentVariables {
   @IsOptional()
   DATA_KEY_PREV: string = '';
 
-  // Telegram (optional)
   @IsString()
   @IsOptional()
   TELEGRAM_BOT_TOKEN: string = '';
 
-  // Sentry (optional)
   @IsString()
   @IsOptional()
   SENTRY_DSN: string = '';
