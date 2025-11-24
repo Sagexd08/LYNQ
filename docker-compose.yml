@@ -72,7 +72,7 @@ services:
   # Frontend Application
   frontend:
     build:
-      context: ./frontend
+      context: ./apps/web/frontend
       dockerfile: Dockerfile
     container_name: lynq-frontend
     environment:
@@ -86,12 +86,12 @@ services:
     networks:
       - lynq-network
     volumes:
-      - ./frontend/src:/app/src
+      - ./apps/web/frontend/src:/app/src
 
   # Admin Dashboard
   admin:
     build:
-      context: ./admin
+      context: ./apps/web/admin
       dockerfile: Dockerfile
     container_name: lynq-admin
     environment:
@@ -104,7 +104,7 @@ services:
     networks:
       - lynq-network
     volumes:
-      - ./admin/src:/app/src
+      - ./apps/web/admin/src:/app/src
 
   # PgAdmin for database management
   pgadmin:
