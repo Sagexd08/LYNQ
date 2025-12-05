@@ -56,8 +56,8 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
     const init = async () => {
       try {
         if (window.ethereum) {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
+          if (accounts && accounts.length > 0 && accounts[0]) {
             setCurrentAccount(accounts[0]);
           }
         }
@@ -76,8 +76,10 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
         throw new Error("MetaMask not found");
       }
       
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      setCurrentAccount(accounts[0]);
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+      if (accounts && accounts.length > 0 && accounts[0]) {
+        setCurrentAccount(accounts[0]);
+      }
       setError(null);
     } catch (error) {
       console.error("Failed to connect wallet:", error);

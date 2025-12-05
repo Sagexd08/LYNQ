@@ -77,10 +77,10 @@ export const walletProviders: WalletProvider[] = [
   {
     id: 'coinbase',
     name: 'Coinbase Wallet',
-    icon: '�',
+    icon: '𝍮',
     description: 'Secure wallet by Coinbase',
     downloadUrl: 'https://www.coinbase.com/wallet',
-    detectMethod: () => !!(window.ethereum && window.ethereum.isCoinbaseWallet),
+    detectMethod: () => !!(window.ethereum && (window.ethereum as any).isCoinbaseWallet),
     connect: async (): Promise<WalletResponse> => {
       try {
         if (!coinbaseProvider) {

@@ -9,8 +9,8 @@ const LoanPlatform: React.FC = () => {
     const checkWallet = async () => {
       try {
         if (window.ethereum) {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          setIsConnected(accounts.length > 0);
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
+          setIsConnected(accounts && accounts.length > 0);
         } else {
           setIsConnected(false);
         }

@@ -34,6 +34,31 @@ export class UserService {
     });
   }
 
+  async findByWalletAddress(address: string): Promise<User | null> {
+    // Search across all chains for a wallet address
+    const users = await this.userRepository.find();
+    for (const user of users) {
+      if (user.walletAddresses) {
+        for (const chain in user.walletAddresses) {
+          if (user.walletAddresses[chain]?.toLowerCase() === address.toLowerCase()) {
+            return user;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  async createFromWallet(walletAddress: string): Promise<User> {
+    const newUser = this.userRepository.create({
+      email: `wallet-${walletAddress.slice(0, 6)}-${Date.now()}@lynq.local`,
+      walletAddresses: {
+        ethereum: walletAddress,
+      },
+    });
+    return this.userRepository.save(newUser);
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findById(id);
     Object.assign(user, updateUserDto);

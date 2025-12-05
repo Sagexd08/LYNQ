@@ -72,11 +72,12 @@ const LoanRequestForm: React.FC = () => {
     const checkWallet = async () => {
       try {
         if (window.ethereum) {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
-            setUserAddress(accounts[0]);
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
+          if (accounts && accounts.length > 0 && accounts[0]) {
+            const address = accounts[0];
+            setUserAddress(address);
             setIsWalletConnected(true);
-            await checkContractAndUserStatus(accounts[0]);
+            await checkContractAndUserStatus(address);
           }
         } else {
           setIsWalletConnected(false);
@@ -164,9 +165,10 @@ const LoanRequestForm: React.FC = () => {
       console.log("Requesting trust score calculation...");
       
       if (!window.ethereum) throw new Error("Wallet not connected");
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        await checkContractAndUserStatus(accounts[0]);
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
+      if (accounts && accounts.length > 0 && accounts[0]) {
+        const address = accounts[0];
+        await checkContractAndUserStatus(address);
       }
       
       if (!hasTrustScore) {
