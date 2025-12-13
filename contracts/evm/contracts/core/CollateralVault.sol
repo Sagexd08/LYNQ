@@ -36,7 +36,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     ) external nonReentrant returns (uint256) {
         require(amount > 0, "Amount must be > 0");
 
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
+        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
         uint256 collateralId = uint256(
             keccak256(abi.encodePacked(msg.sender, token, amount, block.timestamp))
@@ -65,7 +65,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         collateral.locked = false;
         userTokenBalance[msg.sender][collateral.token] -= collateral.amount;
 
-        IERC20(collateral.token).transfer(msg.sender, collateral.amount);
+        require(IERC20(collateral.token).transfer(msg.sender, collateral.amount), "Transfer failed");
 
         emit CollateralUnlocked(collateralId);
     }

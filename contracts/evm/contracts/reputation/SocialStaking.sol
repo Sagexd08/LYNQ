@@ -41,7 +41,7 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         require(loanCore != address(0), "LoanCore not set");
         
         // Transfer tokens to this contract
-        stakingToken.transferFrom(msg.sender, address(this), amount);
+        require(stakingToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         
         stakes[loanId][msg.sender].amount += amount;
         stakes[loanId][msg.sender].timestamp = block.timestamp;
@@ -87,7 +87,7 @@ contract SocialStaking is Ownable, ReentrancyGuard {
             // Burn or send to treasury
             // For now, let's just keep them in the contract (effectively slashed for users)
             // or transfer to owner/treasury
-            stakingToken.transfer(owner(), amountToSlash);
+            require(stakingToken.transfer(owner(), amountToSlash), "Transfer failed");
             emit Slashed(loanId, amountToSlash);
         }
     }
@@ -101,7 +101,7 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         require(amount > 0, "No stake to withdraw");
         
         userStake.amount = 0;
-        stakingToken.transfer(msg.sender, amount);
+        require(stakingToken.transfer(msg.sender, amount), "Transfer failed");
         
         emit Unstaked(loanId, msg.sender, amount);
     }

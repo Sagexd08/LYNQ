@@ -15,6 +15,7 @@ const getAccounts = (): HardhatAccounts => {
   const selectedNetwork = process.env.HARDHAT_NETWORK ?? "hardhat";
   const hasMnemonic = typeof process.env.MNEMONIC === "string" && process.env.MNEMONIC.trim().length > 0;
   const hasPrivateKey = typeof process.env.PRIVATE_KEY === "string" && process.env.PRIVATE_KEY.trim().length > 0;
+  const allowMnemonic = process.env.USE_MNEMONIC === "1" || process.env.USE_MNEMONIC === "true";
 
   // Never silently deploy from a known fallback key.
   // If a non-local network is selected, require explicit credentials.
@@ -24,8 +25,16 @@ const getAccounts = (): HardhatAccounts => {
     );
   }
 
-  if (hasMnemonic) return { mnemonic: process.env.MNEMONIC!.trim() };
   if (hasPrivateKey) return [process.env.PRIVATE_KEY!.trim()];
+
+  if (hasMnemonic) {
+    if (!allowMnemonic) {
+      throw new Error(
+        "MNEMONIC is set but disabled by default. Set PRIVATE_KEY instead, or set USE_MNEMONIC=1 to explicitly allow mnemonic-based deployments."
+      );
+    }
+    return { mnemonic: process.env.MNEMONIC!.trim() };
+  }
 
   // Local hardhat network can use its default generated accounts.
   return undefined;
@@ -33,12 +42,13 @@ const getAccounts = (): HardhatAccounts => {
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.24",
     settings: {
       optimizer: {
         enabled: true,
         runs: 200,
       },
+      // viaIR is required for this codebase to avoid stack-too-deep in verifier flows
       viaIR: true,
     },
   },
@@ -82,7 +92,28 @@ const config: HardhatUserConfig = {
       mainnet: process.env.ETHERSCAN_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       bsc: process.env.BSCSCAN_API_KEY || "",
+      mantle: process.env.ETHERSCAN_API_KEY || "",
+      mantleSepolia: process.env.ETHERSCAN_API_KEY || "",
     },
+    customChains: [
+      {
+        network: "mantle",
+        chainId: 5000,
+        urls: {
+          // Mantlescan is powered by Etherscan; verification uses Etherscan V2 multi-chain endpoint.
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://mantlescan.xyz",
+        },
+      },
+      {
+        network: "mantleSepolia",
+        chainId: 5003,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://sepolia.mantlescan.xyz",
+        },
+      },
+    ],
   },
 };
 

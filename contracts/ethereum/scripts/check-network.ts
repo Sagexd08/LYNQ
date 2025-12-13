@@ -12,17 +12,26 @@ async function main() {
     const rpcUrl = process.env.RPC_URL || 'Unknown';
     console.log(`✅ RPC URL: ${rpcUrl}\n`);
 
-    // Get account balance
-    const [signer] = await ethers.getSigners();
-    const address = signer.address;
-    const balance = await provider.getBalance(address);
+    // Optional: check a specific account balance (no Hardhat runtime required)
+    const privateKey = process.env.PRIVATE_KEY;
+    const signerAddressEnv = process.env.SIGNER_ADDRESS;
 
-    console.log(`👤 Signer Address: ${address}`);
-    console.log(`💰 Account Balance: ${ethers.formatEther(balance)} ETH\n`);
+    const address = privateKey
+      ? new ethers.Wallet(privateKey).address
+      : signerAddressEnv || null;
 
-    if (balance < ethers.parseEther('0.1')) {
-      console.warn('⚠️  WARNING: Low balance. You may not have enough ETH for deployment.');
-      console.log('Get testnet ETH from: https://sepoliafaucet.com\n');
+    if (address) {
+      const balance = await provider.getBalance(address);
+      console.log(`👤 Address: ${address}`);
+      console.log(`💰 Account Balance: ${ethers.formatEther(balance)} ETH\n`);
+
+      if (balance < ethers.parseEther('0.1')) {
+        console.warn('⚠️  WARNING: Low balance. You may not have enough ETH for deployment.');
+        console.log('Get testnet ETH from: https://sepoliafaucet.com\n');
+      }
+    } else {
+      console.log('ℹ️  No PRIVATE_KEY or SIGNER_ADDRESS provided; skipping balance check.');
+      console.log('   Set PRIVATE_KEY (preferred) or SIGNER_ADDRESS to validate funds.\n');
     }
     const feeData = await provider.getFeeData();
     const gasPrice = feeData.gasPrice || 0n;

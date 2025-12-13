@@ -131,6 +131,10 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     address public platformTreasury;
     IERC20 public stablecoin;
 
+    // Auction configuration
+    // Stored as basis points per hour (e.g., 200 = 2% per hour)
+    uint256 public defaultPriceDecayBpsPerHour = 200;
+
     // ============ Events ============
     
     event LiquidatorRegistered(
@@ -215,6 +219,12 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         
         stablecoin = IERC20(_stablecoin);
         platformTreasury = _treasury;
+    }
+
+    function setDefaultPriceDecayBpsPerHour(uint256 bpsPerHour) external onlyOwner {
+        // sanity bounds: (0, 5000] => at most 50% decay per hour
+        require(bpsPerHour > 0 && bpsPerHour <= 5000, "Invalid decay");
+        defaultPriceDecayBpsPerHour = bpsPerHour;
     }
 
     // ============ Liquidator Management ============
@@ -333,6 +343,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         require(collateralAmount > 0, "Collateral amount must be > 0");
         require(collateralToken != address(0), "Invalid collateral token");
         require(platformFeePercentage <= 10000, "Invalid platform fee");
+        require(defaultPriceDecayBpsPerHour > 0 && defaultPriceDecayBpsPerHour <= 5000, "Invalid decay");
 
         uint256 auctionId = ++_auctionIdCounter;
 
@@ -344,7 +355,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             startPrice: startPrice,
             minimumPrice: minimumPrice,
             currentPrice: startPrice,
-            priceDecayPercentPerHour: 200, // 2% per hour
+            priceDecayPercentPerHour: defaultPriceDecayBpsPerHour,
             platformFeePercentage: platformFeePercentage,
             auctionStartTime: 0,
             auctionEndTime: 0,
@@ -391,12 +402,14 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             return auction.minimumPrice;
         }
 
-        // Calculate decay: startPrice * (1 - decayPercentPerHour)^hoursElapsed
-        uint256 decayFactor = 100 - auction.priceDecayPercentPerHour / 100;
+        // Calculate decay (bps per hour): startPrice * (1 - bps/10000)^hoursElapsed
+        // e.g. 200 bps => 2% per hour
+        require(auction.priceDecayPercentPerHour > 0 && auction.priceDecayPercentPerHour <= 9900, "Invalid decay");
+        uint256 decayFactorBps = 10000 - auction.priceDecayPercentPerHour;
         uint256 decayedPrice = auction.startPrice;
 
         for (uint256 i = 0; i < hoursElapsed; i++) {
-            decayedPrice = (decayedPrice * decayFactor) / 100;
+            decayedPrice = (decayedPrice * decayFactorBps) / 10000;
         }
 
         // Price should not go below minimum
@@ -719,6 +732,15 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     function setPlatformTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "Invalid treasury address");
         platformTreasury = _treasury;
+    }
+
+    /**
+     * Recover accidentally sent native funds (ETH/MNT)
+     */
+    function recoverStuckNative(address payable to, uint256 amount) external onlyOwner {
+        require(to != address(0), "Invalid recipient");
+        (bool ok, ) = to.call{value: amount}('');
+        require(ok, "Native transfer failed");
     }
 
     /**

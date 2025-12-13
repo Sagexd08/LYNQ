@@ -21,6 +21,15 @@ contract CreditScoreVerifier is EIP712 {
             "LoanProposal(address borrower,uint256 loanAmount,uint256 collateralAmount,uint256 interestRate,uint256 duration,uint256 timestamp,uint256 nonce)"
         );
 
+    struct LoanProposal {
+        address borrower;
+        uint256 loanAmount;
+        uint256 collateralAmount;
+        uint256 interestRate;
+        uint256 duration;
+        uint256 timestamp;
+    }
+
     bytes32 public constant RISK_PARAMETERS_TYPEHASH =
         keccak256(
             "RiskParameters(uint256 anomalyScore,uint256 defaultProbability,uint256 recoveryRate,uint256 timestamp,uint256 nonce)"
@@ -112,29 +121,44 @@ contract CreditScoreVerifier is EIP712 {
         uint256 timestamp,
         bytes calldata signature
     ) external returns (bool) {
-        require(block.timestamp <= timestamp + 1 hours, "Signature expired");
+        LoanProposal memory proposal = LoanProposal({
+            borrower: borrower,
+            loanAmount: loanAmount,
+            collateralAmount: collateralAmount,
+            interestRate: interestRate,
+            duration: duration,
+            timestamp: timestamp
+        });
 
+        return _verifyLoanProposal(proposal, signature);
+    }
+
+    function _verifyLoanProposal(LoanProposal memory proposal, bytes calldata signature)
+        internal
+        returns (bool)
+    {
+        require(block.timestamp <= proposal.timestamp + 1 hours, "Signature expired");
+
+        uint256 nonce = nonces[proposal.borrower];
         bytes32 structHash = keccak256(
             abi.encode(
                 LOAN_PROPOSAL_TYPEHASH,
-                borrower,
-                loanAmount,
-                collateralAmount,
-                interestRate,
-                duration,
-                timestamp,
-                nonces[borrower]
+                proposal.borrower,
+                proposal.loanAmount,
+                proposal.collateralAmount,
+                proposal.interestRate,
+                proposal.duration,
+                proposal.timestamp,
+                nonce
             )
         );
 
         bytes32 digest = _hashTypedDataV4(structHash);
         address recovered = ECDSA.recover(digest, signature);
-
         require(recovered == trustedSigner, "Invalid signature");
 
-        nonces[borrower]++;
-        emit LoanProposalVerified(borrower, loanAmount, collateralAmount, timestamp);
-
+        nonces[proposal.borrower] = nonce + 1;
+        emit LoanProposalVerified(proposal.borrower, proposal.loanAmount, proposal.collateralAmount, proposal.timestamp);
         return true;
     }
 

@@ -1,0 +1,30 @@
+name: Contracts CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build EVM contracts
+        run: pnpm --filter @lynq/contracts-evm run build
+
+      - name: Compile legacy Ethereum contracts
+        run: pnpm --filter lynq-ethereum-contracts run compile
