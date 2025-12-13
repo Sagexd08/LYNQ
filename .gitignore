@@ -14,3 +14,5 @@ coverage
 out
 artifacts
 .typechain
+cache
+typechain-types

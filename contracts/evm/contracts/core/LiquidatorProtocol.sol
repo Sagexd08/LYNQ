@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     
+    // ============ Enums ============
     enum LiquidatorStatus {
         INACTIVE,
         ACTIVE,
@@ -221,7 +222,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     /**
      * Register a new liquidator
      */
-    function registerLiquidator(uint256 bondAmount) external payable nonReentrant {
+    function registerLiquidator(uint256 bondAmount) external nonReentrant {
         require(
             liquidators[msg.sender].wallet == address(0),
             "Liquidator already registered"
@@ -251,6 +252,19 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         _liquidatorCount++;
 
         emit LiquidatorRegistered(msg.sender, bondAmount, block.timestamp);
+    }
+
+    /**
+     * Deactivate a liquidator (enables bond withdrawal)
+     */
+    function deactivateLiquidator(address liquidator)
+        external
+        onlyOwner
+        liquidatorExists(liquidator)
+        nonReentrant
+    {
+        Liquidator storage liq = liquidators[liquidator];
+        liq.status = LiquidatorStatus.DEACTIVATED;
     }
 
     /**
@@ -317,6 +331,8 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         require(startPrice > minimumPrice, "Invalid price range");
         require(minimumPrice > 0, "Minimum price must be > 0");
         require(collateralAmount > 0, "Collateral amount must be > 0");
+        require(collateralToken != address(0), "Invalid collateral token");
+        require(platformFeePercentage <= 10000, "Invalid platform fee");
 
         uint256 auctionId = ++_auctionIdCounter;
 
@@ -561,6 +577,26 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
 
         // Calculate platform fee
         uint256 platformFee = (winningBidAmount * auction.platformFeePercentage) / 10000;
+
+        // Ensure winner can actually pay (avoid reverting the whole settlement)
+        uint256 allowance = stablecoin.allowance(winningBid.liquidatorAddress, address(this));
+        uint256 balance = stablecoin.balanceOf(winningBid.liquidatorAddress);
+        if (allowance < winningBidAmount || balance < winningBidAmount) {
+            auction.status = AuctionStatus.FAILED;
+            emit LiquidationFailed(auctionId, "Winner cannot pay", block.timestamp);
+
+            Liquidator storage liq = liquidators[winningBid.liquidatorAddress];
+            liq.totalLiquidations++;
+            liq.failureCount++;
+            if (liq.failureCount >= MAX_FAILURES_BEFORE_SUSPENSION) {
+                liq.suspensionScore = MAX_SUSPENSION_SCORE;
+                liq.status = LiquidatorStatus.SUSPENDED;
+            } else {
+                liq.suspensionScore = (liq.failureCount * 100) / MAX_FAILURES_BEFORE_SUSPENSION;
+            }
+
+            return;
+        }
 
         // Transfer winning bid amount
         require(

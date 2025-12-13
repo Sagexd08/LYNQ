@@ -49,6 +49,14 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  MANTLE_RPC_URL: string = 'https://rpc.mantle.xyz';
+
+  @IsString()
+  @IsOptional()
+  MANTLE_SEPOLIA_RPC_URL: string = 'https://rpc.sepolia.mantle.xyz';
+
+  @IsString()
+  @IsOptional()
   ETHEREUM_RPC_URL: string = '';
 
   @IsString()

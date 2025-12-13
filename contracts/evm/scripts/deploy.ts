@@ -1,6 +1,12 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
+import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
+
   console.log("Deploying LYNQ contracts...");
 
   const LoanCore = await ethers.getContractFactory("LoanCore");
@@ -18,7 +24,24 @@ async function main() {
   await reputationPoints.waitForDeployment();
   console.log("ReputationPoints deployed to:", await reputationPoints.getAddress());
 
-  await loanCore.setCollateralVault(await collateralVault.getAddress());
+  // Deploy MockToken for LiquidatorProtocol (if needed, or use existing)
+  // For testnet, we'll deploy a new MockToken to act as the stablecoin
+  const MockToken = await ethers.getContractFactory("MockToken");
+  const mockToken = await MockToken.deploy("Mock Stablecoin", "mUSD");
+  await mockToken.waitForDeployment();
+  console.log("MockToken (Stablecoin) deployed to:", await mockToken.getAddress());
+
+  const LiquidatorProtocol = await ethers.getContractFactory("LiquidatorProtocol");
+  // Constructor args: _stablecoin, _treasury
+  const liquidatorProtocol = await LiquidatorProtocol.deploy(
+    await mockToken.getAddress(),
+    deployer.address
+  );
+  await liquidatorProtocol.waitForDeployment();
+  console.log("LiquidatorProtocol deployed to:", await liquidatorProtocol.getAddress());
+
+  const linkTx = await loanCore.setCollateralVault(await collateralVault.getAddress());
+  await linkTx.wait();
   console.log("Contracts linked successfully");
 
   console.log("\nDeployment Summary:");
@@ -26,6 +49,29 @@ async function main() {
   console.log("LoanCore:", await loanCore.getAddress());
   console.log("CollateralVault:", await collateralVault.getAddress());
   console.log("ReputationPoints:", await reputationPoints.getAddress());
+  console.log("MockToken:", await mockToken.getAddress());
+  console.log("LiquidatorProtocol:", await liquidatorProtocol.getAddress());
+
+  const net = await ethers.provider.getNetwork();
+  const deployment = {
+    network: network.name,
+    chainId: Number(net.chainId),
+    deployer: deployer.address,
+    contracts: {
+      LoanCore: await loanCore.getAddress(),
+      CollateralVault: await collateralVault.getAddress(),
+      ReputationPoints: await reputationPoints.getAddress(),
+      MockToken: await mockToken.getAddress(),
+      LiquidatorProtocol: await liquidatorProtocol.getAddress(),
+    },
+    timestamp: new Date().toISOString(),
+  };
+
+  const outDir = path.join(__dirname, "..", "deployments");
+  fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, `${network.name}.json`);
+  fs.writeFileSync(outPath, JSON.stringify(deployment, null, 2));
+  console.log("\nWrote deployment file:", outPath);
 }
 
 main().catch((error) => {

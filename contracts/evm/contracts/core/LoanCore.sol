@@ -50,6 +50,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
     constructor() Ownable(msg.sender) {}
 
     function setCollateralVault(address _vault) external onlyOwner {
+        require(_vault != address(0), "Invalid vault");
         collateralVault = _vault;
     }
 
@@ -103,7 +104,9 @@ contract LoanCore is Ownable, ReentrancyGuard {
     ) external nonReentrant returns (uint256) {
         require(amount > 0, "Amount must be > 0");
         require(collateralAmount > 0, "Collateral must be > 0");
+        require(collateralToken != address(0), "Invalid collateral token");
         require(duration > 0, "Duration must be > 0");
+        require(collateralVault != address(0), "Collateral vault not set");
 
         uint256 loanId = loanCounter++;
         uint256 interest = (amount * interestRate) / 10000;
@@ -122,10 +125,9 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
         userLoans[msg.sender].push(loanId);
 
-        IERC20(collateralToken).transferFrom(
-            msg.sender,
-            collateralVault,
-            collateralAmount
+        require(
+            IERC20(collateralToken).transferFrom(msg.sender, collateralVault, collateralAmount),
+            "Collateral transfer failed"
         );
 
         emit LoanCreated(loanId, msg.sender, amount, collateralAmount);

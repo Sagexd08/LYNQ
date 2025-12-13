@@ -58,7 +58,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   mantle: {
     chainId: 5000,
     chainIdHex: '0x1388',
-    name: 'Mantle',
+    name: 'Mantle Mainnet',
     rpcUrl: 'https://rpc.mantle.xyz',
     explorerUrl: 'https://mantlescan.xyz',
     nativeCurrency: {
@@ -76,7 +76,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   mantleSepolia: {
     chainId: 5003,
     chainIdHex: '0x138b',
-    name: 'Mantle Sepolia Testnet',
+    name: 'Mantle Sepolia',
     rpcUrl: 'https://rpc.sepolia.mantle.xyz',
     explorerUrl: 'https://explorer.sepolia.mantle.xyz',
     nativeCurrency: {
@@ -90,6 +90,8 @@ export const NETWORKS: Record<string, NetworkConfig> = {
       reputationPoints: import.meta.env.VITE_REPUTATION_POINTS_ADDRESS_MANTLE_SEPOLIA || '',
     },
   },
+
+
 
   polygon: {
     chainId: 137,

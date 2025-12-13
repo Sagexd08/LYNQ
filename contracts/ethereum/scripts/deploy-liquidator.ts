@@ -1,4 +1,5 @@
 import { ethers } from 'hardhat';
+import type { ContractTransactionResponse } from 'ethers';
 
 async function main() {
   console.log('🚀 Deploying LYNQ Liquidator Protocol to Testnet...\n');
@@ -18,7 +19,10 @@ async function main() {
 
   console.log('📋 Deploying USDC Stablecoin...');
   const USDCFactory = await ethers.getContractFactory('USDC');
-  const usdc = await USDCFactory.deploy();
+  const usdc = (await USDCFactory.deploy()) as Awaited<ReturnType<typeof USDCFactory.deploy>> & {
+    mint: (to: string, amount: bigint) => Promise<ContractTransactionResponse | null>;
+    approve: (spender: string, amount: bigint) => Promise<ContractTransactionResponse | null>;
+  };
   await usdc.waitForDeployment();
   const usdcAddress = await usdc.getAddress();
   console.log(`✅ USDC deployed to: ${usdcAddress}\n`);
@@ -38,7 +42,9 @@ async function main() {
 
   console.log('💵 Minting test USDC...');
   const mintTx = await usdc.mint(deployer.address, ethers.parseUnits('100000', 6));
-  await mintTx.wait();
+  if (mintTx) {
+    await mintTx.wait();
+  }
   console.log('✅ Minted 100,000 USDC to deployer\n');
 
   console.log('📋 Deploying supporting contracts...');
@@ -128,19 +134,24 @@ async function main() {
   try {
 
     const approveTx = await usdc.approve(protocolAddress, ethers.parseUnits('100000', 6));
-    await approveTx.wait();
-    console.log('   ✅ USDC approval successful');
+    if (approveTx) {
+      await approveTx.wait();
+      console.log('   ✅ USDC approval successful');
+    }
 
     const registerTx = await liquidatorProtocol.registerLiquidator(ethers.parseEther('10'));
     const registerReceipt = await registerTx.wait();
     console.log(`   ✅ Liquidator registration successful (tx: ${registerReceipt?.hash})\n`);
 
     const stats = await liquidatorProtocol.getLiquidatorStats(deployer.address);
+    const statusCode = Number(stats.status);
+    const statusLabel =
+      statusCode === 0 ? 'INACTIVE' : statusCode === 1 ? 'ACTIVE' : statusCode === 2 ? 'SUSPENDED' : 'DEACTIVATED';
     console.log('📊 Liquidator Stats:');
-    console.log(`   • Status: ${stats.status === 0 ? 'INACTIVE' : stats.status === 1 ? 'ACTIVE' : 'SUSPENDED'}`);
+    console.log(`   • Status: ${statusLabel}`);
     console.log(`   • Bond Amount: ${ethers.formatEther(stats.bondAmount)} ETH`);
-    console.log(`   • Successful Liquidations: ${stats.successfulLiquidations}`);
-    console.log(`   • Total Liquidations: ${stats.totalLiquidations}\n`);
+    console.log(`   • Successful Liquidations: ${stats.successfulLiquidations.toString()}`);
+    console.log(`   • Total Liquidations: ${stats.totalLiquidations.toString()}\n`);
   } catch (error) {
     console.error('❌ Registration test failed:', error);
   }
