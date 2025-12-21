@@ -61,6 +61,18 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  CREDIT_SCORE_VERIFIER_ADDRESS: string = '';
+
+  @IsNumber()
+  @IsOptional()
+  CHAIN_ID: number = 31337;
+
+  @IsString()
+  @IsOptional()
+  SOCIAL_STAKING_ADDRESS: string = '';
+
+  @IsString()
+  @IsOptional()
   FLASH_LOAN_CONTRACT_ADDRESS: string = '';
 
   @IsString()

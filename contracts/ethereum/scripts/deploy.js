@@ -2,6 +2,18 @@ const { ethers } = require("hardhat");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
+
+  const expectedDeployer = (process.env.EXPECTED_DEPLOYER_ADDRESS || "").trim();
+  if (expectedDeployer) {
+    const actual = deployer.address.toLowerCase();
+    const expected = expectedDeployer.toLowerCase();
+    if (actual !== expected) {
+      throw new Error(
+        `Refusing to deploy: deployer address mismatch. Expected ${expectedDeployer}, got ${deployer.address}. ` +
+          `Check PRIVATE_KEY/MNEMONIC and derivation path.`
+      );
+    }
+  }
   
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());

@@ -46,6 +46,19 @@ module.exports = {
       url: "http://127.0.0.1:8545",
       chainId: 1337,
     },
+    alfajores: {
+      url:
+        process.env.CELO_ALFAJORES_RPC_URL ||
+        process.env.ALFAJORES_RPC_URL ||
+        "https://alfajores-forno.celo-testnet.org",
+      accounts: getAccounts(),
+      chainId: 44787,
+    },
+    celo: {
+      url: process.env.CELO_RPC_URL || "https://forno.celo.org",
+      accounts: getAccounts(),
+      chainId: 42220,
+    },
     sepolia: {
       url: process.env.ETHEREUM_SEPOLIA_RPC_URL || process.env.SEPOLIA_RPC_URL || "",
       accounts: getAccounts(),
@@ -67,7 +80,30 @@ module.exports = {
     timeout: 60000,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || "",
+    apiKey: {
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      alfajores: process.env.CELOSCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      celo: process.env.CELOSCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+    },
+    customChains: [
+      {
+        network: "alfajores",
+        chainId: 44787,
+        urls: {
+          apiURL: "https://api-alfajores.celoscan.io/api",
+          browserURL: "https://alfajores.celoscan.io",
+        },
+      },
+      {
+        network: "celo",
+        chainId: 42220,
+        urls: {
+          apiURL: "https://api.celoscan.io/api",
+          browserURL: "https://celoscan.io",
+        },
+      },
+    ],
   },
 };
 

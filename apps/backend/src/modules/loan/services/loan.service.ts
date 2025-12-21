@@ -5,6 +5,8 @@ import { Loan, LoanStatus } from '../entities/loan.entity';
 import { CreateLoanDto } from '../dto/create-loan.dto';
 import { RepayLoanDto } from '../dto/repay-loan.dto';
 import { UserService } from '../../user/services/user.service';
+import { ConfigService } from '@nestjs/config';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class LoanService {
@@ -12,7 +14,8 @@ export class LoanService {
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
     private readonly userService: UserService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) { }
 
   async create(userId: string, createLoanDto: CreateLoanDto): Promise<Loan> {
     const user = await this.userService.findById(userId);
@@ -121,5 +124,110 @@ export class LoanService {
     const loan = await this.findById(loanId);
     loan.status = status;
     return this.loanRepository.save(loan);
+  }
+
+  async createRefinanceOffer(loanId: string, userId: string): Promise<any> {
+    const loan = await this.findById(loanId);
+
+    if (loan.userId !== userId) {
+      throw new BadRequestException('Not authorized to refinance this loan');
+    }
+
+    if (loan.status !== LoanStatus.ACTIVE) {
+      throw new BadRequestException('Loan is not active');
+    }
+
+    // Get current user tier
+    const user = await this.userService.findById(userId);
+    const newInterestRateStr = this.calculateInterestRate(user.reputationTier);
+    const newInterestRate = parseFloat(newInterestRateStr);
+    const currentInterestRate = parseFloat(loan.interestRate);
+
+    // Check if new terms are better
+    if (newInterestRate >= currentInterestRate) {
+      throw new BadRequestException(`Current rate (${currentInterestRate}%) is already optimal or equal to new rate (${newInterestRate}%)`);
+    }
+
+    // Get On-Chain ID from metadata
+    const onChainId = loan.metadata?.onChainId;
+    if (!onChainId) {
+      throw new BadRequestException('Loan does not have an on-chain ID linked yet');
+    }
+
+    // Prepare EIP-712 Signature
+    const privateKey = this.configService.get<string>('PRIVATE_KEY');
+    if (!privateKey) {
+      throw new Error('PRIVATE_KEY not configured');
+    }
+
+    const verifierAddress = this.configService.get<string>('CREDIT_SCORE_VERIFIER_ADDRESS');
+    if (!verifierAddress) {
+      throw new Error('CREDIT_SCORE_VERIFIER_ADDRESS not configured');
+    }
+
+    const chainId = this.configService.get<number>('CHAIN_ID', 31337);
+    const signer = new ethers.Wallet(privateKey);
+
+    const domain = {
+      name: 'LYNQ',
+      version: '1',
+      chainId: chainId,
+      verifyingContract: verifierAddress,
+    };
+
+    const types = {
+      RefinanceProposal: [
+        { name: 'loanId', type: 'uint256' },
+        { name: 'newInterestRate', type: 'uint256' },
+        { name: 'newDuration', type: 'uint256' },
+        { name: 'timestamp', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+      ],
+    };
+
+    // Check User Wallet Address
+    const borrowerAddress = user.walletAddresses?.[loan.chain];
+    if (!borrowerAddress) {
+      throw new BadRequestException(`User does not have a connected wallet address for chain ${loan.chain}`);
+    }
+
+    // Fetch nonce from contract
+    let nonce = 0;
+    try {
+      const rpcUrl = this.configService.get<string>('RPC_URL', 'http://localhost:8545');
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const verifierContract = new ethers.Contract(
+        verifierAddress,
+        ['function getNonce(address user) view returns (uint256)'],
+        provider
+      );
+      nonce = Number(await verifierContract.getNonce(borrowerAddress));
+    } catch (e) {
+      throw new BadRequestException('Could not fetch nonce for verification: ' + (e instanceof Error ? e.message : String(e)));
+    }
+
+    const rateInBasisPoints = Math.round(newInterestRate * 100);
+    const timestamp = Math.floor(Date.now() / 1000);
+
+    const value = {
+      loanId: onChainId,
+      newInterestRate: rateInBasisPoints,
+      newDuration: loan.durationDays * 24 * 3600, // Convert days to seconds
+      timestamp,
+      nonce,
+    };
+
+    const signature = await signer.signTypedData(domain, types, value);
+
+    return {
+      success: true,
+      proposal: value,
+      signature,
+      betterTerms: {
+        oldRate: currentInterestRate,
+        newRate: newInterestRate,
+        improvement: (currentInterestRate - newInterestRate).toFixed(2) + '%'
+      }
+    };
   }
 }

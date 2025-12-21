@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { LoanRepaymentService } from '../../services/loanRepaymentService';
+import { loanApi, RefinanceOffer } from '../../services/api/loanApi';
 
 interface Loan {
   id: string;
@@ -30,7 +31,11 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  
+  // Refinance State
+  const [refinanceLoading, setRefinanceLoading] = useState(false);
+  const [refinanceOffer, setRefinanceOffer] = useState<RefinanceOffer | null>(null);
+
+
   useEffect(() => {
     const initService = async () => {
       if (loan?.contractAddress && typeof window !== 'undefined' && window.ethereum) {
@@ -39,8 +44,8 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
           const service = new LoanRepaymentService(loan.contractAddress, provider);
           await service.connectSigner();
           setRepaymentService(service);
-          
-          
+
+
           const details = await service.getLoanDetails(loan.id);
           setLoanDetails(details);
         } catch (err) {
@@ -51,7 +56,56 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
     };
 
     initService();
+    initService();
   }, [loan?.contractAddress, loan?.id]);
+
+  const handleCheckRefinance = async () => {
+    setRefinanceLoading(true);
+    setError(null);
+    try {
+      const offer = await loanApi.checkRefinance(loan.id);
+      if (offer.success) {
+        setRefinanceOffer(offer);
+        setSuccess('Refinance offer available!');
+      } else {
+        setError('No better terms available currently.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.response?.data?.message || 'Failed to check refinance eligibility');
+    } finally {
+      setRefinanceLoading(false);
+    }
+  };
+
+  const handleAcceptRefinance = async () => {
+    if (!repaymentService || !refinanceOffer) return;
+
+    setIsProcessing(true);
+    setError(null);
+    try {
+      const { proposal, signature } = refinanceOffer;
+      const tx = await repaymentService.executeRefinance(
+        proposal.loanId,
+        proposal.newInterestRate.toString(),
+        proposal.newDuration,
+        proposal.timestamp,
+        signature
+      );
+
+      setSuccess(`Refinance transaction sent: ${tx.hash}`);
+      await tx.wait();
+      setSuccess('Loan successfully refinanced!');
+      setRefinanceOffer(null);
+
+      const updatedDetails = await repaymentService.getLoanDetails(loan.id);
+      setLoanDetails(updatedDetails);
+    } catch (err: any) {
+      setError(err.message || 'Refinance failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (!repaymentService || (!paymentAmount && paymentType === 'partial')) return;
@@ -62,7 +116,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
 
     try {
       let tx;
-      
+
       if (paymentType === 'full') {
         tx = await repaymentService.executeFullRepayment(loan.id);
       } else {
@@ -73,11 +127,11 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
       if (tx) {
         setSuccess(`Payment successful! Transaction: ${tx.hash}`);
         setPaymentAmount('');
-        
-        
+
+
         await tx.wait();
-        
-        
+
+
         const updatedDetails = await repaymentService.getLoanDetails(loan.id);
         setLoanDetails(updatedDetails);
       }
@@ -98,29 +152,28 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
 
   return (
     <div className="w-full bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10 space-y-6">
-      
-      {}
+
+      { }
       <div className="flex justify-between items-start">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white">
             Loan #{loan?.id || 'TBD'}
           </h2>
           <p className="text-white/70 text-sm">{loan?.type || 'Personal Loan'}</p>
-        </div> 
+        </div>
         <span
-          className={`px-4 py-2 rounded-full text-sm font-semibold border backdrop-blur-sm ${
-            loan?.status === 'Active'
-              ? 'bg-green-400/10 text-green-400 border-green-400/30'
-              : loan?.status === 'Pending'
+          className={`px-4 py-2 rounded-full text-sm font-semibold border backdrop-blur-sm ${loan?.status === 'Active'
+            ? 'bg-green-400/10 text-green-400 border-green-400/30'
+            : loan?.status === 'Pending'
               ? 'bg-yellow-400/10 text-yellow-300 border-yellow-400/30'
               : 'bg-gray-400/10 text-gray-300 border-gray-400/30'
-          }`}
+            }`}
         >
           {loan?.status || 'Active'}
         </span>
       </div>
 
-      {}
+      { }
       <div className="bg-white/5 border border-cyan-400/10 rounded-lg p-4 text-center shadow-inner shadow-cyan-500/5">
         <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-1">
           {loanDetails ? formatCurrency(ethers.formatEther(loanDetails.remainingBalance)) : (loan?.amount || '$0')}
@@ -130,7 +183,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </p>
       </div>
 
-      {}
+      { }
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className="text-white/60 text-xs">Interest Rate</p>
@@ -146,7 +199,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       </div>
 
-      {}
+      { }
       {loanDetails && (
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -164,48 +217,87 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       )}
 
-      {}
+
+
+      {/* Refinance Section */}
+      {loanDetails && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-white">Refinance Options</h3>
+          {!refinanceOffer ? (
+            <button
+              onClick={handleCheckRefinance}
+              disabled={refinanceLoading}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors"
+            >
+              {refinanceLoading ? 'Checking Eligibility...' : 'Check for Lower Rate'}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-black/20 p-3 rounded text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-white/70">Current Rate:</span>
+                  <span className="text-white">{refinanceOffer.betterTerms.oldRate}%</span>
+                </div>
+                <div className="flex justify-between font-bold text-green-400">
+                  <span>New Rate:</span>
+                  <span>{refinanceOffer.betterTerms.newRate}%</span>
+                </div>
+                <div className="text-xs text-green-300 pt-1">
+                  Improvement: {refinanceOffer.betterTerms.improvement}
+                </div>
+              </div>
+              <button
+                onClick={handleAcceptRefinance}
+                disabled={isProcessing}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors"
+              >
+                {isProcessing ? 'Processing Refinance...' : 'Accept & Refinance'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Error/Success */}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
           {error}
         </div>
       )}
-      
+
       {success && (
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-green-400 text-sm">
           {success}
         </div>
       )}
 
-      {}
+      { }
       <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-4">
         <h3 className="text-lg font-semibold text-white">Make Payment</h3>
-        
-        {}
+
+        { }
         <div className="flex space-x-4">
           <button
             onClick={() => setPaymentType('partial')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              paymentType === 'partial'
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${paymentType === 'partial'
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+              }`}
           >
             Partial Payment
           </button>
           <button
             onClick={() => setPaymentType('full')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              paymentType === 'full'
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${paymentType === 'full'
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+              }`}
           >
             Full Payment
           </button>
         </div>
 
-        {}
+        { }
         {paymentType === 'partial' && (
           <div>
             <label className="block text-white/60 text-xs mb-2">Payment Amount (ETH)</label>
@@ -219,16 +311,16 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
           </div>
         )}
 
-        {}
+        { }
         <button
           onClick={handlePayment}
           disabled={isProcessing || (!paymentAmount && paymentType === 'partial')}
           className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg"
         >
-          {isProcessing 
-            ? 'Processing...' 
-            : paymentType === 'full' 
-              ? 'Pay Full Amount' 
+          {isProcessing
+            ? 'Processing...'
+            : paymentType === 'full'
+              ? 'Pay Full Amount'
               : 'Make Payment'
           }
         </button>

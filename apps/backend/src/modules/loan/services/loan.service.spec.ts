@@ -6,10 +6,13 @@ import { Loan, LoanStatus } from '../entities/loan.entity';
 import { UserService } from '../../user/services/user.service';
 import { User, ReputationTier } from '../../user/entities/user.entity';
 
+import { ConfigService } from '@nestjs/config';
+
 describe('LoanService', () => {
   let service: LoanService;
   let loanRepository: Repository<Loan>;
   let userService: UserService;
+  let configService: ConfigService;
 
   const mockLoanRepository = {
     create: jest.fn(),
@@ -23,10 +26,19 @@ describe('LoanService', () => {
     updateReputationPoints: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn(),
+  };
+
   beforeEach(() => {
     loanRepository = mockLoanRepository as unknown as Repository<Loan>;
     userService = mockUserService as unknown as UserService;
-    service = new LoanService(loanRepository as any, userService as any);
+    configService = mockConfigService as unknown as ConfigService;
+    service = new LoanService(
+      loanRepository as any,
+      userService as any,
+      configService as any
+    );
   });
 
   afterEach(() => {
@@ -72,7 +84,6 @@ describe('LoanService', () => {
       expect(result).toBeDefined();
     });
   });
-
   describe('findByUser', () => {
     it('should return all loans for a user', async () => {
       const mockLoans = [
@@ -89,6 +100,54 @@ describe('LoanService', () => {
         where: { userId: 'user-123' },
         order: { createdAt: 'DESC' },
       });
+    });
+  });
+
+  describe('createRefinanceOffer', () => {
+    it('should throw if loan is not active', async () => {
+      const mockLoan = {
+        id: 'loan-1',
+        userId: 'user-123',
+        status: LoanStatus.REPAID,
+      } as Loan;
+
+      (mockLoanRepository.findOne as unknown as jest.MockedFunction<any>).mockResolvedValue(mockLoan);
+
+      await expect(service.createRefinanceOffer('loan-1', 'user-123'))
+        .rejects.toThrow('Loan is not active');
+    });
+
+    it('should throw if user is not authorized', async () => {
+      const mockLoan = {
+        id: 'loan-1',
+        userId: 'other-user',
+        status: LoanStatus.ACTIVE,
+      } as Loan;
+
+      (mockLoanRepository.findOne as unknown as jest.MockedFunction<any>).mockResolvedValue(mockLoan);
+
+      await expect(service.createRefinanceOffer('loan-1', 'user-123'))
+        .rejects.toThrow('Not authorized');
+    });
+
+    it('should throw if new terms are not better', async () => {
+      const mockLoan = {
+        id: 'loan-1',
+        userId: 'user-123',
+        status: LoanStatus.ACTIVE,
+        interestRate: '5.00', // GOLD/PLATINUM rate
+      } as Loan;
+
+      const mockUser = {
+        id: 'user-123',
+        reputationTier: ReputationTier.BRONZE, // 15.00%
+      } as User;
+
+      (mockLoanRepository.findOne as unknown as jest.MockedFunction<any>).mockResolvedValue(mockLoan);
+      (mockUserService.findById as unknown as jest.MockedFunction<any>).mockResolvedValue(mockUser);
+
+      await expect(service.createRefinanceOffer('loan-1', 'user-123'))
+        .rejects.toThrow('Current rate (5%) is already optimal');
     });
   });
 });

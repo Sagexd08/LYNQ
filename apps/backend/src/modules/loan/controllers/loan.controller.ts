@@ -42,4 +42,10 @@ export class LoanController {
   async liquidateLoan(@Param('id') id: string): Promise<any> {
     return this.loanService.liquidate(id);
   }
+
+  @Post(':id/refinance-offer')
+  @ApiOperation({ summary: 'Generate refinance offer' })
+  async createRefinanceOffer(@Param('id') id: string, @Request() req: any): Promise<any> {
+    return this.loanService.createRefinanceOffer(id, req.user.id);
+  }
 }

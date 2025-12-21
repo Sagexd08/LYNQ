@@ -33,6 +33,23 @@ export interface RepayLoanRequest {
   transactionHash: string;
 }
 
+export interface RefinanceOffer {
+  success: boolean;
+  proposal: {
+    loanId: string;
+    newInterestRate: number;
+    newDuration: number;
+    timestamp: number;
+    nonce: number;
+  };
+  signature: string;
+  betterTerms: {
+    oldRate: number;
+    newRate: number;
+    improvement: string;
+  };
+}
+
 export const loanApi = {
 
   async createLoan(data: CreateLoanRequest): Promise<LoanResponse> {
@@ -48,6 +65,11 @@ export const loanApi = {
 
   async getLoanById(id: string): Promise<LoanResponse> {
     const response = await apiClient.get<LoanResponse>(`/loans/${id}`);
+    return response.data;
+  },
+
+  async checkRefinance(id: string): Promise<RefinanceOffer> {
+    const response = await apiClient.post<RefinanceOffer>(`/loans/${id}/refinance-offer`);
     return response.data;
   },
 

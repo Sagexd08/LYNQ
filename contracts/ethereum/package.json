@@ -7,7 +7,9 @@
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js",
     "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:alfajores": "hardhat run scripts/deploy.js --network alfajores",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "addr:mnemonic": "node scripts/derive-address.js",
     "verify": "hardhat verify --network sepolia",
     "node": "hardhat node"
   },
