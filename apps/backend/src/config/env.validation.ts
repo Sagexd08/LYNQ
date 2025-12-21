@@ -1,121 +1,79 @@
 import { plainToClass } from 'class-transformer';
-import { IsString, IsNumber, IsOptional, validateSync, IsEnum } from 'class-validator';
+import { IsNumber, IsOptional, IsString, validateSync, IsEnum, IsBooleanString } from 'class-validator';
 
 enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
+    Development = 'development',
+    Production = 'production',
+    Test = 'test',
 }
 
 export class EnvironmentVariables {
-  @IsEnum(Environment)
-  @IsOptional()
-  NODE_ENV: Environment = Environment.Development;
+    @IsEnum(Environment)
+    @IsOptional()
+    NODE_ENV: Environment = Environment.Development;
 
-  @IsNumber()
-  @IsOptional()
-  PORT: number = 3000;
+    @IsNumber()
+    @IsOptional()
+    PORT: number = 3000;
 
-  @IsString()
-  DB_HOST!: string;
+    @IsString()
+    @IsOptional()
+    DB_HOST: string = 'localhost';
 
-  @IsNumber()
-  @IsOptional()
-  DB_PORT: number = 5432;
+    @IsNumber()
+    @IsOptional()
+    DB_PORT: number = 5432;
 
-  @IsString()
-  DB_USER!: string;
+    @IsString()
+    @IsOptional()
+    DB_USER: string = 'postgres';
 
-  @IsString()
-  DB_PASSWORD!: string;
+    @IsString()
+    @IsOptional()
+    DB_PASSWORD: string = 'postgres';
 
-  @IsString()
-  DB_NAME!: string;
+    @IsString()
+    @IsOptional()
+    DB_NAME: string = 'lynq';
 
-  @IsString()
-  JWT_SECRET!: string;
+    @IsString()
+    @IsOptional()
+    TELEGRAM_BOT_TOKEN: string = '';
 
-  @IsString()
-  @IsOptional()
-  JWT_EXPIRATION: string = '7d';
+    @IsString()
+    @IsOptional()
+    FRONTEND_URL?: string;
 
-  @IsString()
-  @IsOptional()
-  FRONTEND_URL: string = 'http://localhost:3001';
+    @IsString()
+    @IsOptional()
+    ADMIN_URL?: string;
 
-  @IsString()
-  @IsOptional()
-  ADMIN_URL: string = 'http://localhost:3002';
+    @IsString()
+    @IsOptional()
+    CORS_ORIGINS?: string;
 
-  @IsString()
-  @IsOptional()
-  MANTLE_RPC_URL: string = 'https://rpc.mantle.xyz';
+    @IsString()
+    @IsOptional()
+    SENTRY_DSN?: string;
 
-  @IsString()
-  @IsOptional()
-  MANTLE_SEPOLIA_RPC_URL: string = 'https://rpc.sepolia.mantle.xyz';
+    @IsString()
+    @IsOptional()
+    LOG_LEVEL?: string;
 
-  @IsString()
-  @IsOptional()
-  ETHEREUM_RPC_URL: string = '';
-
-  @IsString()
-  @IsOptional()
-  CREDIT_SCORE_VERIFIER_ADDRESS: string = '';
-
-  @IsNumber()
-  @IsOptional()
-  CHAIN_ID: number = 31337;
-
-  @IsString()
-  @IsOptional()
-  SOCIAL_STAKING_ADDRESS: string = '';
-
-  @IsString()
-  @IsOptional()
-  FLASH_LOAN_CONTRACT_ADDRESS: string = '';
-
-  @IsString()
-  @IsOptional()
-  FLASH_LOAN_OPERATOR_PRIVATE_KEY: string = '';
-
-  @IsString()
-  @IsOptional()
-  PRIVATE_KEY: string = '';
-
-  @IsString()
-  @IsOptional()
-  LOG_LEVEL: string = 'info';
-
-  @IsString()
-  @IsOptional()
-  DATA_KEY: string = '';
-
-  @IsString()
-  @IsOptional()
-  DATA_KEY_PREV: string = '';
-
-  @IsString()
-  @IsOptional()
-  TELEGRAM_BOT_TOKEN: string = '';
-
-  @IsString()
-  @IsOptional()
-  SENTRY_DSN: string = '';
+    @IsBooleanString()
+    @IsOptional()
+    ENABLE_SWAGGER?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
-  const validatedConfig = plainToClass(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
-
-  const errors = validateSync(validatedConfig, {
-    skipMissingProperties: false,
-  });
-
-  if (errors.length > 0) {
-    throw new Error(errors.toString());
-  }
-
-  return validatedConfig;
+    const validatedConfig = plainToClass(EnvironmentVariables, config, {
+        enableImplicitConversion: true,
+    });
+    const errors = validateSync(validatedConfig, {
+        skipMissingProperties: false,
+    });
+    if (errors.length > 0) {
+        throw new Error(errors.toString());
+    }
+    return validatedConfig;
 }

@@ -8,8 +8,9 @@ A production-grade, multi-chain DeFi lending platform with ML-enhanced credit sc
 LYNQ/
 ├── apps/
 │   ├── backend/          # NestJS API server
-│   ├── frontend/         # Next.js user application
-│   └── admin/           # Next.js admin dashboard
+│   └── web/
+│       ├── frontend/     # Vite + React user app
+│       └── admin/        # Next.js admin dashboard
 ├── packages/
 │   └── blockchain-adapter/  # Multi-chain abstraction layer
 ├── contracts/
@@ -226,12 +227,12 @@ pnpm run migration:run
 5. **Start development servers**
 ```bash
 # Start all apps
-pnpm run dev
+pnpm run dev:apps
 
-# Or individually:
-pnpm run dev:backend   # Port 3000
-pnpm run dev:frontend  # Port 3001
-pnpm run dev:admin     # Port 3002
+# Or individually via workspace filters
+pnpm --filter @lynq/backend dev   # Port 3000 (API)
+pnpm --filter @lynq/frontend dev  # Port 3001 (Vite frontend)
+pnpm --filter @lynq/admin dev     # Port 3002 (Next admin)
 ```
 
 ### Deploy Smart Contracts
@@ -334,10 +335,15 @@ FLOW_ACCESS_NODE=https://rest-mainnet.onflow.org
 
 ### Frontend Environment Variables
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_CHAIN_ID=1
-NEXT_PUBLIC_ENABLE_APTOS=true
-NEXT_PUBLIC_ENABLE_FLOW=true
+# apps/web/frontend (Vite)
+VITE_API_BASE_URL=http://localhost:3000/api/v1
+VITE_APP_NAME=LYNQ
+VITE_APP_VERSION=dev
+VITE_ENABLE_ANALYTICS=false
+VITE_ENABLE_ERROR_REPORTING=false
+
+# apps/web/admin (Next.js)
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
 ```
 
 ## 📈 Advanced ML Architecture

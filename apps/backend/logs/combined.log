@@ -1,3 +1,45 @@
 {"environment":"development","level":"info","message":"Server running on port 5000","port":5000,"service":"lynq-backend","timestamp":"2025-11-19 13:57:25"}
 {"environment":"development","level":"info","message":"Server running on port 5000","port":5000,"service":"lynq-backend","timestamp":"2025-11-19 13:57:49"}
 {"environment":"development","level":"info","message":"Server running on port 5000","port":5000,"service":"lynq-backend","timestamp":"2025-11-19 14:00:59"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:50:17"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:53:59"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:53:59"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:53:59"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:55:55"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:24"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:43"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:43"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:43"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:58"}
+{"level":"info","message":"Ensemble Models Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:59"}
+{"level":"info","message":"Anomaly Detection Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:59"}
+{"level":"info","message":"Predictive Analytics Service initialized","service":"lynq-backend","timestamp":"2025-12-22 03:56:59"}

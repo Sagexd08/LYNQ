@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { LoanService } from '../services/loan.service';
 import { CreateLoanDto } from '../dto/create-loan.dto';
 import { RepayLoanDto } from '../dto/repay-loan.dto';
@@ -7,21 +7,23 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('Loans')
 @Controller('loans')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class LoanController {
-  constructor(private readonly loanService: LoanService) {}
+  constructor(private readonly loanService: LoanService) { }
 
   @Post()
-  @ApiOperation({ summary: 'Create new loan' })
-  async createLoan(@Request() req: any, @Body() createLoanDto: CreateLoanDto): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new loan request' })
+  async create(@Request() req: any, @Body() createLoanDto: CreateLoanDto): Promise<any> {
     return this.loanService.create(req.user.id, createLoanDto);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all loans for user' })
+  @Get('my-loans')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user loans' })
   @ApiQuery({ name: 'status', required: false })
-  async getUserLoans(@Request() req: any, @Query('status') status?: string): Promise<any> {
+  async getMyLoans(@Request() req: any, @Query('status') status?: string): Promise<any> {
     return this.loanService.findByUser(req.user.id, status);
   }
 
@@ -32,20 +34,26 @@ export class LoanController {
   }
 
   @Put(':id/repay')
-  @ApiOperation({ summary: 'Repay loan' })
-  async repayLoan(@Param('id') id: string, @Body() repayLoanDto: RepayLoanDto): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Repay a loan' })
+  async repay(@Param('id') id: string, @Body() repayLoanDto: RepayLoanDto): Promise<any> {
     return this.loanService.repay(id, repayLoanDto);
   }
 
   @Put(':id/liquidate')
-  @ApiOperation({ summary: 'Liquidate loan' })
-  async liquidateLoan(@Param('id') id: string): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Liquidate a defaulted loan' })
+  async liquidate(@Param('id') id: string): Promise<any> {
     return this.loanService.liquidate(id);
   }
 
-  @Post(':id/refinance-offer')
-  @ApiOperation({ summary: 'Generate refinance offer' })
-  async createRefinanceOffer(@Param('id') id: string, @Request() req: any): Promise<any> {
+  @Post(':id/refinance')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Request refinance offer' })
+  async refinance(@Param('id') id: string, @Request() req: any): Promise<any> {
     return this.loanService.createRefinanceOffer(id, req.user.id);
   }
 }

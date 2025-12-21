@@ -1,4 +1,4 @@
-import { expect, afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -10,7 +10,7 @@ afterEach(() => {
 Object.defineProperty(window, 'ethereum', {
   value: {
     isMetaMask: true,
-    request: jest.fn(),
+    request: vi.fn(),
   },
   writable: true,
 });

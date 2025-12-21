@@ -7,6 +7,7 @@ import { RepayLoanDto } from '../dto/repay-loan.dto';
 import { UserService } from '../../user/services/user.service';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
+import { TelegramService } from '../../telegram/services/telegram.service';
 
 @Injectable()
 export class LoanService {
@@ -15,6 +16,7 @@ export class LoanService {
     private readonly loanRepository: Repository<Loan>,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly telegramService: TelegramService,
   ) { }
 
   async create(userId: string, createLoanDto: CreateLoanDto): Promise<Loan> {
@@ -43,7 +45,12 @@ export class LoanService {
       status: LoanStatus.PENDING,
     });
 
-    return this.loanRepository.save(loan);
+    const savedLoan = await this.loanRepository.save(loan);
+
+    // Send Telegram notification
+    await this.telegramService.notifyLoanCreated(userId, savedLoan);
+
+    return savedLoan;
   }
 
   async findById(id: string): Promise<Loan> {
@@ -94,7 +101,17 @@ export class LoanService {
       await this.userService.updateReputationPoints(loan.userId, 100);
     }
 
-    return this.loanRepository.save(loan);
+    const savedLoan = await this.loanRepository.save(loan);
+
+    // Send Telegram notification for full repayment
+    if (savedLoan.status === LoanStatus.REPAID) {
+      await this.telegramService.notifyLoanRepaid(loan.userId, {
+        ...savedLoan,
+        transactionHash: repayLoanDto.transactionHash,
+      });
+    }
+
+    return savedLoan;
   }
 
   async liquidate(loanId: string): Promise<Loan> {
@@ -107,7 +124,12 @@ export class LoanService {
     loan.status = LoanStatus.LIQUIDATED;
     await this.userService.updateReputationPoints(loan.userId, -200);
 
-    return this.loanRepository.save(loan);
+    const savedLoan = await this.loanRepository.save(loan);
+
+    // Send Telegram notification for liquidation
+    await this.telegramService.notifyLoanLiquidated(loan.userId, savedLoan);
+
+    return savedLoan;
   }
 
   private calculateInterestRate(tier: string): string {
@@ -137,24 +159,20 @@ export class LoanService {
       throw new BadRequestException('Loan is not active');
     }
 
-    // Get current user tier
     const user = await this.userService.findById(userId);
     const newInterestRateStr = this.calculateInterestRate(user.reputationTier);
     const newInterestRate = parseFloat(newInterestRateStr);
     const currentInterestRate = parseFloat(loan.interestRate);
 
-    // Check if new terms are better
     if (newInterestRate >= currentInterestRate) {
-      throw new BadRequestException(`Current rate (${currentInterestRate}%) is already optimal or equal to new rate (${newInterestRate}%)`);
+      throw new BadRequestException(`Current rate (${currentInterestRate}%) is already optimal or equal`);
     }
 
-    // Get On-Chain ID from metadata
     const onChainId = loan.metadata?.onChainId;
     if (!onChainId) {
-      throw new BadRequestException('Loan does not have an on-chain ID linked yet');
+      throw new BadRequestException('Loan does not have an on-chain ID');
     }
 
-    // Prepare EIP-712 Signature
     const privateKey = this.configService.get<string>('PRIVATE_KEY');
     if (!privateKey) {
       throw new Error('PRIVATE_KEY not configured');
@@ -185,13 +203,11 @@ export class LoanService {
       ],
     };
 
-    // Check User Wallet Address
     const borrowerAddress = user.walletAddresses?.[loan.chain];
     if (!borrowerAddress) {
-      throw new BadRequestException(`User does not have a connected wallet address for chain ${loan.chain}`);
+      throw new BadRequestException(`User missing wallet for chain ${loan.chain}`);
     }
 
-    // Fetch nonce from contract
     let nonce = 0;
     try {
       const rpcUrl = this.configService.get<string>('RPC_URL', 'http://localhost:8545');
@@ -203,7 +219,7 @@ export class LoanService {
       );
       nonce = Number(await verifierContract.getNonce(borrowerAddress));
     } catch (e) {
-      throw new BadRequestException('Could not fetch nonce for verification: ' + (e instanceof Error ? e.message : String(e)));
+      throw new BadRequestException('Could not fetch nonce');
     }
 
     const rateInBasisPoints = Math.round(newInterestRate * 100);
@@ -212,7 +228,7 @@ export class LoanService {
     const value = {
       loanId: onChainId,
       newInterestRate: rateInBasisPoints,
-      newDuration: loan.durationDays * 24 * 3600, // Convert days to seconds
+      newDuration: loan.durationDays * 24 * 3600,
       timestamp,
       nonce,
     };

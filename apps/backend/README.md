@@ -51,7 +51,7 @@ cp .env.example .env
 
 2. Configure required environment variables in `.env`:
 ```env
-# Database
+# Database (PostgreSQL)
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
@@ -61,9 +61,15 @@ DB_NAME=lynq
 # JWT
 JWT_SECRET=your-super-secret-key-change-this
 
-# CORS
+# CORS (tightened)
 FRONTEND_URL=http://localhost:3001
 ADMIN_URL=http://localhost:3002
+CORS_ORIGINS=http://localhost:3001,http://localhost:3002
+
+# Observability
+SENTRY_DSN=optional-dsn
+ENABLE_SWAGGER=true
+LOG_LEVEL=debug
 ```
 
 ### Installation
@@ -86,8 +92,21 @@ npm run start
 
 The API will be available at:
 - **API**: http://localhost:3000/api/v1
-- **Swagger Docs**: http://localhost:3000/api/docs
+- **Swagger Docs**: http://localhost:3000/api/docs (toggle via `ENABLE_SWAGGER`)
 - **Health Check**: http://localhost:3000/api/v1/health
+
+### Migrations (TypeORM)
+
+```powershell
+# Generate a migration
+pnpm --filter @lynq/backend run migration:generate -- src/migrations/<MigrationName>
+
+# Run migrations
+pnpm --filter @lynq/backend run migration:run
+
+# Revert last migration
+pnpm --filter @lynq/backend run migration:revert
+```
 
 ## 📚 API Documentation
 
@@ -122,9 +141,78 @@ The API will be available at:
 - `POST /api/v1/ml/assess-risk` - Assess loan risk
 - `GET /api/v1/ml/trust-score/:userId` - Get user trust score
 
+#### Telegram Notifications
+- `GET /api/v1/telegram/status` - Check bot status
+- `POST /api/v1/telegram/register` - Register for notifications (auth required)
+- `DELETE /api/v1/telegram/unregister` - Unregister from notifications (auth required)
+- `GET /api/v1/telegram/preferences` - Get notification preferences (auth required)
+- `PUT /api/v1/telegram/preferences` - Update preferences (auth required)
+- `POST /api/v1/telegram/test` - Send test notification (auth required)
+- `POST /api/v1/telegram/webhook` - Telegram webhook endpoint
+
 ### Interactive Documentation
 
 Full interactive API documentation is available at `/api/docs` when the server is running.
+
+## 📱 Telegram Integration
+
+LYNQ supports Telegram notifications for real-time updates on your DeFi activities.
+
+### Setup
+
+1. **Get Bot Token**: The bot token is already configured. If you need your own bot:
+   - Message [@BotFather](https://t.me/BotFather) on Telegram
+   - Create a new bot with `/newbot`
+   - Copy the token to your `.env` file
+
+2. **Configure Environment**:
+   ```env
+   TELEGRAM_BOT_TOKEN=your_bot_token_here
+   ```
+
+3. **Get Your Chat ID**:
+   - Message your bot with `/start`
+   - The bot will reply with your Chat ID
+   - Use this Chat ID to register in the LYNQ app
+
+### Notification Types
+
+| Type | Description |
+|------|-------------|
+| `LOAN_CREATED` | New loan request created |
+| `LOAN_APPROVED` | Loan approved |
+| `LOAN_ACTIVATED` | Loan activated with collateral |
+| `LOAN_REPAID` | Loan fully repaid |
+| `LOAN_LIQUIDATED` | Loan position liquidated |
+| `LOAN_DUE_SOON` | Loan due in 3 days |
+| `LOAN_OVERDUE` | Loan payment overdue |
+| `HEALTH_FACTOR_WARNING` | Health factor below 1.5 |
+| `HEALTH_FACTOR_CRITICAL` | Health factor below 1.2 |
+| `LIQUIDATION_RISK` | Imminent liquidation risk |
+| `CREDIT_SCORE_UPDATED` | Credit score changed |
+| `TIER_UPGRADED` | Reputation tier upgraded |
+| `TIER_DOWNGRADED` | Reputation tier downgraded |
+| `VOUCH_RECEIVED` | Received a vouch from another user |
+| `DEPOSIT_CONFIRMED` | Deposit transaction confirmed |
+| `WITHDRAWAL_CONFIRMED` | Withdrawal transaction confirmed |
+
+### Bot Commands
+
+Users can interact with the bot using these commands:
+- `/start` - Get your Chat ID for registration
+- `/help` - Show available commands
+- `/status` - Check connection status
+- `/stop` - Disable notifications
+
+### Webhook Setup (Optional)
+
+For production, set up a webhook to receive bot commands:
+```bash
+POST /api/v1/telegram/webhook/set
+{
+  "url": "https://your-domain.com/api/v1/telegram/webhook"
+}
+```
 
 ## 🧪 Testing
 

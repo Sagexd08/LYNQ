@@ -2,12 +2,12 @@ import { useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
-  Shield,
-  Coins,
-  Droplets,
-  TrendingUp,
-  ArrowLeftRight,
-  Repeat
+  Brain,
+  ShieldAlert,
+  Activity,
+  Globe,
+  Award,
+  Zap
 } from 'lucide-react';
 import FadeIn from '../reactbits/FadeIn';
 
@@ -63,41 +63,40 @@ export default function FeaturesCarousel() {
 
   const features = [
     {
-      icon: <Coins className="w-8 h-8" />,
-      title: 'Small Loans',
-      description:
-        'Access instant microloans from $100-$5,000 with competitive rates and flexible terms tailored to your needs',
-      gradient: 'from-blue-400 to-cyan-400',
+      icon: <Brain className="w-8 h-8" />,
+      title: 'ML Credit Scoring',
+      description: '5-factor weighted algorithm analyzing payment history, utilization, and behavior.',
+      gradient: 'from-neon-cyan to-electric-blue',
     },
     {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: 'Big Loans',
-      description: 'Large-scale lending for major investments and business growth',
-      gradient: 'from-purple-400 to-pink-400',
+      icon: <ShieldAlert className="w-8 h-8" />,
+      title: 'Fraud Detection',
+      description: 'Real-time pattern analysis and velocity checks to prevent platform abuse.',
+      gradient: 'from-red-500 to-orange-500',
     },
     {
-      icon: <Droplets className="w-8 h-8" />,
-      title: 'Faucet',
-      description: 'Get started with free tokens to build your reputation',
-      gradient: 'from-cyan-400 to-blue-400',
+      icon: <Activity className="w-8 h-8" />,
+      title: 'Risk Assessment',
+      description: 'Dynamic liquidation risk monitoring with predictive alerts.',
+      gradient: 'from-yellow-400 to-orange-400',
     },
     {
-      icon: <Shield className="w-8 h-8" />,
-      title: 'Stake Marketplace',
-      description: 'Buy and sell staking positions in a secure marketplace',
-      gradient: 'from-green-400 to-teal-400',
+      icon: <Globe className="w-8 h-8" />,
+      title: 'Multi-Chain Lending',
+      description: 'Seamlessly borrow and repay across Ethereum, Polygon, and more.',
+      gradient: 'from-blue-500 to-indigo-500',
     },
     {
-      icon: <ArrowLeftRight className="w-8 h-8" />,
-      title: 'Bridge',
-      description: 'Cross-chain asset transfers with minimal fees',
-      gradient: 'from-orange-400 to-red-400',
+      icon: <Award className="w-8 h-8" />,
+      title: 'Reputation System',
+      description: 'Build your on-chain credit history and unlock lower interest rates.',
+      gradient: 'from-magenta to-deep-purple',
     },
     {
-      icon: <Repeat className="w-8 h-8" />,
-      title: 'Swap',
-      description: 'Instant token swaps with best-in-class rates',
-      gradient: 'from-indigo-400 to-purple-400',
+      icon: <Zap className="w-8 h-8" />,
+      title: 'Instant Liquidity',
+      description: 'Get small to large loans instantly with minimal collateral.',
+      gradient: 'from-green-400 to-emerald-500',
     },
   ];
 
@@ -126,7 +125,7 @@ export default function FeaturesCarousel() {
         </div>
 
         <div className="relative">
-          {}
+          { }
           <div className="block lg:hidden">
             <div className="flex flex-col items-center space-y-6">
               <Card className="w-full max-w-sm mx-auto bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
@@ -144,7 +143,7 @@ export default function FeaturesCarousel() {
                   </p>
                 </CardContent>
               </Card>
-              
+
               <div className="flex items-center space-x-4">
                 <Button
                   onClick={prevFeature}
@@ -153,19 +152,18 @@ export default function FeaturesCarousel() {
                 >
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Button>
-                
+
                 <div className="flex space-x-2">
                   {features.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentFeature(index)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        index === currentFeature ? 'bg-cyan-400 w-6' : 'bg-gray-600'
-                      }`}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentFeature ? 'bg-cyan-400 w-6' : 'bg-gray-600'
+                        }`}
                     />
                   ))}
                 </div>
-                
+
                 <Button
                   onClick={nextFeature}
                   size="icon"
@@ -177,7 +175,7 @@ export default function FeaturesCarousel() {
             </div>
           </div>
 
-          {}
+          { }
           <div className="hidden lg:flex items-center justify-center space-x-8 mb-8">
             <Button
               onClick={prevFeature}
@@ -188,7 +186,7 @@ export default function FeaturesCarousel() {
             </Button>
 
             <div className="flex items-center space-x-6 px-8">
-              {}
+              { }
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform -rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
@@ -205,7 +203,7 @@ export default function FeaturesCarousel() {
                 </CardContent>
               </Card>
 
-              {}
+              { }
               <Card className="w-80 h-96 bg-white/15 backdrop-blur-xl border-2 border-cyan-400/50 transform scale-110 transition-all duration-500 shadow-2xl shadow-cyan-500/30">
                 <CardContent className="p-8 h-full flex flex-col justify-center items-center text-center space-y-6">
                   <div
@@ -222,7 +220,7 @@ export default function FeaturesCarousel() {
                 </CardContent>
               </Card>
 
-              {}
+              { }
               <Card className="w-64 h-80 bg-white/10 backdrop-blur-xl border border-purple-500/30 transform rotate-6 transition-all duration-500 hover:rotate-0 shadow-lg shadow-purple-500/20">
                 <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center space-y-4">
                   <div
@@ -249,17 +247,16 @@ export default function FeaturesCarousel() {
             </Button>
           </div>
 
-          {}
+          { }
           <div className="flex justify-center space-x-2">
             {features.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentFeature(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentFeature
-                    ? 'bg-cyan-400 shadow-lg shadow-cyan-400/50'
-                    : 'bg-gray-600 hover:bg-gray-500'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentFeature
+                  ? 'bg-cyan-400 shadow-lg shadow-cyan-400/50'
+                  : 'bg-gray-600 hover:bg-gray-500'
+                  }`}
               />
             ))}
           </div>

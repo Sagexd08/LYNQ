@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   walletProviders,
   useWalletDetection,
@@ -9,6 +9,7 @@ import {
   WalletProvider,
   WalletResponse
 } from './walletConfig';
+import { X, ExternalLink, Zap, Shield, Wallet, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 interface WalletConnectionModalProps {
   isOpen: boolean;
@@ -17,61 +18,46 @@ interface WalletConnectionModalProps {
   isLandingPage?: boolean;
 }
 
-const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onWalletConnect, 
-  isLandingPage = false 
+const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
+  isOpen,
+  onClose,
+  onWalletConnect,
+  isLandingPage = false
 }) => {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  
+
   const { detectedWallets, isDetecting } = useWalletDetection();
 
-  
-  console.log('Detected wallets:', detectedWallets);
-
-  
   const handleWalletConnect = async (wallet: WalletProvider) => {
-    console.log('Attempting to connect to wallet:', wallet.name);
     setIsConnecting(true);
     setSelectedWallet(wallet.id);
     setError(null);
 
     try {
-      
       const connectionResult: WalletResponse = await connectToWallet(wallet.id);
-      console.log('Connection successful:', connectionResult);
-      
-      
+
       const savedConnection: SavedWalletConnection = {
         ...connectionResult,
         walletType: wallet.name,
         connectedAt: new Date().toISOString()
       };
-      
-      
+
       saveWalletConnection(savedConnection);
-      
-      
       onWalletConnect(savedConnection);
-      
       onClose();
     } catch (error: unknown) {
       console.error(`${wallet.name} connection error:`, error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setError(`Failed to connect with ${wallet.name}: ${errorMessage}`);
+      setError(`Failed to connect: ${errorMessage}`);
     } finally {
       setIsConnecting(false);
       setSelectedWallet(null);
     }
   };
 
-  
   const handleTestWalletConnect = () => {
-    console.log('Connecting to test wallet...');
     const testWalletData: SavedWalletConnection = {
       address: '0x1234567890abcdef1234567890abcdef12345678',
       walletName: 'Test Wallet',
@@ -79,126 +65,199 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
       walletType: 'Test',
       connectedAt: new Date().toISOString()
     };
-    
-    
+
     saveWalletConnection(testWalletData);
-    
-    
     onWalletConnect(testWalletData);
-    
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[60] px-4" style={{ paddingTop: isLandingPage ? '120px' : '100px' }}>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full max-h-[calc(100vh-140px)] overflow-y-auto shadow-2xl animate-fade-in">
-        {}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Select Wallet
-          </h2>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ paddingTop: isLandingPage ? '80px' : '60px' }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+            <div className="relative w-full max-w-md">
+              {/* Glow Effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-electric-blue via-neon-cyan to-deep-purple rounded-3xl blur-xl opacity-30" />
 
-        {}
-        <div className="p-4 bg-green-50 dark:bg-green-900/20 border-b border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-green-700 dark:text-green-300 text-center">
-            Powered by AIP-62 Wallet Standard
-          </p>
-        </div>
-        
-        {}
-        {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-red-700 dark:text-red-300 text-center">
-              {error}
-            </p>
-          </div>
-        )}
-
-        {}
-        <div className="p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Crypto Wallets
-          </h3>
-          <div className="space-y-2">
-            {walletProviders.map((wallet) => {
-              const isDetected = detectedWallets[wallet.id];
-              const isCurrentlyConnecting = isConnecting && selectedWallet === wallet.id;
-
-              return (
-                <button
-                  key={wallet.id}
-                  onClick={() => isDetected ? handleWalletConnect(wallet) : window.open(wallet.downloadUrl, '_blank')}
-                  disabled={isConnecting}
-                  className="w-full flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                >
-                  <span className="text-2xl">{wallet.icon}</span>
-                  <div className="flex-1 text-left">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {wallet.name}
+              {/* Modal Content */}
+              <div className="relative bg-lynq-card/95 backdrop-blur-2xl rounded-2xl border border-glass-border shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="relative px-6 py-5 border-b border-glass-border/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-electric-blue to-neon-cyan">
+                        <Wallet className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white">Connect Wallet</h2>
+                        <p className="text-xs text-gray-400">Choose your preferred wallet</p>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {isCurrentlyConnecting ? 'Connecting...' : 
-                       isDetecting ? 'Detecting...' :
-                       isDetected ? 'Installed' : 'Not Detected'}
-                    </div>
-                  </div>
-                  {(isCurrentlyConnecting || (isDetecting && !isCurrentlyConnecting)) && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
-                  )}
-                  {!isDetected && (
-                    <span className="text-xs text-blue-600 dark:text-blue-400">Install</span>
-                  )}
-                </button>
-              );
-            })}
-            
-            {}
-            <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                For Testing
-              </h4>
-              <button
-                onClick={handleTestWalletConnect}
-                disabled={isConnecting}
-                className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors disabled:opacity-50 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-              >
-                <span className="text-2xl">🧪</span>
-                <div className="flex-1 text-left">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    Test Wallet
-                  </div>
-                  <div className="text-sm text-green-600 dark:text-green-400">
-                    Demo connection (for testing)
+                    <button
+                      onClick={onClose}
+                      className="p-2 rounded-lg hover:bg-glass-white transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-400" />
+                    </button>
                   </div>
                 </div>
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {}
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-start gap-2">
-            <div className="text-blue-500 mt-0.5">ℹ️</div>
-            <div className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>REMIND</strong><br />
-              Please switch your wallet to <span className="font-semibold">CORRECT NETWORK</span>.
+                {/* Security Badge */}
+                <div className="px-6 py-3 bg-neon-cyan/5 border-b border-glass-border/30">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-neon-cyan" />
+                    <span className="text-xs font-medium text-neon-cyan">
+                      Secured by AIP-62 Wallet Standard
+                    </span>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 py-3 bg-error/10 border-b border-error/20">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-error" />
+                          <span className="text-sm text-error">{error}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Wallet List */}
+                <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
+                  {/* Main Wallets */}
+                  {walletProviders.map((wallet) => {
+                    const isDetected = detectedWallets[wallet.id];
+                    const isCurrentlyConnecting = isConnecting && selectedWallet === wallet.id;
+
+                    return (
+                      <motion.button
+                        key={wallet.id}
+                        onClick={() => isDetected ? handleWalletConnect(wallet) : window.open(wallet.downloadUrl, '_blank')}
+                        disabled={isConnecting}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className={`
+                          w-full flex items-center gap-4 p-4 rounded-xl
+                          border transition-all duration-200
+                          ${isDetected
+                            ? 'bg-glass-white/50 border-glass-border hover:border-neon-cyan/30 hover:bg-glass-white'
+                            : 'bg-lynq-darker/50 border-glass-border/50 opacity-60 hover:opacity-80'
+                          }
+                          ${isCurrentlyConnecting ? 'border-neon-cyan/50' : ''}
+                          disabled:cursor-not-allowed
+                        `}
+                      >
+                        {/* Wallet Icon */}
+                        <div className="w-12 h-12 rounded-xl bg-lynq-darker flex items-center justify-center text-3xl">
+                          {wallet.icon}
+                        </div>
+
+                        {/* Wallet Info */}
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-white">{wallet.name}</span>
+                            {isDetected && (
+                              <span className="px-2 py-0.5 rounded-full bg-success/20 text-success text-[10px] font-semibold uppercase">
+                                Detected
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-400 mt-0.5">
+                            {isCurrentlyConnecting ? 'Connecting...' :
+                              isDetecting ? 'Checking...' :
+                                isDetected ? 'Ready to connect' : 'Not installed'}
+                          </div>
+                        </div>
+
+                        {/* Status Indicator */}
+                        {isCurrentlyConnecting ? (
+                          <Loader2 className="w-5 h-5 text-neon-cyan animate-spin" />
+                        ) : isDetecting ? (
+                          <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                        ) : isDetected ? (
+                          <CheckCircle2 className="w-5 h-5 text-success" />
+                        ) : (
+                          <ExternalLink className="w-4 h-4 text-gray-500" />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+
+                  {/* Divider */}
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="flex-1 h-px bg-glass-border/50" />
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">For Testing</span>
+                    <div className="flex-1 h-px bg-glass-border/50" />
+                  </div>
+
+                  {/* Test Wallet */}
+                  <motion.button
+                    onClick={handleTestWalletConnect}
+                    disabled={isConnecting}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-success/10 to-neon-cyan/10 border border-success/30 hover:border-success/50 transition-all disabled:opacity-50"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center text-3xl">
+                      🧪
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-white">Demo Wallet</span>
+                      <div className="text-sm text-gray-400 mt-0.5">
+                        Test the app without a real wallet
+                      </div>
+                    </div>
+                    <Zap className="w-5 h-5 text-success" />
+                  </motion.button>
+                </div>
+
+                {/* Footer Info */}
+                <div className="px-6 py-4 bg-lynq-darker/50 border-t border-glass-border/50">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-lg bg-electric-blue/10">
+                      <Zap className="w-4 h-4 text-electric-blue" />
+                    </div>
+                    <div className="text-xs text-gray-400 leading-relaxed">
+                      <span className="text-white font-medium">New to Web3?</span>{' '}
+                      We recommend MetaMask or Petra for the best experience.
+                      Make sure you're on the correct network.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

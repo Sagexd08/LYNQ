@@ -59,6 +59,16 @@ pnpm lint
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 
+## Environment Variables
+
+Create an `.env` file (see `.env.example`) with at least:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+```
+
+For production deployments, point `NEXT_PUBLIC_API_URL` to the deployed API, e.g. `https://api.example.com/api/v1`.
+
 ## Key Directories
 
 - `src/`: Source code

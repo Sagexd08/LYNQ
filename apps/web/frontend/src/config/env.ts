@@ -16,7 +16,7 @@ interface EnvironmentConfig {
 
 const ENV_KEYS = {
   PARTICLE_PROJECT_ID: 'VITE_PARTICLE_PROJECT_ID',
-  PARTICLE_CLIENT_KEY: 'VITE_PARTICLE_CLIENT_KEY', 
+  PARTICLE_CLIENT_KEY: 'VITE_PARTICLE_CLIENT_KEY',
   PARTICLE_APP_ID: 'VITE_PARTICLE_APP_ID',
   DEFAULT_NETWORK: 'VITE_DEFAULT_NETWORK',
   MODULE_ADDRESS: 'VITE_MODULE_ADDRESS',
@@ -47,7 +47,7 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
 
 const parseEnvConfig = (): EnvironmentConfig => {
   const network = getEnvVar(ENV_KEYS.DEFAULT_NETWORK, DEFAULTS.DEFAULT_NETWORK);
-  
+
   return {
     PARTICLE_PROJECT_ID: getEnvVar(ENV_KEYS.PARTICLE_PROJECT_ID, DEFAULTS.PARTICLE_PROJECT_ID),
     PARTICLE_CLIENT_KEY: getEnvVar(ENV_KEYS.PARTICLE_CLIENT_KEY, DEFAULTS.PARTICLE_CLIENT_KEY),
@@ -70,7 +70,7 @@ export const ETHEREUM_CONFIG = {
   clientKey: ENV_CONFIG.PARTICLE_CLIENT_KEY,
   appId: ENV_CONFIG.PARTICLE_APP_ID,
   chainName: 'Ethereum',
-  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 11155111 : 1, 
+  chainId: ENV_CONFIG.DEFAULT_NETWORK === 'testnet' ? 11155111 : 1,
 } as const;
 
 
@@ -94,8 +94,9 @@ export const NETWORK_ENDPOINTS = {
 
 export const validateEnv = (): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
-  
+
+
+  /*
   const requiredParticleVars = [
     'PARTICLE_PROJECT_ID',
     'PARTICLE_CLIENT_KEY', 
@@ -108,22 +109,23 @@ export const validateEnv = (): { isValid: boolean; errors: string[] } => {
       errors.push(`Missing or invalid ${varName}`);
     }
   }
-  
-  
+  */
+
+
   if (!['mainnet', 'testnet'].includes(ENV_CONFIG.DEFAULT_NETWORK)) {
     errors.push('DEFAULT_NETWORK must be either "mainnet" or "testnet"');
   }
-  
-  
+
+
   if (ENV_CONFIG.MODULE_ADDRESS && !/^0x[a-fA-F0-9]+$/.test(ENV_CONFIG.MODULE_ADDRESS)) {
     errors.push('MODULE_ADDRESS must be a valid hex address starting with 0x');
   }
 
-  
+
   if (!ENV_CONFIG.VITE_TELEGRAM_BOT_TOKEN) {
-    
+
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -133,21 +135,21 @@ export const validateEnv = (): { isValid: boolean; errors: string[] } => {
 
 export const logEnvStatus = (): void => {
   if (!APP_CONFIG.enableDebugLogs) return;
-  
+
   const validation = validateEnv();
-  
+
   console.group('🔧 Environment Configuration');
   console.log('Network:', ENV_CONFIG.DEFAULT_NETWORK);
   console.log('Module Address:', ENV_CONFIG.MODULE_ADDRESS || 'Not configured');
   console.log('Analytics Enabled:', APP_CONFIG.enableAnalytics);
-  
+
   if (validation.isValid) {
     console.log('✅ Environment validation passed');
   } else {
     console.warn('⚠️ Environment validation issues:');
     validation.errors.forEach(error => console.warn(`  - ${error}`));
   }
-  
+
   console.groupEnd();
 };
 

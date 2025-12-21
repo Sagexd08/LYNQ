@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { CollateralController } from './controllers/collateral.controller';
-import { CollateralService } from './services/collateral.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CollateralController } from './collateral.controller';
+import { CollateralService } from './collateral.service';
 import { Collateral } from './entities/collateral.entity';
-import { UserModule } from '../user/user.module';
-import { LoanModule } from '../loan/loan.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CollateralScheduler } from './collateral.scheduler';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Collateral]), UserModule, LoanModule],
+  imports: [TypeOrmModule.forFeature([Collateral]), ScheduleModule.forRoot(), AuditModule],
   controllers: [CollateralController],
-  providers: [CollateralService],
+  providers: [CollateralService, CollateralScheduler],
   exports: [CollateralService],
 })
 export class CollateralModule {}

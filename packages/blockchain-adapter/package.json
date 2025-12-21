@@ -7,7 +7,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src/**/*.ts",
-    "test": "echo \"(TODO) add adapter tests\""
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "dependencies": {
     "@onflow/fcl": "^1.20.3",
@@ -17,7 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.3.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "vitest": "^1.6.0"
   },
   "optionalDependencies": {
     "@next/swc-win32-x64-msvc": "^14.2.33"

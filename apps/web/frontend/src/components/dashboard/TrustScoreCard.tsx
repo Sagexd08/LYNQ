@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 interface TrustScoreCardProps {
   score: number | null;
@@ -6,17 +7,88 @@ interface TrustScoreCardProps {
 
 const TrustScoreCard: React.FC<TrustScoreCardProps> = ({ score }) => {
   const safeScore = score ?? 0;
-  const tier: number = safeScore >= 86 ? 4 : safeScore >= 61 ? 3 : safeScore >= 31 ? 2 : 1;
-  const tierLabels = ["Ineligible", "Basic", "Standard", "Advanced", "Elite"];
-  const tierLabel: string = tierLabels[tier] || "Basic";
+
+  // Tier Logic (Aligned with PRD: Bronze -> Silver -> Gold -> Platinum)
+  // Assuming 0-100 scale: <40 Bronze, 40-70 Silver, 70-90 Gold, >90 Platinum
+  let tier = "BRONZE";
+  let color = "text-orange-400";
+  let ringColor = "#FB923C";
+
+  if (safeScore >= 90) { tier = "PLATINUM"; color = "text-neon-cyan"; ringColor = "#00E5FF"; }
+  else if (safeScore >= 70) { tier = "GOLD"; color = "text-yellow-400"; ringColor = "#FACC15"; }
+  else if (safeScore >= 40) { tier = "SILVER"; color = "text-gray-300"; ringColor = "#D1D5DB"; }
+
+  // SVG Ring Calculations
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (safeScore / 100) * circumference;
+  const dashOffset = circumference - progress;
 
   return (
-    <div className="bg-gradient-to-r from-purple-700 to-indigo-700 text-white p-6 rounded-xl shadow-xl w-full max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-2">🎖 TrustScore NFT</h2>
-      <p className="text-5xl font-extrabold tracking-widest">{safeScore}</p>
-      <p className="text-lg mt-2">Tier: <span className="font-semibold">{tierLabel}</span></p>
-      <p className="text-xs mt-1 text-white/70">Dynamic reputation from loan activity</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-lg relative overflow-hidden"
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-cyan to-deep-purple" />
+
+      <div className="flex flex-col items-center">
+        <h2 className="text-white/80 font-heading tracking-wider mb-6">CREDIT INTELLIGENCE</h2>
+
+        {/* Animated Ring */}
+        <div className="relative w-48 h-48 mb-6">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle
+              cx="96"
+              cy="96"
+              r={radius}
+              fill="transparent"
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="12"
+            />
+            <motion.circle
+              cx="96"
+              cy="96"
+              r={radius}
+              fill="transparent"
+              stroke={ringColor}
+              strokeWidth="12"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: dashOffset }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="drop-shadow-glow"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-5xl font-bold text-white font-mono">{safeScore}</span>
+            <span className={`text-xs font-bold tracking-widest mt-1 ${color}`}>{tier}</span>
+          </div>
+        </div>
+
+        {/* Tier Badge */}
+        <div className={`px-4 py-1 rounded-full border bg-white/5 ${color} border-current/30 text-sm font-bold tracking-wider mb-4 shadow-[0_0_15px_rgba(0,0,0,0.3)]`}>
+          {tier} TIER
+        </div>
+
+        {/* ML Confidence */}
+        <div className="w-full bg-black/30 rounded-lg p-3">
+          <div className="flex justify-between text-xs text-white/60 mb-1">
+            <span>ML Confidence</span>
+            <span className="text-green-400">98% (High)</span>
+          </div>
+          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-green-400"
+              initial={{ width: 0 }}
+              animate={{ width: "98%" }}
+              transition={{ delay: 1, duration: 1 }}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

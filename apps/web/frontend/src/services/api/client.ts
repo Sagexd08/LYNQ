@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
-const getApiBaseUrl = (): string => {
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+export const getApiBaseUrl = (): string => {
+  const envValue = (import.meta as any)?.env?.VITE_API_BASE_URL;
+  return envValue || 'http://localhost:3000/api/v1';
 };
 
 const apiClient: AxiosInstance = axios.create({
@@ -30,7 +31,7 @@ apiClient.interceptors.response.use(
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data as any;
-      
+
       if (status === 401) {
         localStorage.removeItem('authToken');
         toast.error('Session expired. Please reconnect your wallet.');
@@ -44,7 +45,7 @@ apiClient.interceptors.response.use(
     } else if (error.request) {
       toast.error('Network error. Please check your connection.');
     }
-    
+
     return Promise.reject(error);
   }
 );

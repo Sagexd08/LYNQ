@@ -1,260 +1,467 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
-import { Telegraf, Context, Scenes } from 'telegraf';
-import { ethers } from 'ethers';
-import { FlashLoanService } from '../../flashloan/services/flash-loan.service';
-import { User } from '../../../modules/user/entities/user.entity';
-import { NotificationSettings } from '../../../modules/user/entities/notification-settings.entity';
-import { Loan, LoanStatus } from '../../../modules/loan/entities/loan.entity';
-import { Repayment, RepaymentStatus } from '../../../modules/loan/entities/repayment.entity';
-import { TrustScore } from '../../../modules/user/entities/trust-score.entity';
+import {
+    NotificationType,
+    NotificationPayload,
+    TelegramUser,
+    NotificationPreferences,
+    DEFAULT_NOTIFICATION_PREFERENCES,
+} from '../types/notification.types';
+import { getMessageTemplate, TemplateData } from '../templates/message.templates';
+
+interface TelegramApiResponse {
+    ok: boolean;
+    result?: any;
+    description?: string;
+    error_code?: number;
+}
+
+interface SendMessageOptions {
+    parse_mode?: 'MarkdownV2' | 'HTML' | 'Markdown';
+    disable_web_page_preview?: boolean;
+    disable_notification?: boolean;
+    reply_markup?: any;
+}
 
 @Injectable()
-export class TelegramService implements OnModuleInit, OnModuleDestroy {
-  private bot: Telegraf<Context>;
-  private readonly logger = new Logger(TelegramService.name);
+export class TelegramService implements OnModuleInit {
+    private readonly logger = new Logger(TelegramService.name);
+    private readonly baseUrl: string;
+    private readonly botToken: string;
+    private isEnabled: boolean = false;
 
-  constructor(
-    private configService: ConfigService,
-    private flashLoanService: FlashLoanService,
-    @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(NotificationSettings) private notifRepo: Repository<NotificationSettings>,
-    @InjectRepository(Loan) private loanRepo: Repository<Loan>,
-    @InjectRepository(Repayment) private repaymentRepo: Repository<Repayment>,
-    @InjectRepository(TrustScore) private trustRepo: Repository<TrustScore>,
-  ) {
-    const token = this.configService.get<string>('TELEGRAM_BOT_TOKEN');
-    if (token) {
-      this.bot = new Telegraf(token);
-    } else {
-      this.logger.warn('TELEGRAM_BOT_TOKEN is not set. Telegram bot will not start.');
+    // In-memory storage for demo - use database in production
+    private readonly users: Map<string, TelegramUser> = new Map();
+    private readonly walletToChatId: Map<string, string> = new Map();
+
+    constructor(private readonly configService: ConfigService) {
+        this.botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN', '');
+        this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
     }
-  }
 
-  onModuleInit() {
-    if (this.bot) {
-      this.setupScenes();
-      this.setupCommands();
-      this.bot.launch().catch(err => this.logger.error('Failed to launch Telegram bot', err));
-      this.logger.log('Telegram Bot started');
-    }
-  }
-
-  onModuleDestroy() {
-    if (this.bot) {
-      this.bot.stop('SIGTERM');
-    }
-  }
-
-  private setupScenes() {
-    const onboardingScene = new Scenes.WizardScene<any>(
-      'onboarding',
-      async (ctx) => {
-        await ctx.reply('Welcome to LYNQ Telegram Bot! Please enter your wallet address to link your account:');
-        return ctx.wizard.next();
-      },
-      async (ctx) => {
-        const walletAddress = (ctx.message as any)?.text?.trim();
-        if (!walletAddress || !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-          await ctx.reply('Invalid wallet address. Please enter a valid Ethereum address:');
-          return;
-        }
-
-        const user = await this.userRepo
-          .createQueryBuilder('user')
-          .where("user.walletAddresses @> :filter", { filter: JSON.stringify({ evm: walletAddress.toLowerCase() }) })
-          .getOne();
-
-        if (!user) {
-          await ctx.reply('User not found. Please register on the platform first.');
-          return ctx.scene.leave();
-        }
-
-        let settings = await this.notifRepo.findOne({ where: { userId: user.id } });
-        if (!settings) {
-          settings = this.notifRepo.create({ userId: user.id, telegramEnabled: true, telegramChatId: ctx.chat!.id.toString() });
-        } else {
-          settings.telegramEnabled = true;
-          settings.telegramChatId = ctx.chat!.id.toString();
-        }
-        await this.notifRepo.save(settings);
-
-        await ctx.reply(`✅ Account linked successfully! Welcome, ${user.email || 'User'}.`);
-        return ctx.scene.leave();
-      }
-    );
-
-    const flashLoanScene = new Scenes.WizardScene<any>(
-      'flashloan',
-      async (ctx) => {
-        await ctx.reply('Enter the amount for flash loan (in ETH):');
-        return ctx.wizard.next();
-      },
-      async (ctx) => {
-        const amount = parseFloat((ctx.message as any)?.text?.trim());
-        if (isNaN(amount) || amount <= 0) {
-          await ctx.reply('Invalid amount. Please enter a positive number:');
-          return;
-        }
-
-        const chatId = ctx.chat!.id.toString();
-        const settings = await this.notifRepo.findOne({
-          where: { telegramChatId: chatId, telegramEnabled: true }
-        });
-
-        if (!settings) {
-          await ctx.reply('Please link your account first with /start');
-          return ctx.scene.leave();
+    async onModuleInit() {
+        if (!this.botToken) {
+            this.logger.warn('⚠️ TELEGRAM_BOT_TOKEN not configured - Telegram notifications disabled');
+            return;
         }
 
         try {
-          // Assuming getFlashLoanQuote is available in FlashLoanService
-          const result = await this.flashLoanService.getFlashLoanQuote(
-             '0x0000000000000000000000000000000000000000', // dummy
-             ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'],
-             [ethers.parseEther(amount.toString()).toString()]
-          );
-          
-          await ctx.reply(`✅ Flash loan quote received (Execution disabled in refactor)`);
-
+            const me = await this.getMe();
+            if (me.ok) {
+                this.isEnabled = true;
+                this.logger.log(`✅ Telegram Bot connected: @${me.result.username}`);
+            }
         } catch (error) {
-          await ctx.reply(`❌ Flash loan failed: ${(error as Error).message}`);
+            this.logger.error('❌ Failed to connect to Telegram Bot API', error);
+        }
+    }
+
+    /**
+     * Check if Telegram notifications are enabled
+     */
+    isNotificationsEnabled(): boolean {
+        return this.isEnabled;
+    }
+
+    /**
+     * Get bot information
+     */
+    async getMe(): Promise<TelegramApiResponse> {
+        return this.apiRequest('getMe');
+    }
+
+    /**
+     * Send a text message to a chat
+     */
+    async sendMessage(
+        chatId: string,
+        text: string,
+        options: SendMessageOptions = {}
+    ): Promise<TelegramApiResponse> {
+        if (!this.isEnabled) {
+            this.logger.debug('Telegram notifications disabled, skipping message');
+            return { ok: false, description: 'Telegram notifications disabled' };
         }
 
-        return ctx.scene.leave();
-      }
-    );
+        const payload = {
+            chat_id: chatId,
+            text,
+            parse_mode: options.parse_mode || 'MarkdownV2',
+            disable_web_page_preview: options.disable_web_page_preview ?? true,
+            disable_notification: options.disable_notification ?? false,
+            ...options,
+        };
 
-    const stage = new Scenes.Stage([onboardingScene, flashLoanScene]);
-    this.bot.use(stage.middleware());
-  }
+        return this.apiRequest('sendMessage', payload);
+    }
 
-  private setupCommands() {
-    this.bot.start(async (ctx) => {
-      const chatId = ctx.chat!.id.toString();
-      const existing = await this.notifRepo.findOne({ where: { telegramChatId: chatId, telegramEnabled: true } });
+    /**
+     * Send a notification based on type and data
+     */
+    async sendNotification(payload: NotificationPayload): Promise<boolean> {
+        try {
+            const chatId = payload.chatId || this.getChatIdByUserId(payload.userId);
+            if (!chatId) {
+                this.logger.warn(`No chat ID found for user: ${payload.userId}`);
+                return false;
+            }
 
-      if (existing) {
-        await ctx.reply('Welcome back! Use /help to see available commands.');
-      } else {
-        // await ctx.scene.enter('onboarding'); // TODO: Implement scenes
-      }
-    });
+            // Check user preferences
+            if (payload.userId) {
+                const user = this.users.get(payload.userId);
+                if (user && !this.shouldSendNotification(payload.type, user.preferences)) {
+                    this.logger.debug(`Notification ${payload.type} disabled for user ${payload.userId}`);
+                    return false;
+                }
+            }
 
-    this.bot.command('help', async (ctx) => {
-      const helpText = `
-🤖 LYNQ Telegram Bot Commands:
+            const message = getMessageTemplate(payload.type, payload.data as TemplateData);
+            const result = await this.sendMessage(chatId, message);
 
-/start - Link your account or welcome back
-/status - Check your loan status
-/portfolio - View your portfolio
-/flashloan - Execute a flash loan
-/reminders - Manage repayment reminders
-/alerts - View transaction risk alerts
-/ai - Ask AI financial assistant
-/admin - Admin commands (if admin)
+            if (result.ok) {
+                this.logger.log(`✉️ Notification sent: ${payload.type} to ${chatId}`);
+            } else {
+                this.logger.error(`Failed to send notification: ${result.description}`);
+            }
 
-/cancel - Cancel current operation
-      `;
-      await ctx.reply(helpText);
-    });
+            return result.ok;
+        } catch (error) {
+            this.logger.error(`Error sending notification: ${error.message}`, error.stack);
+            return false;
+        }
+    }
 
-    this.bot.command('status', async (ctx) => {
-      const chatId = ctx.chat!.id.toString();
-      const settings = await this.notifRepo.findOne({ where: { telegramChatId: chatId, telegramEnabled: true } });
+    /**
+     * Send a notification to a wallet address
+     */
+    async notifyByWallet(
+        walletAddress: string,
+        type: NotificationType,
+        data: Record<string, any>
+    ): Promise<boolean> {
+        const chatId = this.walletToChatId.get(walletAddress.toLowerCase());
+        if (!chatId) {
+            this.logger.debug(`No Telegram chat linked to wallet: ${walletAddress}`);
+            return false;
+        }
 
-      if (!settings) {
-        await ctx.reply('Please link your account first with /start');
-        return;
-      }
+        return this.sendNotification({ type, chatId, data });
+    }
 
-      const loans = await this.loanRepo.find({ where: { userId: settings.userId } });
+    // ============ CONVENIENCE METHODS ============
 
-      if (loans.length === 0) {
-        await ctx.reply('No active loans found.');
-        return;
-      }
+    /**
+     * Notify about loan creation
+     */
+    async notifyLoanCreated(userId: string, loanData: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.LOAN_CREATED,
+            userId,
+            data: {
+                loanId: loanData.id,
+                amount: loanData.amount,
+                chain: loanData.chain,
+                collateralAmount: loanData.collateralAmount,
+                interestRate: loanData.interestRate,
+            },
+        });
+    }
 
-      let message = '📊 Your Loan Status:\n\n';
-      loans.forEach(loan => {
-        const remaining = Number(loan.outstandingAmount);
-        const interestRate = Number(loan.interestRate);
-        const due = loan.dueDate ? new Date(loan.dueDate) : null;
-        message += `Loan ID: ${loan.id}\nOutstanding: ${remaining.toFixed(4)}\nAPR: ${interestRate.toFixed(2)}%\nStatus: ${loan.status}\nDue: ${due ? due.toDateString() : 'N/A'}\n\n`;
-      });
+    /**
+     * Notify about loan approval
+     */
+    async notifyLoanApproved(userId: string, loanData: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.LOAN_APPROVED,
+            userId,
+            data: {
+                loanId: loanData.id,
+                amount: loanData.amount,
+                interestRate: loanData.interestRate,
+                dueDate: loanData.dueDate,
+            },
+        });
+    }
 
-      await ctx.reply(message);
-    });
+    /**
+     * Notify about loan activation
+     */
+    async notifyLoanActivated(userId: string, loanData: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.LOAN_ACTIVATED,
+            userId,
+            data: {
+                loanId: loanData.id,
+                amount: loanData.amount,
+                collateralAmount: loanData.collateralAmount,
+                healthFactor: loanData.healthFactor,
+                dueDate: loanData.dueDate,
+                transactionHash: loanData.transactionHash,
+            },
+        });
+    }
 
-    this.bot.command('portfolio', async (ctx) => {
-      const chatId = ctx.chat!.id.toString();
-      const settings = await this.notifRepo.findOne({ where: { telegramChatId: chatId, telegramEnabled: true } });
+    /**
+     * Notify about loan repayment
+     */
+    async notifyLoanRepaid(userId: string, loanData: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.LOAN_REPAID,
+            userId,
+            data: {
+                loanId: loanData.id,
+                amount: loanData.amount,
+                transactionHash: loanData.transactionHash,
+            },
+        });
+    }
 
-      if (!settings) {
-        await ctx.reply('Please link your account first with /start');
-        return;
-      }
+    /**
+     * Notify about loan liquidation
+     */
+    async notifyLoanLiquidated(userId: string, loanData: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.LOAN_LIQUIDATED,
+            userId,
+            data: {
+                loanId: loanData.id,
+                amount: loanData.amount,
+                collateralAmount: loanData.collateralAmount,
+                transactionHash: loanData.transactionHash,
+            },
+        });
+    }
 
-      const trustScore = await this.trustRepo.findOne({ where: { userId: settings.userId } });
-      const loans = await this.loanRepo.find({ where: { userId: settings.userId } });
+    /**
+     * Notify about health factor warning
+     */
+    async notifyHealthFactorWarning(userId: string, data: any): Promise<boolean> {
+        const type = data.healthFactor < 1.2
+            ? NotificationType.HEALTH_FACTOR_CRITICAL
+            : NotificationType.HEALTH_FACTOR_WARNING;
 
-      const message = `
-📈 Portfolio Overview:
+        return this.sendNotification({
+            type,
+            userId,
+            data: {
+                loanId: data.loanId,
+                currentHealthFactor: data.healthFactor,
+                threshold: 1.5,
+                collateralValue: data.collateralValue,
+                debtValue: data.debtValue,
+            },
+        });
+    }
 
-Trust Score: ${trustScore?.score || 500}
-Active Loans: ${loans.filter(l => l.status === 'ACTIVE').length}
-Total Borrowed: ${loans.reduce((sum, l) => sum + Number(l.amount), 0)} (units)
-      `;
+    /**
+     * Notify about credit score update
+     */
+    async notifyCreditScoreUpdate(userId: string, data: any): Promise<boolean> {
+        const type = data.newTier !== data.oldTier
+            ? (data.newScore > data.oldScore
+                ? NotificationType.TIER_UPGRADED
+                : NotificationType.TIER_DOWNGRADED)
+            : NotificationType.CREDIT_SCORE_UPDATED;
 
-      await ctx.reply(message);
-    });
+        return this.sendNotification({
+            type,
+            userId,
+            data: {
+                oldScore: data.oldScore,
+                newScore: data.newScore,
+                oldTier: data.oldTier,
+                newTier: data.newTier,
+                reason: data.reason,
+            },
+        });
+    }
 
-    this.bot.command('flashloan', async (ctx) => {
-      // await ctx.scene.enter('flashloan'); // TODO: Implement scenes
-    });
+    /**
+     * Notify about vouch received
+     */
+    async notifyVouchReceived(userId: string, data: any): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.VOUCH_RECEIVED,
+            userId,
+            data: {
+                voucherId: data.voucherId,
+                voucherAddress: data.voucherAddress,
+                amount: data.amount,
+                message: data.message,
+            },
+        });
+    }
 
-    this.bot.command('reminders', async (ctx) => {
-      const chatId = ctx.chat!.id.toString();
-      const settings = await this.notifRepo.findOne({ where: { telegramChatId: chatId, telegramEnabled: true } });
+    /**
+     * Notify about transaction confirmation
+     */
+    async notifyTransactionConfirmed(userId: string, data: any): Promise<boolean> {
+        const type = data.type === 'deposit'
+            ? NotificationType.DEPOSIT_CONFIRMED
+            : NotificationType.WITHDRAWAL_CONFIRMED;
 
-      if (!settings) {
-        await ctx.reply('Please link your account first with /start');
-        return;
-      }
+        return this.sendNotification({
+            type,
+            userId,
+            data: {
+                type: data.type,
+                amount: data.amount,
+                asset: data.asset,
+                transactionHash: data.transactionHash,
+                chain: data.chain,
+            },
+        });
+    }
 
-      const repayments = await this.repaymentRepo.find({
-        where: {
-          status: RepaymentStatus.PENDING,
-          dueDate: MoreThanOrEqual(new Date()),
-        },
-        order: { dueDate: 'ASC' },
-        take: 5,
-      });
+    /**
+     * Send welcome message to new user
+     */
+    async sendWelcome(chatId: string): Promise<boolean> {
+        return this.sendNotification({
+            type: NotificationType.WELCOME,
+            chatId,
+            data: {},
+        });
+    }
 
-      if (repayments.length === 0) {
-        await ctx.reply('No upcoming repayments.');
-        return;
-      }
+    // ============ USER MANAGEMENT ============
 
-      let message = '⏰ Upcoming Repayment Reminders:\n\n';
-      repayments.forEach(r => {
-        const due = new Date(r.dueDate);
-        message += `Loan ${r.loanId}: ${Number(r.amount).toFixed(4)} due ${due.toDateString()}\n`;
-      });
+    /**
+     * Register a user for Telegram notifications
+     */
+    registerUser(
+        userId: string,
+        chatId: string,
+        walletAddress: string,
+        username?: string
+    ): TelegramUser {
+        const user: TelegramUser = {
+            id: userId,
+            chatId,
+            walletAddress: walletAddress.toLowerCase(),
+            username,
+            isActive: true,
+            preferences: { ...DEFAULT_NOTIFICATION_PREFERENCES },
+            createdAt: new Date(),
+        };
 
-      await ctx.reply(message);
-    });
+        this.users.set(userId, user);
+        this.walletToChatId.set(walletAddress.toLowerCase(), chatId);
 
-    this.bot.command('cancel', async (ctx) => {
-      // await ctx.scene.leave(); // TODO: Implement scenes
-      await ctx.reply('Operation cancelled.');
-    });
+        this.logger.log(`📱 User registered for Telegram: ${userId} -> ${chatId}`);
+        return user;
+    }
 
-    this.bot.catch((err, ctx) => {
-      this.logger.error('Bot error:', err);
-      ctx.reply('An error occurred. Please try again.');
-    });
-  }
+    /**
+     * Update user notification preferences
+     */
+    updatePreferences(userId: string, preferences: Partial<NotificationPreferences>): boolean {
+        const user = this.users.get(userId);
+        if (!user) return false;
+
+        user.preferences = { ...user.preferences, ...preferences };
+        this.users.set(userId, user);
+        return true;
+    }
+
+    /**
+     * Unregister a user from Telegram notifications
+     */
+    unregisterUser(userId: string): boolean {
+        const user = this.users.get(userId);
+        if (!user) return false;
+
+        this.walletToChatId.delete(user.walletAddress);
+        this.users.delete(userId);
+        return true;
+    }
+
+    /**
+     * Get user by ID
+     */
+    getUser(userId: string): TelegramUser | undefined {
+        return this.users.get(userId);
+    }
+
+    // ============ PRIVATE METHODS ============
+
+    private getChatIdByUserId(userId?: string): string | undefined {
+        if (!userId) return undefined;
+        return this.users.get(userId)?.chatId;
+    }
+
+    private shouldSendNotification(type: NotificationType, prefs: NotificationPreferences): boolean {
+        // Map notification types to preference keys
+        const prefMap: Partial<Record<NotificationType, keyof NotificationPreferences>> = {
+            [NotificationType.LOAN_CREATED]: 'loanAlerts',
+            [NotificationType.LOAN_APPROVED]: 'loanAlerts',
+            [NotificationType.LOAN_ACTIVATED]: 'loanAlerts',
+            [NotificationType.LOAN_REPAID]: 'loanAlerts',
+            [NotificationType.LOAN_LIQUIDATED]: 'loanAlerts',
+            [NotificationType.LOAN_DUE_SOON]: 'loanAlerts',
+            [NotificationType.LOAN_OVERDUE]: 'loanAlerts',
+            [NotificationType.HEALTH_FACTOR_WARNING]: 'healthFactorAlerts',
+            [NotificationType.HEALTH_FACTOR_CRITICAL]: 'healthFactorAlerts',
+            [NotificationType.LIQUIDATION_RISK]: 'healthFactorAlerts',
+            [NotificationType.CREDIT_SCORE_UPDATED]: 'creditScoreAlerts',
+            [NotificationType.TIER_UPGRADED]: 'creditScoreAlerts',
+            [NotificationType.TIER_DOWNGRADED]: 'creditScoreAlerts',
+            [NotificationType.DEPOSIT_CONFIRMED]: 'transactionAlerts',
+            [NotificationType.WITHDRAWAL_CONFIRMED]: 'transactionAlerts',
+            [NotificationType.DAILY_SUMMARY]: 'dailySummary',
+            [NotificationType.PRICE_ALERT]: 'priceAlerts',
+        };
+
+        const prefKey = prefMap[type];
+        if (!prefKey) return true; // Allow unspecified notification types
+
+        return prefs[prefKey];
+    }
+
+    private async apiRequest(method: string, body?: any): Promise<TelegramApiResponse> {
+        try {
+            const url = `${this.baseUrl}/${method}`;
+            const options: RequestInit = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(url, options);
+            const data = await response.json() as TelegramApiResponse;
+
+            if (!data.ok) {
+                this.logger.error(`Telegram API error: ${data.description}`);
+            }
+
+            return data;
+        } catch (error) {
+            this.logger.error(`Telegram API request failed: ${error.message}`);
+            return { ok: false, description: error.message };
+        }
+    }
+
+    /**
+     * Set webhook for receiving updates (optional - for bot commands)
+     */
+    async setWebhook(url: string): Promise<TelegramApiResponse> {
+        return this.apiRequest('setWebhook', { url });
+    }
+
+    /**
+     * Delete webhook
+     */
+    async deleteWebhook(): Promise<TelegramApiResponse> {
+        return this.apiRequest('deleteWebhook');
+    }
+
+    /**
+     * Get webhook info
+     */
+    async getWebhookInfo(): Promise<TelegramApiResponse> {
+        return this.apiRequest('getWebhookInfo');
+    }
 }

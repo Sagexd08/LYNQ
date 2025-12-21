@@ -1,6 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Loan } from '../../loan/entities/loan.entity';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 export enum CollateralStatus {
   LOCKED = 'LOCKED',
@@ -8,58 +6,32 @@ export enum CollateralStatus {
   LIQUIDATED = 'LIQUIDATED',
 }
 
-@Entity('collaterals')
+@Entity({ name: 'collateral' })
 export class Collateral {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user!: User;
+  @Column({ type: 'varchar', length: 128 })
+  userId: string;
 
-  @Column()
-  userId!: string;
+  @Column({ type: 'varchar', length: 128 })
+  tokenAddress: string;
 
-  @ManyToOne(() => Loan, { nullable: true })
-  @JoinColumn({ name: 'loanId' })
-  loan?: Loan;
+  @Column({ type: 'numeric', precision: 36, scale: 18 })
+  amount: string;
 
-  @Column({ nullable: true })
-  loanId?: string;
+  @Column({ type: 'varchar', length: 32, default: CollateralStatus.LOCKED })
+  status: CollateralStatus;
 
-  @Column()
-  chain!: string;
+  @Column({ type: 'numeric', precision: 36, scale: 18, nullable: true })
+  lastValuation?: string | null;
 
-  @Column()
-  tokenAddress!: string;
-
-  @Column()
-  tokenSymbol!: string;
-
-  @Column({ type: 'decimal', precision: 18, scale: 8 })
-  amount!: string;
-
-  @Column({ type: 'decimal', precision: 18, scale: 2 })
-  valueUSD!: string;
-
-  @Column({ type: 'enum', enum: CollateralStatus, default: CollateralStatus.UNLOCKED })
-  status!: CollateralStatus;
-
-  @Column({ nullable: true })
-  contractAddress?: string;
-
-  @Column({ nullable: true })
-  transactionHash?: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  lockedAt?: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  unlockedAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  lastValuationAt?: Date | null;
 
   @CreateDateColumn()
-  createdAt!: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedAt: Date;
 }

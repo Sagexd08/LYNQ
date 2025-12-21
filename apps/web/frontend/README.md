@@ -59,8 +59,21 @@ pnpm lint
 - **Build Tool:** Vite
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **State Management:** (Add details if known, e.g., Context, Redux, Zustand)
-- **Routing:** (Add details if known, e.g., React Router)
+- **State Management:** Zustand + React Query
+- **Routing:** React Router
+
+## Environment Variables
+
+Create an `.env` file (see `.env.example`) with at least:
+
+```
+VITE_API_BASE_URL=http://localhost:3000/api/v1
+VITE_APP_NAME=LYNQ
+VITE_ENABLE_ANALYTICS=false
+VITE_ENABLE_ERROR_REPORTING=false
+```
+
+During production deployments, point `VITE_API_BASE_URL` to the deployed API, e.g. `https://api.example.com/api/v1`.
 
 ## Key Directories
 

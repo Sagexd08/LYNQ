@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Copy, Check, Wallet, Globe, Activity } from 'lucide-react';
 
 interface PersonalDetailsProps {
   address?: string;
@@ -10,9 +12,10 @@ interface PersonalDetailsProps {
 }
 
 const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError }) => {
-  const [usdRate, setUsdRate] = useState(2500); 
-  const [trustScore] = useState(75); 
+  const [usdRate, setUsdRate] = useState(2500);
+  const [trustScore] = useState(75);
   const [trustTier, setTrustTier] = useState("🥈 Gold");
+  const [copied, setCopied] = useState(false);
 
   const fetchPrice = async () => {
     try {
@@ -26,7 +29,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
 
   useEffect(() => {
     fetchPrice();
-    
     if (trustScore >= 86) setTrustTier("🥇 Elite");
     else if (trustScore >= 61) setTrustTier("🥈 Gold");
     else if (trustScore >= 31) setTrustTier("🥉 Silver");
@@ -36,136 +38,97 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
   const handleCopy = () => {
     if (address) {
       navigator.clipboard.writeText(address);
-      console.log('Wallet address copied to clipboard');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const network = address?.startsWith('0x') ? 'Ethereum Mainnet' : 'Unknown';
 
   return (
-    <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg shadow-purple-500/10 transition-all hover:shadow-purple-500/20">
-      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="text-purple-400">👤</span> Personal Details
-      </h3>
-
-      <div className="space-y-6 text-sm text-white/80">
-        {}
-        <div>
-          <label className="block text-white/60 mb-1">Wallet Address</label>
-          <div className="p-3 bg-white/5 border border-white/10 rounded-lg font-mono break-all text-white text-sm flex justify-between items-center">
-            <span>{address || 'Not connected'}</span>
-            {address && (
-              <button 
-                onClick={handleCopy} 
-                className="ml-2 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-              >
-                Copy
-              </button>
-            )}
-          </div>
+    <motion.div
+      className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg shadow-black/20 group hover:border-electric-blue/30 transition-all duration-300"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.01 }}
+    >
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-xl font-heading font-bold text-white flex items-center gap-2">
+          <span className="p-2 bg-electric-blue/20 rounded-lg text-electric-blue">
+            <Wallet className="w-5 h-5" />
+          </span>
+          Wallet Details
+        </h3>
+        <div className={`px-3 py-1 rounded-full text-xs font-medium border ${address ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+          {address ? '● Connected' : '○ Disconnected'}
         </div>
+      </div>
 
-        {}
-        {walletType && (
-          <div>
-            <label className="block text-white/60 mb-1">Wallet Provider</label>
-            <div className="text-lg font-medium text-cyan-400">{walletType}</div>
-          </div>
-        )}
-
-        {}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-white/60 mb-1">ETH Balance</label>
-            <div className="text-lg font-bold text-green-400">
-              {isLoadingBalance ? (
-                <span className="animate-pulse">Loading...</span>
-              ) : balanceError ? (
-                <span className="text-red-400">Error</span>
-              ) : ethBalance ? (
-                `${ethBalance.toFixed(4)} ETH`
-              ) : (
-                '--'
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="flex items-center justify-between text-white/60 mb-1">
-              USD Value
-              <button
-                onClick={fetchPrice}
-                className="text-xs px-2 py-0.5 bg-cyan-600 hover:bg-cyan-700 rounded text-white transition-colors"
-              >
-                🔄 Refresh
-              </button>
-            </label>
-            <div className="text-lg font-bold text-white">
-              {isLoadingBalance ? (
-                <span className="animate-pulse">Loading...</span>
-              ) : ethBalance ? (
-                `$${(ethBalance * usdRate).toFixed(2)}`
-              ) : (
-                '--'
-              )}
-            </div>
-          </div>
-        </div>
-
-        {}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-white/60 mb-1">TrustScore</label>
-            <div className="text-lg font-bold text-purple-300">{trustScore}</div>
-          </div>
-          <div>
-            <label className="block text-white/60 mb-1">Tier</label>
-            <div className="text-lg font-bold text-yellow-300">{trustTier}</div>
-          </div>
-        </div>
-
-        {}
-        <div>
-          <label className="block text-white/60 mb-1">Account Status</label>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span>
-            <span className="text-green-400 font-medium">
-              {address ? 'Connected & Verified' : 'Not Connected'}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Address Section */}
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Address</label>
+          <div
+            onClick={handleCopy}
+            className="group/addr cursor-pointer p-4 bg-black/20 border border-white/5 rounded-xl flex items-center justify-between hover:bg-black/40 hover:border-neon-cyan/30 transition-colors"
+          >
+            <span className="font-mono text-sm text-white/90 truncate mr-2">
+              {address || 'Not connected'}
+            </span>
+            <span className="text-neon-cyan">
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4 opacity-50 group-hover/addr:opacity-100" />}
             </span>
           </div>
         </div>
 
-        {}
-        {address && (
-          <div>
-            <label className="block text-white/60 mb-1">Connected At</label>
-            <div className="text-white/80">
-              {connectedAt
-                ? new Date(connectedAt).toLocaleString()
-                : new Date().toLocaleString()}
+        {/* Balance Section */}
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-white/50 font-bold flex justify-between">
+            <span>Holdings</span>
+            <button onClick={fetchPrice} className="text-electric-blue hover:text-white transition-colors text-[10px]">REFRESH</button>
+          </label>
+          <div className="p-4 bg-gradient-to-r from-electric-blue/10 to-transparent border border-electric-blue/20 rounded-xl">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-mono font-bold text-white">
+                {isLoadingBalance ? '...' : (ethBalance || 0).toFixed(4)}
+              </span>
+              <span className="text-sm text-electric-blue font-bold">ETH</span>
+            </div>
+            <div className="text-xs text-white/50 font-mono mt-1">
+              ≈ ${(ethBalance * usdRate).toFixed(2)} USD
             </div>
           </div>
-        )}
+        </div>
 
-        {}
-        {address && (
-          <div>
-            <label className="block text-white/60 mb-1">Network</label>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-              <span className="text-green-400 font-medium">{network}</span>
+        {/* Network Info */}
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Network</label>
+          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
+            <div className="p-2 bg-purple-500/20 rounded-full text-purple-400">
+              <Globe className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">{network}</div>
+              <div className="text-xs text-white/50">{walletType || 'Web3 Wallet'}</div>
             </div>
           </div>
-        )}
+        </div>
 
-        {}
-        {balanceError && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <label className="block text-red-400 mb-1">Balance Error</label>
-            <div className="text-red-300 text-xs">{balanceError}</div>
+        {/* Trust Score Mini */}
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Reputation</label>
+          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 bg-gradient-to-r from-transparent to-yellow-500/5">
+            <div className="p-2 bg-yellow-500/20 rounded-full text-yellow-400">
+              <Activity className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">{trustTier}</div>
+              <div className="text-xs text-white/50">Score: {trustScore}</div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
