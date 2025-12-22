@@ -28,6 +28,7 @@ export const buildTypeOrmOptions = (env: Record<string, string | undefined>): Da
         synchronize: isDev,
         migrationsRun: !isDev,
         logging: nodeEnv !== 'test',
+        ssl: env.DB_HOST !== 'localhost' ? { rejectUnauthorized: false } : false,
     } satisfies DataSourceOptions;
 };
 

@@ -16,7 +16,6 @@ import {
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { contractService } from '../services/contractService';
-import { CONTRACT_ADDRESSES } from '../config/contracts';
 import { useWalletStore } from '../store/walletStore';
 
 type LoanStatus = 'active' | 'pending' | 'repaid' | 'defaulted';

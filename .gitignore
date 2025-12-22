@@ -11,7 +11,9 @@ build
 coverage
 .cache
 .next
+.next
 out
+.turbo
 artifacts
 .typechain
 cache

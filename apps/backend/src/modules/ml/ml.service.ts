@@ -194,16 +194,39 @@ export class MLService {
     };
   }
 
-  ensemblePrediction(dto: any) {
-    // Ensemble model logic
+  ensemblePrediction(data: { creditScore: number; debtRatio: number; repaymentRate: number }) {
+    // Deterministic Ensemble Logic
+    // 1. Logistic Regression Proxy (Weight 0.1)
+    const logRegPred = (1000 - data.creditScore) / 1000;
+
+    // 2. Random Forest Proxy (Weight 0.4) - Non-linear penalty for high debt
+    const rfPred = data.debtRatio > 0.5 ? 0.8 : 0.2;
+
+    // 3. Gradient Boosting Proxy (Weight 0.3) - Reward good repayment strongly
+    const gbPred = data.repaymentRate > 90 ? 0.05 : 0.6;
+
+    // 4. Neural Net Proxy (Weight 0.2) - Complex interaction (mocked as average)
+    const nnPred = (logRegPred + rfPred + gbPred) / 3;
+
+    // Weighted Vote
+    const weightedScore = (
+      (logRegPred * 0.1) +
+      (rfPred * 0.4) +
+      (gbPred * 0.3) +
+      (nnPred * 0.2)
+    );
+
+    const prediction = weightedScore > 0.5 ? 'DEFAULT_RISK' : 'NO_DEFAULT';
+    const confidence = Math.min(Math.abs(0.5 - weightedScore) * 200, 99); // Higher distance from 0.5 = higher confidence
+
     return {
-      prediction: 'NO_DEFAULT',
-      confidence: 85 + Math.random() * 10,
+      prediction,
+      confidence: confidence.toFixed(2),
       models: {
-        randomForest: { prediction: 0.1, weight: 0.4 },
-        gradientBoosting: { prediction: 0.12, weight: 0.3 },
-        neuralNetwork: { prediction: 0.08, weight: 0.2 },
-        logisticRegression: { prediction: 0.15, weight: 0.1 }
+        randomForest: { prediction: rfPred.toFixed(2), weight: 0.4 },
+        gradientBoosting: { prediction: gbPred.toFixed(2), weight: 0.3 },
+        neuralNetwork: { prediction: nnPred.toFixed(2), weight: 0.2 },
+        logisticRegression: { prediction: logRegPred.toFixed(2), weight: 0.1 }
       }
     };
   }

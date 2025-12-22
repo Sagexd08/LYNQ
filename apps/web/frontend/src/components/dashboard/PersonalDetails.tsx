@@ -11,7 +11,7 @@ interface PersonalDetailsProps {
   balanceError?: string | null;
 }
 
-const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, connectedAt, isLoadingBalance, balanceError }) => {
+const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, isLoadingBalance }) => {
   const [usdRate, setUsdRate] = useState(2500);
   const [trustScore] = useState(75);
   const [trustTier, setTrustTier] = useState("🥈 Gold");

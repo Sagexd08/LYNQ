@@ -1,4 +1,6 @@
 
-> @lynq/blockchain-adapter@1.0.0 build C:\Users\sohom\OneDrive\Desktop\LYNQ\packages\blockchain-adapter
+> @lynq/blockchain-adapter@1.0.0 build C:\Users\sohom\OneDrive\Desktop\Blockchain\LYNQ\packages\blockchain-adapter
 > tsc
 
+src/adapters/evm.adapter.test.ts(39,50): error TS2503: Cannot find namespace 'vi'.
+ ELIFECYCLE  Command failed with exit code 2.
