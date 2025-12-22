@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Zap,
-  TrendingUp,
+
   AlertTriangle,
   CheckCircle,
   Info,
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
-import { ConfidenceIndicator, RiskAlert } from '../components/ml/MLInsights';
+import { ConfidenceIndicator } from '../components/ml/MLInsights';
 
 // Flash Loan Page
 const FlashLoanPage: React.FC = () => {

@@ -124,7 +124,7 @@ export async function getNativeBalance(
         return {
             balance: balanceWei.toString(),
             formatted: parseFloat(formatted).toFixed(4),
-            symbol: config.nativeCurrency.symbol,
+            symbol: config?.nativeCurrency?.symbol || 'ETH',
         };
     } catch (error) {
         console.error(`Error fetching balance for ${address} on ${chainKey}:`, error);
@@ -152,8 +152,8 @@ export async function getTokenBalance(
         const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, provider);
 
         const [balance, decimals] = await Promise.all([
-            tokenContract.balanceOf(address),
-            tokenContract.decimals(),
+            (tokenContract as any).balanceOf(address),
+            (tokenContract as any).decimals(),
         ]);
 
         const formatted = ethers.formatUnits(balance, decimals);

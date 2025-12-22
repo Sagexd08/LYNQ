@@ -21,6 +21,9 @@ LYNQ/
 ## 🚀 Features
 
 ### Backend Modules
+> [!NOTE]
+> **Backend Status:** The backend services are currently in active development. The Indexer module uses a polling mechanism for simplicity. Advanced ML features are integrated but may require partial mocking for local testing without full data pipelines.
+
 
 #### 🔐 Authentication (`apps/backend/src/modules/auth`)
 - JWT-based authentication
@@ -134,13 +137,14 @@ LYNQ/
 ### 🌍 Deployed Contracts (Mantle Sepolia)
 | Contract | Address |
 | :--- | :--- |
-| **LoanCore** | `0x28d19bce67566423719B2E471f578b765F4375BA` |
-| **SocialStaking** | `0xbcCa20A57E9d55B928355cd23aB5Ed585d45cEB2` |
-| **CreditScoreVerifier** | `0x146038F8b136596f9C3EaBb9e531d9548d593d62` |
-| **ReputationPoints** | `0xeD42659476443dE01d113322E156913EA056332F` |
-| **CollateralVault** | `0x52F3f3C2d1610454E6c3345b5E02DA767dC4f4D2` |
-| **LiquidatorProtocol** | `0x4dCeFaE1b3B79Ad325D8870C84937f88FEC6a51c` |
-| **MockToken** | `0xA386808b7ed83be964caB5c022A19d58cca8039e` |
+| **LoanCore** | `0x16fB626C9Ef59aa865366d086931FAcfDc70490F` |
+| **SocialStaking** | `0xF7569f3F1f8E667829061941f3A09603a7501A09` |
+| **CreditScoreVerifier** | `0x47B887406f3773fdc45C50692ba8e37732036b01` |
+| **ReputationPoints** | `0x989671777720a8b82AF271f48287d4ace3F3b363` |
+| **CollateralVault** | `0x8D65d4bbED41a9BbDDEdA63c5798e16058e31A4A` |
+| **LiquidatorProtocol** | `0xd1125B8FEa5dF57aB1f3c3A225FF48E8Ff83D032` |
+| **MockToken** | `0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C` |
+
 
 ### LoanCore.sol
 - Loan lifecycle management

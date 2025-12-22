@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { IndexerModule } from './modules/indexer/indexer.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { validate } from './config/env.validation';
 import { buildTypeOrmOptions } from './config/database.config';
@@ -17,7 +19,8 @@ import { BlockchainModule } from './modules/blockchain/blockchain.module';
 import { FlashLoanModule } from './modules/flashloan/flashloan.module';
 import { HealthModule } from './modules/health/health.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuditModule } from './modules/audit/audit.module';
 import { MetricsController } from './common/metrics/metrics.controller';
@@ -67,8 +70,14 @@ import { MLModule } from './modules/ml/ml.module';
         FlashLoanModule,
         HealthModule,
         TelegramModule,
+        IndexerModule,
     ],
     controllers: [MetricsController],
-    providers: [],
+    providers: [
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+        },
+    ],
 })
 export class AppModule { }

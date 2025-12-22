@@ -5,7 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import NavBar from './components/NavBar';
 import HealthIndicator from './components/HealthIndicator';
 import { useWalletStore } from './store/walletStore';
-import { getSavedWalletConnection, clearSavedWalletConnection } from './components/wallet/walletConfig';
+import { getSavedWalletConnection } from './components/wallet/walletConfig';
 import { getNativeBalance, getChainByChainId, SUPPORTED_CHAINS } from './services/blockchain';
 
 // Lazy load pages for code splitting
@@ -14,6 +14,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LoansPage = lazy(() => import('./pages/LoansPage'));
 const FlashLoanPage = lazy(() => import('./pages/FlashLoanPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const CreateLoanPage = lazy(() => import('./pages/CreateLoanPage'));
 
 // Loading Fallback
 const LoadingFallback = () => (
@@ -31,7 +32,7 @@ const Layout = ({
   useTestnet,
   onToggleNetwork,
   onWalletConnect,
-  currentChainKey
+
 }: {
   children: React.ReactNode;
   useTestnet: boolean;
@@ -62,7 +63,6 @@ const Layout = ({
 function App() {
   const [useTestnet, setUseTestnet] = useState<boolean>(true); // Default to testnet for safety
   const [currentChainKey, setCurrentChainKey] = useState<string>('mantleSepolia');
-  const [isLoadingBalance, setIsLoadingBalance] = useState<boolean>(false);
 
   // Wallet store actions
   const address = useWalletStore((state) => state.address);
@@ -79,7 +79,6 @@ function App() {
       return;
     }
 
-    setIsLoadingBalance(true);
     setLoadingBalance(true);
 
     try {
@@ -101,7 +100,6 @@ function App() {
         updateBalance(0);
       }
     } finally {
-      setIsLoadingBalance(false);
       setLoadingBalance(false);
     }
   }, [currentChainKey, updateBalance, setLoadingBalance, setBalanceError]);
@@ -125,8 +123,8 @@ function App() {
       connect({
         address: walletData.address,
         walletType: walletData.walletType || walletData.walletName || '',
-        chainId: walletData.chainId || SUPPORTED_CHAINS[chainKey].chainId.toString(),
-        networkName: walletData.networkName || SUPPORTED_CHAINS[chainKey].name,
+        chainId: walletData.chainId || SUPPORTED_CHAINS[chainKey]?.chainId.toString(),
+        networkName: walletData.networkName || SUPPORTED_CHAINS[chainKey]?.name,
         publicKey: walletData.publicKey,
         email: walletData.email,
         name: walletData.name,
@@ -148,7 +146,9 @@ function App() {
     setCurrentChainKey(newChainKey);
 
     const config = SUPPORTED_CHAINS[newChainKey];
-    updateNetwork(config.chainId.toString(), config.name);
+    if (config) {
+      updateNetwork(config.chainId.toString(), config.name);
+    }
 
     // Refetch balance with new network
     if (address) {
@@ -208,6 +208,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/loans/new" element={<CreateLoanPage />} />
             <Route path="/loans/*" element={<LoansPage />} />
             <Route path="/flashloan/*" element={<FlashLoanPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />

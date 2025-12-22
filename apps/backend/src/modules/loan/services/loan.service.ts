@@ -42,7 +42,9 @@ export class LoanService {
       durationDays: createLoanDto.durationDays,
       startDate: new Date(),
       dueDate,
-      status: LoanStatus.PENDING,
+      status: createLoanDto.transactionHash ? LoanStatus.ACTIVE : LoanStatus.PENDING,
+      transactionHash: createLoanDto.transactionHash,
+      metadata: createLoanDto.onChainId ? { onChainId: createLoanDto.onChainId } : undefined,
     });
 
     const savedLoan = await this.loanRepository.save(loan);

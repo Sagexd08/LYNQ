@@ -34,8 +34,6 @@ async function bootstrap() {
         credentials: true,
     });
 
-    // Sentry-related interceptors/filters removed
-
     app.setGlobalPrefix('api/v1');
 
     app.useGlobalPipes(

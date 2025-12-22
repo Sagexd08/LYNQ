@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
+import { contractService } from '../services/contractService';
+import { CONTRACT_ADDRESSES } from '../config/contracts';
+import { useWalletStore } from '../store/walletStore';
 
 type LoanStatus = 'active' | 'pending' | 'repaid' | 'defaulted';
 
@@ -164,60 +167,40 @@ const LoansPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Mock data
-  const loans: Loan[] = [
-    {
-      id: 'loan-001',
-      amount: '$5,000',
-      collateral: 'ETH',
-      collateralAmount: '2.5',
-      healthFactor: 1.85,
-      interestRate: 7.5,
-      dueDate: 'Jan 15, 2025',
-      status: 'active',
-      createdAt: '2024-12-01',
-      outstandingAmount: '$4,250',
-      chain: 'mantle',
-    },
-    {
-      id: 'loan-002',
-      amount: '$7,450',
-      collateral: 'MNT',
-      collateralAmount: '180',
-      healthFactor: 1.42,
-      interestRate: 8.2,
-      dueDate: 'Feb 1, 2025',
-      status: 'active',
-      createdAt: '2024-12-10',
-      outstandingAmount: '$7,450',
-      chain: 'mantle',
-    },
-    {
-      id: 'loan-003',
-      amount: '$2,000',
-      collateral: 'ETH',
-      collateralAmount: '1.2',
-      healthFactor: 2.10,
-      interestRate: 6.5,
-      dueDate: 'Dec 20, 2024',
-      status: 'repaid',
-      createdAt: '2024-11-15',
-      outstandingAmount: '$0',
-      chain: 'ethereum',
-    },
-    {
-      id: 'loan-004',
-      amount: '$10,000',
-      collateral: 'ETH',
-      collateralAmount: '4.0',
-      healthFactor: 0,
-      interestRate: 9.0,
-      dueDate: 'Mar 1, 2025',
-      status: 'pending',
-      createdAt: '2024-12-20',
-      outstandingAmount: '$10,000',
-      chain: 'polygon',
-    },
-  ];
+  const { address } = useWalletStore();
+  const [loans, setLoans] = useState<Loan[]>([]);
+
+  React.useEffect(() => {
+    const fetchUserLoans = async () => {
+      if (address) {
+        try {
+          const fetched = await contractService.getUserLoans(address);
+          const mapped: Loan[] = fetched.map((l: any) => ({
+            id: l.id,
+            amount: `$${parseFloat(l.amount).toFixed(2)}`,
+            collateral: 'MNT', // Mock -> MNT
+            collateralAmount: parseFloat(l.collateral).toFixed(2),
+            healthFactor: 1.85, // Mock HF
+            interestRate: l.interestRate,
+            dueDate: l.dueDate === 'Invalid Date' ? 'No Due Date' : l.dueDate,
+            status: l.status as LoanStatus,
+            createdAt: '2025-01-01', // Mock date
+            outstandingAmount: `$${parseFloat(l.amount).toFixed(2)}`, // Simplified
+            chain: 'mantle',
+          }));
+          setLoans(mapped);
+        } catch (e) {
+          console.error("Error fetching loans:", e);
+        }
+      }
+    };
+    fetchUserLoans();
+  }, [address]);
+
+  // Mock data preserved if needed for testing, but overwritten by state above initially empty
+  /* 
+  const loans: Loan[] = [...]
+  */
 
   const filteredLoans = loans.filter(loan => {
     if (filter !== 'all' && loan.status !== filter) return false;

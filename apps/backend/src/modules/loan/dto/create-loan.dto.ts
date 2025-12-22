@@ -5,6 +5,8 @@ export enum SupportedChain {
     EVM = 'evm',
     APTOS = 'aptos',
     FLOW = 'flow',
+    MANTLE = 'mantle',
+    MANTLE_SEPOLIA = 'mantleSepolia',
 }
 
 export class CreateLoanDto {
@@ -30,4 +32,12 @@ export class CreateLoanDto {
     @Min(7)
     @Max(365)
     durationDays!: number;
+
+    @ApiProperty({ example: '0x...', required: false })
+    @IsString()
+    transactionHash?: string;
+
+    @ApiProperty({ example: '1', required: false })
+    @IsString()
+    onChainId?: string;
 }

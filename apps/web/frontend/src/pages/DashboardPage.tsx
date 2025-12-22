@@ -15,10 +15,17 @@ import {
   Target,
   Sparkles,
 } from 'lucide-react';
+import { contractService } from '../services/contractService';
+import { CONTRACT_ADDRESSES } from '../config/contracts';
+import toast from 'react-hot-toast';
+import { loanApi } from '../services/api/loans';
+import { userApi } from '../services/api/users';
+import { useWalletStore } from '../store/walletStore';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { CreditScoreDisplay, TierProgress } from '../components/ml/CreditScore';
 import { MLInsightCard, RiskAlert } from '../components/ml/MLInsights';
+import { RefinanceModal } from '../components/dashboard/RefinanceModal';
 
 // Stat Card Component
 const StatCard: React.FC<{
@@ -59,17 +66,13 @@ const StatCard: React.FC<{
 );
 
 // Active Loan Card
+
 const ActiveLoanCard: React.FC<{
-  loan: {
-    id: string;
-    amount: string;
-    collateral: string;
-    healthFactor: number;
-    dueDate: string;
-    interestRate: number;
-  };
+  loan: any;
   delay?: number;
-}> = ({ loan, delay = 0 }) => {
+  onRepay: (id: string, amount: string, assetAddress: string) => void;
+  onRefinance: (id: string, rate: number) => void;
+}> = ({ loan, delay = 0, onRepay, onRefinance }) => {
   const getHealthColor = (health: number) => {
     if (health >= 1.5) return 'text-success';
     if (health >= 1.2) return 'text-warning';
@@ -126,9 +129,22 @@ const ActiveLoanCard: React.FC<{
             View Details
             <ChevronRight className="w-4 h-4" />
           </Link>
-          <Button size="sm" variant="secondary">
-            Repay
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="bg-transparent border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+              onClick={() => onRefinance(loan.id, loan.interestRate)}
+            >
+              Refinance
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onRepay(loan.id, loan.amount.split(' ')[0], (loan.assetAddress || CONTRACT_ADDRESSES.mantleSepolia.StableToken || '') as string)}
+            >
+              Repay
+            </Button>
+          </div>
         </div>
       </GlassCard>
     </motion.div>
@@ -177,10 +193,24 @@ const ActivityItem: React.FC<{
 
 // Main Dashboard Component
 const DashboardPage: React.FC = () => {
-  // Mock data - would come from API in production
-  const creditScore = 742;
+  const [creditScore, setCreditScore] = React.useState(0);
+  const [tier, setTier] = React.useState<any>('bronze');
   const previousScore = 718;
-  const tier = 'gold' as const;
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await userApi.getProfile();
+        if (res.data) {
+          setCreditScore(res.data.reputationPoints || 0);
+          setTier((res.data.reputationTier || 'BRONZE').toLowerCase());
+        }
+      } catch (e) {
+        console.error("Failed to fetch profile:", e);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const stats = [
     { label: 'Total Borrowed', value: '$12,450', change: 8.2, icon: CreditCard },
@@ -189,28 +219,99 @@ const DashboardPage: React.FC = () => {
     { label: 'Net Position', value: '+$16,470', change: 22.8, icon: Activity },
   ];
 
-  const activeLoans = [
-    {
-      id: '1',
-      amount: '$5,000 USDC',
-      collateral: '2.5 ETH',
-      healthFactor: 1.85,
-      dueDate: 'Jan 15, 2025',
-      interestRate: 7.5,
-    },
-    {
-      id: '2',
-      amount: '$7,450 USDC',
-      collateral: '180 MNT',
-      healthFactor: 1.42,
-      dueDate: 'Feb 1, 2025',
-      interestRate: 8.2,
-    },
-  ];
+  const { address } = useWalletStore();
+  const [activeLoans, setActiveLoans] = React.useState<any[]>([]);
+  const [refinanceModalData, setRefinanceModalData] = React.useState<{ id: string, rate: number } | null>(null);
+
+  React.useEffect(() => {
+    const fetchLoans = async () => {
+      if (address) {
+        try {
+          const loans = await contractService.getUserLoans(address);
+          const active = loans
+            .filter((l: any) => l.status === 'active' || l.status === 'pending')
+            .map((l: any) => ({
+              ...l,
+              amount: `${parseFloat(l.amount).toFixed(2)} USDC`,
+              collateral: `${parseFloat(l.collateral).toFixed(2)} MNT`,
+              healthFactor: 1.85,
+              dueDate: l.dueDate === 'Invalid Date' ? 'No Due Date' : l.dueDate,
+            }));
+          setActiveLoans(active);
+        } catch (error) {
+          console.error("Error fetching loans for dashboard:", error);
+        }
+      }
+    };
+    fetchLoans();
+  }, [address]);
+
+  const handleRefinance = async (id: string, rate: number) => {
+    try {
+      // Find backend loan ID
+      const res = await loanApi.getMyLoans();
+      const loans = Array.isArray(res.data) ? res.data : [];
+      const matched = loans.find((l: any) => l.metadata?.onChainId === id);
+
+      if (matched) {
+        setRefinanceModalData({ id: matched.id, rate });
+      } else {
+        toast.error("Loan not synced with backend. Cannot refinance yet.");
+      }
+    } catch (e) {
+      console.error("Refinance lookup failed:", e);
+      toast.error("Failed to check eligibility");
+    }
+  };
+
+  const handleRepay = async (id: string, amount: string, assetAddress: string) => {
+    try {
+      const cleanAmount = amount.replace(/,/g, '').split(' ')[0]; // Remove commas and currency
+      const txHash = await contractService.repayLoan(id, cleanAmount, assetAddress);
+
+      // Sync with backend
+      try {
+        const response = await loanApi.getMyLoans();
+        // Assuming response.data is the array or response is the array. 
+        // apiClient in client.ts returns 'response', and loanApi uses it.
+        // Usually axios returns data in .data.
+        const loans = Array.isArray(response.data) ? response.data : [];
+        const matchedLoan = loans.find((l: any) =>
+          l.metadata?.onChainId === id
+        );
+
+        if (matchedLoan) {
+          await loanApi.repay(matchedLoan.id, {
+            amount: cleanAmount,
+            transactionHash: txHash
+          });
+        }
+      } catch (e) {
+        console.error("Backend sync failed for repay:", e);
+      }
+
+      // Refresh loans after repay
+      if (address) {
+        const loans = await contractService.getUserLoans(address);
+        const active = loans
+          .filter((l: any) => l.status === 'active' || l.status === 'pending')
+          .map((l: any) => ({
+            ...l,
+            amount: `${parseFloat(l.amount).toFixed(2)} USDC`,
+            collateral: `${parseFloat(l.collateral).toFixed(2)} MNT`,
+            healthFactor: 1.85,
+            dueDate: l.dueDate === 'Invalid Date' ? 'No Due Date' : l.dueDate,
+          }));
+        setActiveLoans(active);
+      }
+    } catch (error) {
+      console.error("Repayment flow error:", error);
+    }
+  };
 
   const recentActivity = [
     { type: 'borrow' as const, amount: '5,000', asset: 'USDC', time: '2 hours ago', txHash: '0x123' },
-    { type: 'deposit' as const, amount: '2.5', asset: 'ETH', time: '2 hours ago', txHash: '0x124' },
+    { type: 'deposit' as const, amount: '2.5', asset: 'MNT', time: '2 hours ago', txHash: '0x124' },
     { type: 'repay' as const, amount: '1,200', asset: 'USDC', time: '1 day ago', txHash: '0x125' },
   ];
 
@@ -301,7 +402,13 @@ const DashboardPage: React.FC = () => {
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 {activeLoans.map((loan, index) => (
-                  <ActiveLoanCard key={loan.id} loan={loan} delay={0.4 + index * 0.1} />
+                  <ActiveLoanCard
+                    key={loan.id}
+                    loan={loan}
+                    delay={0.4 + index * 0.1}
+                    onRepay={handleRepay}
+                    onRefinance={handleRefinance}
+                  />
                 ))}
               </div>
             </motion.div>
@@ -377,6 +484,15 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {refinanceModalData && (
+        <RefinanceModal
+          isOpen={!!refinanceModalData}
+          onClose={() => setRefinanceModalData(null)}
+          loanId={refinanceModalData.id}
+          currentRate={refinanceModalData.rate}
+        />
+      )}
     </div>
   );
 };
