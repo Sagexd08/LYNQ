@@ -20,6 +20,10 @@ export const loanApi = {
         return apiClient.post('/loans', data);
     },
 
+    checkEligibility: async (amount: number) => {
+        return apiClient.get('/loans/check-eligibility', { params: { amount } });
+    },
+
     repay: async (id: string, data: RepayLoanRequest) => {
         return apiClient.put(`/loans/${id}/repay`, data);
     },

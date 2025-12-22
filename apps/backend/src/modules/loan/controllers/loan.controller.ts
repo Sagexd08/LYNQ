@@ -18,6 +18,15 @@ export class LoanController {
     return this.loanService.create(req.user.id, createLoanDto);
   }
 
+  @Get('check-eligibility')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check loan eligibility' })
+  @ApiQuery({ name: 'amount', required: true, type: Number })
+  async checkEligibility(@Request() req: any, @Query('amount') amount: number): Promise<any> {
+    return this.loanService.checkEligibility(req.user.id, amount);
+  }
+
   @Get('my-loans')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

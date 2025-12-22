@@ -1,9 +1,19 @@
-import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common';
 import { MLService } from './ml.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('ML')
 @Controller('ml')
 export class MLController {
-  constructor(private readonly service: MLService) {}
+  constructor(private readonly service: MLService) { }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('my-score')
+  getMyCreditScore(@Req() req: any) {
+    return this.service.calculateUserCreditScore(req.user.id);
+  }
 
   @Post('credit-score')
   calculateCreditScore(@Body() dto: any) {

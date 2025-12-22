@@ -63,6 +63,18 @@ export class EnvironmentVariables {
     @IsBooleanString()
     @IsOptional()
     ENABLE_SWAGGER?: string;
+
+    @IsString()
+    @IsOptional()
+    SUPABASE_URL?: string;
+
+    @IsString()
+    @IsOptional()
+    SUPABASE_KEY?: string;
+
+    @IsString()
+    @IsOptional()
+    SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

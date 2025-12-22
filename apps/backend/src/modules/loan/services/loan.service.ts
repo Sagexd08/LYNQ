@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Loan, LoanStatus } from '../entities/loan.entity';
@@ -8,6 +8,7 @@ import { UserService } from '../../user/services/user.service';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { TelegramService } from '../../telegram/services/telegram.service';
+import { MLService } from '../../ml/ml.service';
 
 @Injectable()
 export class LoanService {
@@ -17,6 +18,8 @@ export class LoanService {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly telegramService: TelegramService,
+    @Inject(forwardRef(() => MLService))
+    private readonly mlService: MLService,
   ) { }
 
   async create(userId: string, createLoanDto: CreateLoanDto): Promise<Loan> {
@@ -46,6 +49,17 @@ export class LoanService {
       transactionHash: createLoanDto.transactionHash,
       metadata: createLoanDto.onChainId ? { onChainId: createLoanDto.onChainId } : undefined,
     });
+
+
+
+    const eligibility = await this.checkEligibility(userId, parseFloat(createLoanDto.amount)).catch(() => ({ eligible: false, flags: ['CHECK_FAILED'] }));
+
+    if (!eligibility.eligible) {
+      loan.metadata = { ...(loan.metadata || {}), riskFlags: ['MANUAL_REVIEW_REQUIRED', ...eligibility.flags] };
+    }
+
+    // --- ML: Risk Assessment (Informational) ---
+    // this.mlService.assessLoanRisk(...) 
 
     const savedLoan = await this.loanRepository.save(loan);
 
@@ -247,5 +261,32 @@ export class LoanService {
         improvement: (currentInterestRate - newInterestRate).toFixed(2) + '%'
       }
     };
+  }
+
+  async checkEligibility(userId: string, amount: number): Promise<any> {
+    const user = await this.userService.findById(userId);
+    const userLoans = await this.loanRepository.find({ where: { userId } });
+    const loans24h = userLoans.filter(l =>
+      (Date.now() - l.createdAt.getTime()) < 24 * 60 * 60 * 1000
+    ).length;
+
+    const amounts = userLoans.map(l => parseFloat(l.amount)).sort((a, b) => a - b);
+    const medianAmount = amounts.length > 0 ? amounts[Math.floor(amounts.length / 2)] : 0;
+
+    const fraudResult = this.mlService.runFraudDetection({
+      loanAmount: amount,
+      medianUserLoanAmt: medianAmount,
+      loans24h: loans24h,
+      accountAgeDays: Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 3600 * 24)),
+      isBlacklisted: false,
+      suspiciousPatterns: false,
+      reputationScore: user.reputationPoints,
+    });
+
+    if (fraudResult.recommendation === 'REJECT') {
+      throw new BadRequestException(`Loan eligibility failed: ${fraudResult.flags.join(', ')}`);
+    }
+
+    return { eligible: true, riskScore: fraudResult.riskScore, flags: fraudResult.flags };
   }
 }

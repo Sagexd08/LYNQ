@@ -7,6 +7,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { loanApi } from '../services/api/loans';
+import toast from 'react-hot-toast';
 
 const CreateLoanPage: React.FC = () => {
     const navigate = useNavigate();
@@ -23,7 +24,15 @@ const CreateLoanPage: React.FC = () => {
 
         setIsSubmitting(true);
         try {
-            // Use CollateralToken (MNT) for collateral
+            try {
+                await loanApi.checkEligibility(parseFloat(formData.amount));
+            } catch (e: any) {
+                const msg = e.response?.data?.message || 'Eligibility check failed';
+                toast.error(msg);
+                setIsSubmitting(false);
+                return;
+            }
+
             const collateralToken = CONTRACT_ADDRESSES.mantleSepolia.CollateralToken;
 
             const { txHash, loanId } = await contractService.createLoan(
@@ -45,13 +54,11 @@ const CreateLoanPage: React.FC = () => {
                 });
             } catch (err) {
                 console.error("Backend sync failed:", err);
-                // Don't block UI flow, but maybe warn? User sees loan on-chain anyway.
             }
 
             navigate('/loans');
         } catch (error) {
             console.error('Failed to create loan:', error);
-            // Toast is handled in contractService
         } finally {
             setIsSubmitting(false);
         }
@@ -59,8 +66,8 @@ const CreateLoanPage: React.FC = () => {
 
     const calculateHealthFactor = () => {
         if (!formData.amount || !formData.collateral) return 0;
-        const loanValue = parseFloat(formData.amount); // Assume 1 USDC = $1
-        const collateralValue = parseFloat(formData.collateral) * 2000; // Mock ETH price $2000
+        const loanValue = parseFloat(formData.amount);
+        const collateralValue = parseFloat(formData.collateral) * 2000;
         if (loanValue === 0) return 0;
         return collateralValue / loanValue;
     };

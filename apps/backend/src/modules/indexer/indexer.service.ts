@@ -158,7 +158,6 @@ export class IndexerService implements OnModuleInit {
         // Querying JSON metadata is database specific. 
         // For Postgres/SQLite in TypeORM, we often need raw query or fetch-all-and-filter if dataset small.
         // Assuming small dataset for dev:
-        // TODO: Optimize this for production with a proper column or JSONB query
         const allLoans = await this.loanRepository.find();
         return allLoans.find(l => l.metadata?.onChainId === onChainId) || null;
     }

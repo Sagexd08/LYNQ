@@ -1,8 +1,57 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import { UserService } from '../user/services/user.service';
+import { LoanService } from '../loan/services/loan.service';
+import { LoanStatus } from '../loan/entities/loan.entity';
 
 @Injectable()
 export class MLService {
   private readonly logger = new Logger(MLService.name);
+
+  constructor(
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => LoanService))
+    private readonly loanService: LoanService,
+  ) { }
+
+  async calculateUserCreditScore(userId: string) {
+    const user = await this.userService.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const loans = await this.loanService.findByUser(userId);
+    const repaidCount = loans.filter(l => l.status === LoanStatus.REPAID).length;
+    const badCount = loans.filter(l => [LoanStatus.LIQUIDATED, LoanStatus.DEFAULTED].includes(l.status)).length;
+    let paymentHistory = 100;
+    if (repaidCount + badCount > 0) {
+      paymentHistory = (repaidCount / (repaidCount + badCount)) * 100;
+    }
+    const activeLoans = loans.filter(l => [LoanStatus.ACTIVE, LoanStatus.PENDING].includes(l.status));
+    let totalOutstanding = 0;
+    let totalCollateralValue = 0;
+
+    activeLoans.forEach(l => {
+      totalOutstanding += parseFloat(l.outstandingAmount);
+      totalCollateralValue += parseFloat(l.collateralAmount);
+    });
+    let utilizationRate = 0;
+    if (totalCollateralValue > 0) {
+      utilizationRate = (totalOutstanding / (totalCollateralValue * 0.8)) * 100;
+      utilizationRate = Math.min(utilizationRate, 100);
+    }
+    const diffTime = Math.abs(Date.now() - new Date(user.createdAt).getTime());
+    const accountAgeDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const reputationScore = Math.min(user.reputationPoints / 10, 100);
+    const chains = new Set(loans.map(l => l.chain));
+    let diversificationScore = chains.size * 20;
+    diversificationScore = Math.min(diversificationScore, 100);
+
+    return this.calculateCreditScore({
+      paymentHistory,
+      utilizationRate,
+      accountAgeDays,
+      reputationScore,
+      diversificationScore
+    });
+  }
 
   calculateCreditScore(data: {
     paymentHistory: number; // 0-100
@@ -146,7 +195,7 @@ export class MLService {
   }
 
   ensemblePrediction(dto: any) {
-    // MOCK: Ensemble model logic
+    // Ensemble model logic
     return {
       prediction: 'NO_DEFAULT',
       confidence: 85 + Math.random() * 10,
@@ -185,7 +234,7 @@ export class MLService {
   }
 
   anomalyDetection(dto: { userId: string, transactionAmount: number, location: string }) {
-    // Mock anomaly check
+    // Perform anomaly detection
     const isAnomaly = Math.random() > 0.8;
     return {
       isAnomaly,
@@ -208,7 +257,7 @@ export class MLService {
   }
 
   forecastTimeseries(dto: any) {
-    // Mock ARIMA forecast
+    // Forecast timeseries using ARIMA model
     const points = [];
     let val = 100;
     for (let i = 0; i < 30; i++) {

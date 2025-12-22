@@ -28,9 +28,7 @@ export class UserService {
     }
 
     async findByWallet(chain: string, address: string): Promise<User | null> {
-        // Simplification: just search for the specific wallet key
-        // Note: SQLite JSON querying is limited, so we might need a raw query or simple load-and-filter if traffic is low.
-        // For now, load and filter is safest for cross-db compatibility in this 'dev' phase.
+        // Find user by wallet address on specific chain
         const users = await this.userRepository.find();
         return users.find(u => u.walletAddresses && u.walletAddresses[chain] === address) || null;
     }

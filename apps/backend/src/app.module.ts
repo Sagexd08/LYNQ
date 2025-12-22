@@ -26,6 +26,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { MetricsController } from './common/metrics/metrics.controller';
 import { CollateralModule } from './modules/collateral/collateral.module';
 import { MLModule } from './modules/ml/ml.module';
+import { SupabaseModule } from './modules/supabase/supabase.module';
 
 @Module({
     imports: [
@@ -71,6 +72,7 @@ import { MLModule } from './modules/ml/ml.module';
         HealthModule,
         TelegramModule,
         IndexerModule,
+        SupabaseModule,
     ],
     controllers: [MetricsController],
     providers: [
