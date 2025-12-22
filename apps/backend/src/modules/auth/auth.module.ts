@@ -10,7 +10,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
     imports: [
-        UserModule, // Provides UserService and UserRepository (via exported TypeOrmModule)
+        UserModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],

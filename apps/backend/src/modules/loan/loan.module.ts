@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { LoanController } from './controllers/loan.controller';
 import { LoanService } from './services/loan.service';
 import { Loan } from './entities/loan.entity';
@@ -11,7 +11,7 @@ import { MLModule } from '../ml/ml.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Loan, Repayment]),
+
         UserModule,
         AuthModule,
         TelegramModule,
@@ -19,7 +19,7 @@ import { MLModule } from '../ml/ml.module';
     ],
     controllers: [LoanController],
     providers: [LoanService],
-    exports: [LoanService, TypeOrmModule],
+    exports: [LoanService],
 })
 export class LoanModule { }
 

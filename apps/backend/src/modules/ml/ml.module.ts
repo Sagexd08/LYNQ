@@ -8,5 +8,6 @@ import { LoanModule } from '../loan/loan.module';
   imports: [UserModule, forwardRef(() => LoanModule)],
   controllers: [MLController],
   providers: [MLService],
+  exports: [MLService],
 })
 export class MLModule { }

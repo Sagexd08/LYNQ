@@ -1,45 +1,73 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SupabaseService } from '../../supabase/supabase.service';
 import { User, ReputationTier } from '../entities/user.entity';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
 export class UserService {
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        private readonly supabaseService: SupabaseService,
     ) { }
 
-    async findById(id: string): Promise<User> {
-        const user = await this.userRepository.findOne({
-            where: { id },
-        });
+    private get supabase() {
+        return this.supabaseService.getClient();
+    }
 
-        if (!user) {
+    async findById(id: string): Promise<User> {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) {
             throw new NotFoundException('User not found');
         }
 
-        return user;
+        return data as User;
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return this.userRepository.findOne({ where: { email } });
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (error) return null;
+        return data as User;
     }
 
     async findByWallet(chain: string, address: string): Promise<User | null> {
         // Find user by wallet address on specific chain
-        const users = await this.userRepository.find();
-        return users.find(u => u.walletAddresses && u.walletAddresses[chain] === address) || null;
+        // Since walletAddresses is a jsonb column, we use the arrow operator
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('*')
+            .eq(`walletAddresses->>${chain}`, address)
+            .single();
+
+        if (error) return null;
+        return data as User;
     }
 
     async findByWalletAddress(address: string): Promise<User | null> {
-        const users = await this.userRepository.find();
+        // This is tricky with JSONB if we don't know the key. 
+        // We might need to select all and filter in memory if the schema is dynamic
+        // Or search specific known chains.
+        // For now, let's try a common heuristic or fetch all (inefficient but safe for small scale)
+        const { data: users, error } = await this.supabase
+            .from('users')
+            .select('*');
+
+        if (error || !users) return null;
+
         for (const user of users) {
-            if (user.walletAddresses) {
-                for (const chain in user.walletAddresses) {
-                    if (user.walletAddresses[chain]?.toLowerCase() === address.toLowerCase()) {
-                        return user;
+            const u = user as User;
+            if (u.walletAddresses) {
+                for (const chain in u.walletAddresses) {
+                    if (u.walletAddresses[chain]?.toLowerCase() === address.toLowerCase()) {
+                        return u;
                     }
                 }
             }
@@ -48,33 +76,67 @@ export class UserService {
     }
 
     async createFromWallet(walletAddress: string): Promise<User> {
-        const newUser = this.userRepository.create({
+        const newUser = {
             email: `wallet-${walletAddress.slice(0, 6)}-${Date.now()}@lynq.local`,
             walletAddresses: {
                 ethereum: walletAddress,
             },
-        });
-        return this.userRepository.save(newUser);
+            reputationPoints: 0,
+            reputationTier: 'BRONZE',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        const { data, error } = await this.supabase
+            .from('users')
+            .insert(newUser)
+            .select()
+            .single();
+
+        if (error) {
+            throw new Error(`Failed to create user: ${error.message}`);
+        }
+        return data as User;
     }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-        const user = await this.findById(id);
-        Object.assign(user, updateUserDto);
-        return this.userRepository.save(user);
+        const { data, error } = await this.supabase
+            .from('users')
+            .update(updateUserDto)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            throw new NotFoundException(`User not found or update failed: ${error.message}`);
+        }
+        return data as User;
     }
 
     async updateReputationPoints(userId: string, points: number): Promise<User> {
         const user = await this.findById(userId);
-        user.reputationPoints += points;
+        let newPoints = (user.reputationPoints || 0) + points;
+        let newTier = user.reputationTier;
 
-        if (user.reputationPoints >= 1000 && user.reputationTier === ReputationTier.BRONZE) {
-            user.reputationTier = ReputationTier.SILVER;
-        } else if (user.reputationPoints >= 5000 && user.reputationTier === ReputationTier.SILVER) {
-            user.reputationTier = ReputationTier.GOLD;
-        } else if (user.reputationPoints >= 15000 && user.reputationTier === ReputationTier.GOLD) {
-            user.reputationTier = ReputationTier.PLATINUM;
+        if (newPoints >= 1000 && newTier === ReputationTier.BRONZE) {
+            newTier = ReputationTier.SILVER;
+        } else if (newPoints >= 5000 && newTier === ReputationTier.SILVER) {
+            newTier = ReputationTier.GOLD;
+        } else if (newPoints >= 15000 && newTier === ReputationTier.GOLD) {
+            newTier = ReputationTier.PLATINUM;
         }
 
-        return this.userRepository.save(user);
+        const { data, error } = await this.supabase
+            .from('users')
+            .update({ reputationPoints: newPoints, reputationTier: newTier })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) {
+            throw new Error(`Failed to update reputation: ${error.message}`);
+        }
+
+        return data as User;
     }
 }

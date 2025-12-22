@@ -2,9 +2,8 @@ import { Module } from '@nestjs/common';
 import { IndexerModule } from './modules/indexer/indexer.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { validate } from './config/env.validation';
-import { buildTypeOrmOptions } from './config/database.config';
 
 // Entities
 import { User } from './modules/user/entities/user.entity';
@@ -35,27 +34,8 @@ import { SupabaseModule } from './modules/supabase/supabase.module';
             envFilePath: '.env',
             validate,
         }),
-        TypeOrmModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => {
-                const env = {
-                    NODE_ENV: configService.get<string>('NODE_ENV'),
-                    DB_HOST: configService.get<string>('DB_HOST'),
-                    DB_PORT: String(configService.get<number>('DB_PORT')),
-                    DB_USER: configService.get<string>('DB_USER'),
-                    DB_PASSWORD: configService.get<string>('DB_PASSWORD'),
-                    DB_NAME: configService.get<string>('DB_NAME'),
-                };
-
-                return {
-                    ...buildTypeOrmOptions(env),
-                    // Ensure Nest knows about entities when synchronizing in dev
-                    entities: [User, Loan, Repayment],
-                    autoLoadEntities: true,
-                    logging: configService.get('NODE_ENV') !== 'test',
-                };
-            },
-        }),
+        // TypeOrmModule removed as per request
+        // Entities are now managed via SupabaseService or raw SQL if needed.
         // Core Modules
         UserModule,
         AuthModule,

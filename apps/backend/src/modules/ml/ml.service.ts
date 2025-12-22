@@ -195,20 +195,10 @@ export class MLService {
   }
 
   ensemblePrediction(data: { creditScore: number; debtRatio: number; repaymentRate: number }) {
-    // Deterministic Ensemble Logic
-    // 1. Logistic Regression Proxy (Weight 0.1)
     const logRegPred = (1000 - data.creditScore) / 1000;
-
-    // 2. Random Forest Proxy (Weight 0.4) - Non-linear penalty for high debt
     const rfPred = data.debtRatio > 0.5 ? 0.8 : 0.2;
-
-    // 3. Gradient Boosting Proxy (Weight 0.3) - Reward good repayment strongly
     const gbPred = data.repaymentRate > 90 ? 0.05 : 0.6;
-
-    // 4. Neural Net Proxy (Weight 0.2) - Complex interaction (mocked as average)
     const nnPred = (logRegPred + rfPred + gbPred) / 3;
-
-    // Weighted Vote
     const weightedScore = (
       (logRegPred * 0.1) +
       (rfPred * 0.4) +

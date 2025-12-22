@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SupabaseService } from '../../supabase/supabase.service';
 import { ethers } from 'ethers';
 import * as bcrypt from 'bcrypt';
 import { User, ReputationTier } from '../../user/entities/user.entity';
@@ -13,11 +12,14 @@ import { WalletConnectDto } from '../dto/wallet-connect.dto';
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
+        private readonly supabaseService: SupabaseService,
     ) { }
+
+    private get supabase() {
+        return this.supabaseService.getClient();
+    }
 
     async register(registerDto: RegisterDto): Promise<{ access_token: string; user: any }> {
         const { email, password, walletAddress } = registerDto;
@@ -36,47 +38,53 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = this.userRepository.create({
+        const newUser = {
             email,
             password: hashedPassword,
             walletAddresses: walletAddress ? { evm: walletAddress } : {},
             reputationTier: ReputationTier.BRONZE,
             reputationPoints: 0,
-        });
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
 
-        await this.userRepository.save(user);
+        const { data: user, error } = await this.supabase
+            .from('users')
+            .insert(newUser)
+            .select()
+            .single();
+
+        if (error || !user) {
+            throw new Error(`Registration failed: ${error?.message}`);
+        }
 
         const payload = { sub: user.id, email: user.email };
         const access_token = this.jwtService.sign(payload);
 
         // Remove password from response
-        const { password: _, ...result } = user;
+        const { password: _, ...result } = user as any;
         return { access_token, user: result };
     }
 
     async login(loginDto: LoginDto): Promise<{ access_token: string; user: any }> {
         const { email, password } = loginDto;
 
-        const user = await this.userService.findByEmail(email);
+        // We need password which is usually hidden, or we explicitly select it.
+        // In Supabase, usually you construct a query.
+        const { data: userWithPassword, error } = await this.supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
 
-        // Passwords are not selected by default in the new entity logic?
-        // Wait, in legacy entity: @Column({ nullable: true, select: false }) password?: string;
-        // So findByEmail won't return password.
-
-        // We need to explicitly select password for login check.
-        const userWithPassword = await this.userRepository.createQueryBuilder("user")
-            .addSelect("user.password")
-            .where("user.email = :email", { email })
-            .getOne();
-
-        if (!userWithPassword || !userWithPassword.password || !(await bcrypt.compare(password, userWithPassword.password))) {
+        if (error || !userWithPassword || !userWithPassword.password || !(await bcrypt.compare(password, userWithPassword.password as string))) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
         const payload = { sub: userWithPassword.id, email: userWithPassword.email };
         const access_token = this.jwtService.sign(payload);
 
-        const { password: _, ...result } = userWithPassword;
+        const { password: _, ...result } = userWithPassword as any;
 
         return { access_token, user: result };
     }
@@ -95,19 +103,29 @@ export class AuthService {
             let user = await this.userService.findByWalletAddress(walletAddress);
 
             if (!user) {
-                user = this.userRepository.create({
+                const newUser = {
                     email: `${walletAddress.substring(0, 8)}@wallet.lynq`,
                     walletAddresses: { [chain]: walletAddress },
                     reputationTier: ReputationTier.BRONZE,
                     reputationPoints: 0,
-                });
-                await this.userRepository.save(user);
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+
+                const { data, error } = await this.supabase
+                    .from('users')
+                    .insert(newUser)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                user = data as User;
             }
 
             const payload = { sub: user.id, wallet: walletAddress };
             const access_token = this.jwtService.sign(payload);
 
-            const { password: _, ...result } = user;
+            const { password: _, ...result } = user as any;
 
             return { access_token, user: result };
         } catch (error) {

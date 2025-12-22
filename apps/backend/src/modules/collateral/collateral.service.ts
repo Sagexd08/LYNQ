@@ -1,27 +1,49 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SupabaseService } from '../supabase/supabase.service';
 import { Collateral } from './entities/collateral.entity';
 
 @Injectable()
+@Injectable()
 export class CollateralService {
-  constructor(@InjectRepository(Collateral) private readonly repo: Repository<Collateral>) {}
+  constructor(private readonly supabaseService: SupabaseService) { }
+
+  private get supabase() {
+    return this.supabaseService.getClient();
+  }
 
   async lockCollateral(dto: Partial<Collateral>) {
-    const entity = this.repo.create({ ...dto, status: 'LOCKED' } as any);
-    return this.repo.save(entity);
+    const { data, error } = await this.supabase
+      .from('collateral')
+      .insert({ ...dto, status: 'LOCKED' })
+      .select()
+      .single();
+
+    if (error) throw new Error(`Lock collateral failed: ${error.message}`);
+    return data as Collateral;
   }
 
   async listUserCollateral(): Promise<Collateral[]> {
-    return this.repo.find();
+    const { data, error } = await this.supabase
+      .from('collateral')
+      .select('*');
+    if (error) return [];
+    return data as Collateral[];
   }
 
   async getCollateralDetails(id: string) {
-    return this.repo.findOneBy({ id });
+    const { data } = await this.supabase
+      .from('collateral')
+      .select('*')
+      .eq('id', id)
+      .single();
+    return data as Collateral;
   }
 
   async unlockCollateral(id: string) {
-    await this.repo.update({ id }, { status: 'UNLOCKED' } as any);
+    await this.supabase
+      .from('collateral')
+      .update({ status: 'UNLOCKED' })
+      .eq('id', id);
     return this.getCollateralDetails(id);
   }
 

@@ -1,6 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SupabaseService } from '../supabase/supabase.service';
 import { Loan, LoanStatus } from '../loan/entities/loan.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
@@ -26,14 +25,15 @@ export class IndexerService implements OnModuleInit {
     ];
 
     constructor(
-        @InjectRepository(Loan)
-        private readonly loanRepository: Repository<Loan>,
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
         private readonly userService: UserService,
         private readonly blockchainService: BlockchainService,
         private readonly configService: ConfigService,
+        private readonly supabaseService: SupabaseService,
     ) { }
+
+    private get supabase() {
+        return this.supabaseService.getClient();
+    }
 
     async onModuleInit() {
         // Delay start slightly to ensure connections
@@ -114,10 +114,12 @@ export class IndexerService implements OnModuleInit {
 
             const loan = await this.findLoanByOnChainId(loanId);
             if (loan && loan.status !== LoanStatus.REPAID) {
-                loan.status = LoanStatus.REPAID;
-                loan.repaidDate = new Date();
-                loan.outstandingAmount = '0';
-                await this.loanRepository.save(loan);
+                await this.supabase.from('loans').update({
+                    status: LoanStatus.REPAID,
+                    repaidDate: new Date(),
+                    outstandingAmount: '0'
+                }).eq('id', loan.id);
+
                 this.logger.log(`Updated Loan ${loan.id} to REPAID via Indexer`);
 
                 // Update user reputation
@@ -137,8 +139,10 @@ export class IndexerService implements OnModuleInit {
 
             const loan = await this.findLoanByOnChainId(loanId);
             if (loan && loan.status !== LoanStatus.LIQUIDATED) {
-                loan.status = LoanStatus.LIQUIDATED;
-                await this.loanRepository.save(loan);
+                await this.supabase.from('loans').update({
+                    status: LoanStatus.LIQUIDATED
+                }).eq('id', loan.id);
+
                 this.logger.log(`Updated Loan ${loan.id} to LIQUIDATED via Indexer`);
 
                 // Slash reputation
@@ -156,9 +160,14 @@ export class IndexerService implements OnModuleInit {
 
     private async findLoanByOnChainId(onChainId: string): Promise<Loan | null> {
         // Querying JSON metadata is database specific. 
-        // For Postgres/SQLite in TypeORM, we often need raw query or fetch-all-and-filter if dataset small.
-        // Assuming small dataset for dev:
-        const allLoans = await this.loanRepository.find();
-        return allLoans.find(l => l.metadata?.onChainId === onChainId) || null;
+        // Supabase/Postgres uses arrow operator ->> for JSON text extraction
+        const { data, error } = await this.supabase
+            .from('loans')
+            .select('*')
+            .eq('metadata->>onChainId', onChainId)
+            .single();
+
+        if (error || !data) return null;
+        return data as Loan;
     }
 }

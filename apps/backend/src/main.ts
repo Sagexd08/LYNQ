@@ -22,6 +22,7 @@ async function bootstrap() {
                 ...(configService.get<string>('CORS_ORIGINS')?.split(',').map((origin) => origin.trim()) || []),
                 'http://localhost:3001',
                 'http://localhost:3002',
+                'http://localhost:5173',
             ].filter(Boolean),
         ),
     );
