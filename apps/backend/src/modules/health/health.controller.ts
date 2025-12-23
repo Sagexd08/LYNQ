@@ -29,9 +29,6 @@ export class HealthController {
             dbLatencyMs = Date.now() - started;
         } catch (error) {
             console.error('Health Check DB Error:', error);
-            try {
-                require('fs').appendFileSync('debug_error.log', `[${new Date().toISOString()}] Health Error: ${JSON.stringify(error, null, 2)}\n`);
-            } catch (ignored) { }
             dbStatus = 'error';
             dbLatencyMs = Date.now() - started;
         }

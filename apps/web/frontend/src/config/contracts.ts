@@ -14,8 +14,8 @@ export const CONTRACT_ADDRESSES = {
     CollateralVault: '0x8D65d4bbED41a9BbDDEdA63c5798e16058e31A4A',
     CreditScoreVerifier: '0x47B887406f3773fdc45C50692ba8e37732036b01',
     GovernanceToken: '0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C',
-    CollateralToken: '0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C',
-    StableToken: '0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C'
+    CollateralToken: '0x12345Fb3Bb48c70a0feB5EF7487187AC298C537D', // Distinct Address
+    StableToken: '0x56789Fb3Bb48c70a0feB5EF7487187AC298C537E'  // Distinct Address
   }
 };
 

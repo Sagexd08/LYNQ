@@ -1,7 +1,15 @@
 import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common';
 import { MLService } from './ml.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  CalculateCreditScoreDto,
+  RunFraudDetectionDto,
+  AssessLoanRiskDto,
+  EnsemblePredictionDto,
+  AnomalyDetectionDto,
+  BaseMlModelDto
+} from './dto/ml.dto';
 
 @ApiTags('ML')
 @Controller('ml')
@@ -11,77 +19,92 @@ export class MLController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('my-score')
+  @ApiOperation({ summary: 'Calculate credit score for the authenticated user' })
   getMyCreditScore(@Req() req: any) {
     return this.service.calculateUserCreditScore(req.user.id);
   }
 
   @Post('credit-score')
-  calculateCreditScore(@Body() dto: any) {
+  @ApiOperation({ summary: 'Calculate credit score based on provided data' })
+  calculateCreditScore(@Body() dto: CalculateCreditScoreDto) {
     return this.service.calculateCreditScore(dto);
   }
 
   @Post('fraud-check')
-  runFraudDetection(@Body() dto: any) {
+  @ApiOperation({ summary: 'Run fraud detection analysis' })
+  runFraudDetection(@Body() dto: RunFraudDetectionDto) {
     return this.service.runFraudDetection(dto);
   }
 
   @Post('risk-assessment')
-  assessLoanRisk(@Body() dto: any) {
+  @ApiOperation({ summary: 'Assess loan risk' })
+  assessLoanRisk(@Body() dto: AssessLoanRiskDto) {
     return this.service.assessLoanRisk(dto);
   }
 
   @Post('ensemble-prediction')
-  ensemblePrediction(@Body() dto: any) {
+  @ApiOperation({ summary: 'Run ensemble model prediction' })
+  ensemblePrediction(@Body() dto: EnsemblePredictionDto) {
     return this.service.ensemblePrediction(dto);
   }
 
   @Post('ensemble-train')
-  ensembleTrain(@Body() dto: any) {
+  @ApiOperation({ summary: 'Trigger ensemble model training' })
+  ensembleTrain(@Body() dto: BaseMlModelDto) {
     return this.service.ensembleTrain(dto);
   }
 
   @Get('feature-importance')
+  @ApiOperation({ summary: 'Get feature importance rankings' })
   getFeatureImportance() {
     return this.service.getFeatureImportance();
   }
 
   @Post('cross-validate')
-  crossValidate(@Body() dto: any) {
+  @ApiOperation({ summary: 'Perform cross-validation' })
+  crossValidate(@Body() dto: BaseMlModelDto) {
     return this.service.crossValidate(dto);
   }
 
   @Post('anomaly-detection')
-  anomalyDetection(@Body() dto: any) {
+  @ApiOperation({ summary: 'Detect anomalies in transaction' })
+  anomalyDetection(@Body() dto: AnomalyDetectionDto) {
     return this.service.anomalyDetection(dto);
   }
 
   @Post('train-anomaly-detector')
-  trainAnomalyDetector(@Body() dto: any) {
+  @ApiOperation({ summary: 'Train anomaly detection model' })
+  trainAnomalyDetector(@Body() dto: BaseMlModelDto) {
     return this.service.trainAnomalyDetector(dto);
   }
 
   @Get('anomaly-baseline')
+  @ApiOperation({ summary: 'Get anomaly detection baseline stats' })
   getAnomalyBaseline() {
     return this.service.getAnomalyBaseline();
   }
 
   @Post('forecast-timeseries')
-  forecastTimeseries(@Body() dto: any) {
+  @ApiOperation({ summary: 'Forecast time series data' })
+  forecastTimeseries(@Body() dto: BaseMlModelDto) {
     return this.service.forecastTimeseries(dto);
   }
 
   @Post('predict-loan-default')
-  predictLoanDefault(@Body() dto: any) {
+  @ApiOperation({ summary: 'Predict loan default probability' })
+  predictLoanDefault(@Body() dto: BaseMlModelDto) {
     return this.service.predictLoanDefault(dto);
   }
 
   @Post('predict-churn')
-  predictChurn(@Body() dto: any) {
+  @ApiOperation({ summary: 'Predict user churn' })
+  predictChurn(@Body() dto: BaseMlModelDto) {
     return this.service.predictChurn(dto);
   }
 
   @Post('forecast-market')
-  forecastMarket(@Body() dto: any) {
+  @ApiOperation({ summary: 'Forecast market trends' })
+  forecastMarket(@Body() dto: BaseMlModelDto) {
     return this.service.forecastMarket(dto);
   }
 }
