@@ -1,117 +1,35 @@
-import React, { useState, Suspense, useEffect } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Zap,
   Shield,
   Brain,
-  Globe,
-  ChevronRight,
   ArrowRight,
-  Sparkles,
-  Lock,
-  BarChart3,
-  Wallet,
-  CheckCircle2,
-  Award,
   Activity,
-  Layers,
+  Lock,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { GlassCard } from '../components/ui/GlassCard';
+import { ConfidenceRing } from '../components/lynq/ConfidenceRing';
+import { RiskMeter } from '../components/lynq/RiskMeter';
 
-// Lazy load wallet modal
 const WalletConnectionModal = React.lazy(() => import('../components/wallet/WalletConnectionModal'));
 
-// Animated Counter Component
-const AnimatedCounter: React.FC<{ end: number; suffix?: string; prefix?: string; duration?: number }> = ({
-  end,
-  suffix = '',
-  prefix = '',
-  duration = 2,
-}) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let startTime: number;
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-      setCount(Math.floor(progress * end));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [end, duration]);
-
-  return <>{prefix}{count.toLocaleString()}{suffix}</>;
-};
-
-// Floating Orb Component
-const FloatingOrb: React.FC<{ size: number; color: string; delay: number; x: string; y: string }> = ({
-  size, color, delay, x, y
+const FloatingElement: React.FC<{ children: React.ReactNode; delay?: number; duration?: number; yOffset?: number }> = ({
+  children, delay = 0, duration = 6, yOffset = 20
 }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0 }}
     animate={{
-      opacity: [0.3, 0.6, 0.3],
-      scale: [1, 1.2, 1],
-      x: [0, 30, 0],
-      y: [0, -20, 0],
+      y: [0, -yOffset, 0],
     }}
     transition={{
-      duration: 8,
-      delay,
+      duration,
       repeat: Infinity,
-      repeatType: 'reverse',
+      ease: "easeInOut",
+      delay
     }}
-    className="absolute rounded-full blur-3xl pointer-events-none"
-    style={{
-      width: size,
-      height: size,
-      background: color,
-      left: x,
-      top: y,
-    }}
-  />
-);
-
-// Feature Card
-const FeatureCard: React.FC<{
-  icon: typeof Zap;
-  title: string;
-  description: string;
-  gradient: string;
-  delay: number;
-}> = ({ icon: Icon, title, description, gradient, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ delay, duration: 0.5 }}
   >
-    <GlassCard interactive className="h-full group">
-      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
-        <Icon className="w-7 h-7 text-white" />
-      </div>
-      <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-      <p className="text-gray-400 leading-relaxed">{description}</p>
-    </GlassCard>
-  </motion.div>
-);
-
-// Chain Logo Component
-const ChainLogo: React.FC<{ name: string; delay: number }> = ({ name, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    viewport={{ once: true }}
-    transition={{ delay }}
-    className="flex flex-col items-center gap-2"
-  >
-    <div className="w-16 h-16 rounded-2xl bg-glass-white border border-glass-border flex items-center justify-center hover:border-neon-cyan/30 transition-colors">
-      <Globe className="w-8 h-8 text-gray-300" />
-    </div>
-    <span className="text-xs text-gray-500">{name}</span>
+    {children}
   </motion.div>
 );
 
@@ -121,424 +39,253 @@ const LandingPage: React.FC = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
-  const features = [
-    {
-      icon: Brain,
-      title: 'AI Risk Intelligence',
-      description: 'Advanced machine learning models analyze wallet behavior, transaction patterns, and on-chain data to provide accurate risk assessments.',
-      gradient: 'from-deep-purple to-electric-blue',
-    },
-    {
-      icon: Shield,
-      title: 'Explainable Credit Scoring',
-      description: 'No black boxes. Every credit decision comes with transparent explanations of the factors that influenced your score.',
-      gradient: 'from-neon-cyan to-success',
-    },
-    {
-      icon: Zap,
-      title: 'Instant Flash Loans',
-      description: 'Execute complex DeFi strategies with uncollateralized flash loans. Borrow and repay within a single transaction block.',
-      gradient: 'from-warning to-tier-gold',
-    },
-    {
-      icon: Globe,
-      title: 'Multi-Chain Support',
-      description: 'Deploy across Mantle, Ethereum, Polygon, and more. Unified experience across all major EVM-compatible chains.',
-      gradient: 'from-electric-blue to-neon-cyan',
-    },
-    {
-      icon: Lock,
-      title: 'Smart Liquidation Protection',
-      description: 'AI-powered monitoring detects risks before liquidation. Automatic alerts and one-click collateral management.',
-      gradient: 'from-error to-warning',
-    },
-    {
-      icon: Award,
-      title: 'Reputation System',
-      description: 'Build your on-chain credit history. Higher tiers unlock better rates, higher limits, and exclusive features.',
-      gradient: 'from-tier-gold to-tier-diamond',
-    },
-  ];
-
-  const stats = [
-    { label: 'Total Value Locked', value: 47.2, suffix: 'M', prefix: '$' },
-    { label: 'Active Users', value: 12847, suffix: '+', prefix: '' },
-    { label: 'Loans Processed', value: 89000, suffix: '+', prefix: '' },
-    { label: 'Default Rate', value: 0.3, suffix: '%', prefix: '' },
-  ];
-
-  const chains = ['Mantle', 'Ethereum', 'Polygon', 'Arbitrum', 'Base'];
-
-  const handleWalletConnect = (walletData: any) => {
-    console.log('Wallet connected:', walletData);
-    setShowWalletModal(false);
-  };
-
   return (
-    <div className="min-h-screen bg-lynq-dark overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        {/* Gradient Mesh */}
-        <div className="absolute inset-0 bg-gradient-mesh opacity-40" />
+    <div className="min-h-screen bg-[#050505] text-white selection:bg-neon-cyan/30 selection:text-white overflow-hidden">
+      {/* Cinematic Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.05),transparent_70%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-        {/* Animated Orbs */}
-        <FloatingOrb size={600} color="rgba(41, 121, 255, 0.15)" delay={0} x="10%" y="20%" />
-        <FloatingOrb size={500} color="rgba(0, 229, 255, 0.12)" delay={2} x="60%" y="10%" />
-        <FloatingOrb size={400} color="rgba(101, 31, 255, 0.15)" delay={4} x="80%" y="60%" />
-        <FloatingOrb size={450} color="rgba(0, 229, 255, 0.1)" delay={3} x="20%" y="70%" />
-
-        {/* Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '100px 100px',
+        {/* Animated Gradient Mesh */}
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.2, 0.1],
           }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.1),transparent_50%)]"
         />
       </div>
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-cyan to-premium-violet flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-heading font-bold text-xl tracking-tight">LYNQ</span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+            <a href="#features" className="hover:text-white transition-colors">Intelligence</a>
+            <a href="#protocol" className="hover:text-white transition-colors">Protocol</a>
+            <a href="#security" className="hover:text-white transition-colors">Security</a>
+          </div>
+
+          <Button
+            size="sm"
+            variant="secondary"
+            className="hidden sm:flex border-white/10"
+            onClick={() => setShowWalletModal(true)}
+          >
+            Connect Wallet
+          </Button>
+        </div>
+      </nav>
 
       {/* Hero Section */}
       <motion.section
         style={{ opacity: heroOpacity, scale: heroScale }}
-        className="relative min-h-screen flex items-center justify-center px-6"
+        className="relative pt-32 pb-20 px-6 z-10"
       >
-        <div className="relative z-10 max-w-6xl mx-auto text-center">
-          {/* Badge */}
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-glass-white backdrop-blur-md border border-glass-border mb-8"
+            transition={{ duration: 0.6 }}
+            className="mb-6 px-4 py-1.5 rounded-full border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan text-xs font-bold tracking-[0.2em] uppercase"
           >
-            <Sparkles className="w-4 h-4 text-neon-cyan" />
-            <span className="text-sm font-medium text-gray-300">AI-Powered DeFi Protocol</span>
-            <span className="px-2 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan text-xs font-bold">LIVE</span>
+            Liquid Confidence 1.0
           </motion.div>
 
-          {/* Main Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold font-heading tracking-tight mb-6"
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight mb-8"
           >
-            <span className="text-white">The Future of</span>
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-electric-blue via-neon-cyan to-deep-purple">
-              DeFi Lending
+            Decentralized Lending.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-premium-violet">
+              Institutional Intelligence.
             </span>
           </motion.h1>
 
-          {/* Subheading */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-2xl text-lg md:text-xl text-gray-400 mb-12 leading-relaxed"
           >
-            Explainable AI credit scoring, dynamic interest rates, and multi-chain
-            liquidity—all in one seamless protocol.
+            Borrow with the confidence of a hedge fund. Driven by real-time ML risk assessment,
+            explainable credit scores, and radical transparency.
           </motion.p>
 
-          {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 mb-20"
           >
-            <Button
-              size="lg"
-              glow
-              icon={<Wallet className="w-5 h-5" />}
-              onClick={() => setShowWalletModal(true)}
-            >
-              Connect Wallet
+            <Button size="lg" className="w-full sm:w-auto px-10 h-14 text-base font-bold bg-white text-black hover:bg-gray-200" onClick={() => setShowWalletModal(true)}>
+              Enter Command Center
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Link to="/dashboard">
-              <Button size="lg" variant="secondary" icon={<ArrowRight className="w-5 h-5" />}>
-                Launch App
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto px-10 h-14 text-base font-bold border-white/10 backdrop-blur-xl">
+                View Live Markets
               </Button>
             </Link>
           </motion.div>
 
-          {/* Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
-          >
-            {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                className="p-6 rounded-2xl bg-glass-white/30 backdrop-blur-md border border-glass-border/50"
-              >
-                <p className="text-3xl md:text-4xl font-bold text-white mb-1">
-                  <AnimatedCounter end={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2 + index * 0.3} />
-                </p>
-                <p className="text-sm text-gray-400">{stat.label}</p>
-              </div>
+          {/* Institutional Trust Strip */}
+          <div className="w-full max-w-4xl pt-10 border-t border-white/5 flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
+            {['ETHEREUM', 'POLYGON', 'APTOS', 'FLOW', 'MANTLE'].map((chain) => (
+              <span key={chain} className="font-metrics text-xs tracking-[0.3em] font-bold">{chain}</span>
             ))}
-          </motion.div>
-
-          {/* Scroll Indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-6 h-10 rounded-full border-2 border-gray-600 flex items-start justify-center p-2"
-            >
-              <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-1 h-2 bg-neon-cyan rounded-full"
-              />
-            </motion.div>
-          </motion.div>
+          </div>
         </div>
       </motion.section>
 
-      {/* Trusted By / Chains Section */}
-      <section className="relative py-20 border-y border-glass-border/30">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center text-gray-500 text-sm uppercase tracking-widest mb-10"
-          >
-            Multi-Chain Support Across Leading Networks
-          </motion.p>
-          <div className="flex justify-center items-center gap-10 flex-wrap">
-            {chains.map((chain, index) => (
-              <ChainLogo key={chain} name={chain} delay={index * 0.1} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="relative py-24 px-6">
+      {/* Intelligence Cards Section */}
+      <section className="relative py-32 px-6 z-10 overflow-hidden" id="features">
         <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-deep-purple/20 text-deep-purple text-sm font-semibold mb-4">
-              CORE FEATURES
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold font-heading text-white mb-4">
-              Built for the Future of Finance
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Enterprise-grade infrastructure meets accessible DeFi.
-              Every feature designed with security and transparency in mind.
-            </p>
-          </motion.div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <FeatureCard
-                key={feature.title}
-                {...feature}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* AI Explainability Section */}
-      <section className="relative py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Content */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <span className="inline-block px-4 py-1.5 rounded-full bg-neon-cyan/20 text-neon-cyan text-sm font-semibold mb-4">
-                NO BLACK BOX AI
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold font-heading text-white mb-6">
-                Transparent Credit Decisions
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-premium-violet/10 text-premium-violet border border-premium-violet/20 font-bold text-[10px] tracking-widest uppercase">
+                <Brain className="w-3 h-3" />
+                ML Intelligence Preview
+              </div>
+              <h2 className="text-4xl md:text-5xl font-heading font-semibold tracking-tight">
+                No black boxes.<br />
+                Just pure clarity.
               </h2>
-              <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-                Our ML models don't just give you a score—they explain why.
-                See exactly which factors influence your creditworthiness with
-                intuitive visualizations and actionable insights.
+              <p className="text-gray-400 text-lg leading-relaxed max-w-md">
+                Every ML output is explainable. We break down the factors influencing your
+                rates so you're always in control of your financial destiny.
               </p>
 
-              <div className="space-y-4">
+              <div className="space-y-6 pt-4">
                 {[
-                  { icon: Brain, text: 'Multi-model ensemble for accuracy' },
-                  { icon: BarChart3, text: 'Factor attribution visualization' },
-                  { icon: CheckCircle2, text: 'Real-time score updates' },
-                  { icon: Activity, text: 'Personalized improvement tips' },
-                ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-glass-white">
-                      <Icon className="w-5 h-5 text-neon-cyan" />
+                  { icon: Shield, title: "Fraud Shield", desc: "Real-time anomaly detection for every transaction." },
+                  { icon: Activity, title: "Risk Monitor", desc: "24/7 monitoring of market volatility and health." },
+                  { icon: Lock, title: "Asset Protection", desc: "Non-custodial infrastructure. Your keys, your assets." }
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex gap-4"
+                  >
+                    <div className="mt-1 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                      <item.icon className="w-5 h-5 text-neon-cyan" />
                     </div>
-                    <span className="text-gray-300">{text}</span>
-                  </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-1">{item.title}</h4>
+                      <p className="text-sm text-gray-500">{item.desc}</p>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            {/* Right: Visual */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan/20 to-deep-purple/20 rounded-3xl blur-3xl" />
-
-              <div className="relative bg-lynq-card/80 backdrop-blur-xl rounded-3xl border border-glass-border p-8">
-                {/* Mock Credit Score UI */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-48 h-48 rounded-full border-8 border-neon-cyan/30 relative">
-                    <div className="text-6xl font-bold text-white">742</div>
-                    <div className="absolute inset-0 rounded-full border-8 border-neon-cyan" style={{ clipPath: 'polygon(50% 0%, 100% 0%, 100% 74%, 50% 74%)' }} />
-                  </div>
-                  <p className="text-gray-400 mt-4">Your LYNQ Score</p>
-                </div>
-
-                {/* Factors */}
-                <div className="space-y-4">
-                  {[
-                    { factor: 'Repayment History', value: 95, color: 'bg-success' },
-                    { factor: 'Collateral Diversity', value: 78, color: 'bg-neon-cyan' },
-                    { factor: 'Protocol Activity', value: 62, color: 'bg-electric-blue' },
-                    { factor: 'Wallet Age', value: 85, color: 'bg-deep-purple' },
-                  ].map(({ factor, value, color }) => (
-                    <div key={factor}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-400">{factor}</span>
-                        <span className="text-white font-medium">{value}%</span>
+            <div className="relative">
+              {/* Feature Preview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <FloatingElement delay={0} yOffset={15}>
+                  <div className="p-6 rounded-2xl bg-[#0F1115] border border-white/10 shadow-2xl backdrop-blur-xl">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="text-[10px] font-metrics text-gray-500 tracking-widest uppercase">Credit Grade</span>
+                      <div className="px-2 py-0.5 rounded-md bg-neon-cyan/10 text-neon-cyan text-[10px] font-bold border border-neon-cyan/20 uppercase">Tier A+</div>
+                    </div>
+                    <div className="flex justify-center my-8">
+                      <ConfidenceRing value={98} size={140} />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full w-[98%] bg-neon-cyan" />
                       </div>
-                      <div className="h-2 bg-lynq-darker rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${value}%` }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1, ease: 'easeOut' }}
-                          className={`h-full ${color} rounded-full`}
-                        />
+                      <p className="text-[10px] text-gray-500 font-metrics tracking-wider leading-relaxed">
+                        HIGH MODEL AGREEMENT: ENSEMBLE CONFIDENCE AT 98.4%
+                      </p>
+                    </div>
+                  </div>
+                </FloatingElement>
+
+                <div className="space-y-6">
+                  <FloatingElement delay={1} yOffset={15}>
+                    <div className="p-6 rounded-2xl bg-[#0F1115] border border-white/10 shadow-2xl backdrop-blur-xl">
+                      <span className="block text-[10px] font-metrics text-gray-500 tracking-widest uppercase mb-4">Risk Level</span>
+                      <RiskMeter level={12} label="Health Ratio Monitor" />
+                    </div>
+                  </FloatingElement>
+
+                  <FloatingElement delay={2} yOffset={15}>
+                    <div className="p-6 rounded-2xl bg-[#0F1115] border border-white/10 shadow-2xl backdrop-blur-xl">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-[10px] font-metrics text-gray-500 tracking-widest uppercase">Fraud Shield</span>
+                        <div className="w-2 h-2 rounded-full bg-neon-cyan animate-pulse" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Scan Status</span>
+                          <span className="text-neon-cyan font-bold font-metrics uppercase">SECURE</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Anomalies Detected</span>
+                          <span className="text-white font-bold font-metrics uppercase">0</span>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {/* Model Agreement */}
-                <div className="mt-8 p-4 rounded-xl bg-lynq-darker/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Layers className="w-5 h-5 text-neon-cyan" />
-                    <span className="text-gray-400 text-sm">Model Agreement</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-bold">92%</span>
-                    <div className="w-3 h-3 rounded-full bg-success" />
-                  </div>
+                  </FloatingElement>
                 </div>
               </div>
-            </motion.div>
+
+              {/* Background Glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-neon-cyan/5 blur-[120px] rounded-full -z-10" />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            {/* Glow */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-electric-blue/20 via-neon-cyan/20 to-deep-purple/20 rounded-3xl blur-2xl" />
-
-            <div className="relative bg-lynq-card/80 backdrop-blur-xl rounded-3xl border border-glass-border p-12 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold font-heading text-white mb-6">
-                Ready to Start?
-              </h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                Connect your wallet and experience the next generation of DeFi lending.
-                No minimum deposits, no hidden fees.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  glow
-                  icon={<Wallet className="w-5 h-5" />}
-                  onClick={() => setShowWalletModal(true)}
-                >
-                  Connect Wallet
-                </Button>
-                <Link to="/docs">
-                  <Button size="lg" variant="ghost">
-                    Read Documentation <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </Link>
+      {/* Trust & Safety Footer Section */}
+      <section className="relative py-24 px-6 border-t border-white/5 bg-[#080808]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+            {[
+              { icon: Shield, title: "Non-Custodial", desc: "Funds never leave your wallet, ensuring total asset control." },
+              { icon: Lock, title: "Verified Contracts", desc: "Rigorous audits and multi-chain verification for maximum safety." },
+              { icon: Zap, title: "Instant Settlements", desc: "Zero-latency settlements powered by institutional-grade infra." },
+              { icon: Brain, title: "Predictive Guard", desc: "Anticipate liquidations before they happen with ML forecasts." }
+            ].map((feature, i) => (
+              <div key={i} className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                  <feature.icon className="w-6 h-6 text-gray-400" />
+                </div>
+                <h3 className="font-bold text-lg text-white">{feature.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{feature.desc}</p>
               </div>
-            </div>
-          </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative py-12 px-6 border-t border-glass-border/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-heading font-bold text-xl text-white">LYNQ</span>
-            </div>
-
-            <div className="flex items-center gap-8 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Documentation</a>
-              <a href="#" className="hover:text-white transition-colors">GitHub</a>
-              <a href="#" className="hover:text-white transition-colors">Discord</a>
-              <a href="#" className="hover:text-white transition-colors">Twitter</a>
-            </div>
-
-            <p className="text-sm text-gray-500">
-              &copy; 2024 LYNQ Protocol. All rights reserved.
-            </p>
-          </div>
-        </div>
+      <footer className="py-12 border-t border-white/5 text-center text-gray-600 text-[10px] tracking-[0.2em] uppercase font-metrics">
+        © 2025 LYNQ PROTOCOL // ALL SYSTEMS OPERATIONAL // LIQUID CONFIDENCE 1.0
       </footer>
 
       {/* Wallet Modal */}
       {showWalletModal && (
-        <Suspense fallback={
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="loading-spinner w-12 h-12" />
-          </div>
-        }>
+        <Suspense fallback={null}>
           <WalletConnectionModal
             isOpen={showWalletModal}
             onClose={() => setShowWalletModal(false)}
-            onWalletConnect={handleWalletConnect}
+            onWalletConnect={(data) => {
+              console.log(data);
+              setShowWalletModal(false);
+            }}
             isLandingPage={true}
           />
         </Suspense>

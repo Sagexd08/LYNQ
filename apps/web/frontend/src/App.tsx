@@ -15,13 +15,16 @@ const LoansPage = lazy(() => import('./pages/LoansPage'));
 const FlashLoanPage = lazy(() => import('./pages/FlashLoanPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const CreateLoanPage = lazy(() => import('./pages/CreateLoanPage'));
+const MLInsightsPage = lazy(() => import('./pages/MLInsightsPage'));
+
+import { RiskAlertDrawer } from './components/lynq/RiskAlertDrawer';
 
 // Loading Fallback
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-lynq-dark flex items-center justify-center">
+  <div className="min-h-screen bg-[#050505] flex items-center justify-center">
     <div className="flex flex-col items-center gap-4">
-      <div className="loading-spinner w-12 h-12" />
-      <p className="text-gray-400 text-sm">Loading...</p>
+      <div className="w-12 h-12 rounded-xl border-2 border-neon-cyan/20 border-t-neon-cyan animate-spin" />
+      <p className="font-metrics text-[10px] text-gray-500 uppercase tracking-widest">Initialising Systems...</p>
     </div>
   </div>
 );
@@ -44,7 +47,7 @@ const Layout = ({
   const isLanding = location.pathname === '/';
 
   return (
-    <div className="min-h-screen bg-lynq-dark">
+    <div className="min-h-screen bg-[#050505]">
       {!isLanding && (
         <NavBar
           useTestnet={useTestnet}
@@ -52,9 +55,10 @@ const Layout = ({
           onWalletConnect={onWalletConnect}
         />
       )}
-      <main className={!isLanding ? 'pt-16' : ''}>
+      <main>
         {children}
       </main>
+      {!isLanding && <RiskAlertDrawer />}
       <HealthIndicator />
     </div>
   );
@@ -105,7 +109,19 @@ function App() {
   }, [currentChainKey, updateBalance, setLoadingBalance, setBalanceError]);
 
   // Handle wallet connection
-  const handleWalletConnect = useCallback((walletData: any) => {
+  interface WalletData {
+    address: string;
+    chainId?: string;
+    walletType?: string;
+    walletName?: string;
+    networkName?: string;
+    publicKey?: string;
+    email?: string;
+    name?: string;
+    social?: string;
+  }
+
+  const handleWalletConnect = useCallback((walletData: WalletData) => {
     if (walletData?.address) {
       console.log('Wallet connected:', walletData);
 
@@ -128,7 +144,7 @@ function App() {
         publicKey: walletData.publicKey,
         email: walletData.email,
         name: walletData.name,
-        social: walletData.social,
+        social: !!walletData.social,
       });
 
       // Fetch real balance
@@ -212,7 +228,8 @@ function App() {
             <Route path="/loans/*" element={<LoansPage />} />
             <Route path="/flashloan/*" element={<FlashLoanPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
-            <Route path="/analytics" element={<DashboardPage />} />
+            <Route path="/ml-insights" element={<MLInsightsPage />} />
+            <Route path="/analytics" element={<MLInsightsPage />} />
             {/* Catch all - redirect to dashboard */}
             <Route path="*" element={<DashboardPage />} />
           </Routes>

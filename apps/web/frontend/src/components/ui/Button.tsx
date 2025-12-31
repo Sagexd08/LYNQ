@@ -17,24 +17,22 @@ interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>
 const variants = {
     primary: `
     relative overflow-hidden
-    bg-gradient-primary text-white font-semibold
-    shadow-glow-sm
-    hover:shadow-glow-md
+    bg-white text-black font-bold
+    hover:bg-gray-200
     disabled:opacity-50 disabled:cursor-not-allowed
   `,
     secondary: `
-    bg-glass-white backdrop-blur-md
-    border border-glass-border text-white font-semibold
-    hover:bg-glass-strong hover:border-neon-cyan/50
+    bg-[#0F1115] backdrop-blur-md
+    border border-white/10 text-white font-bold
+    hover:bg-white/5 hover:border-white/20
   `,
     ghost: `
-    text-gray-300 font-medium
-    hover:text-white hover:bg-glass-white
+    text-gray-400 font-medium
+    hover:text-white hover:bg-white/5
   `,
     danger: `
-    bg-gradient-danger text-white font-semibold
-    shadow-glow-error
-    hover:shadow-lg
+    bg-critical-red text-white font-bold
+    hover:brightness-110
   `,
 };
 

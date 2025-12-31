@@ -5,7 +5,6 @@ import {
   Zap,
   LayoutDashboard,
   CreditCard,
-  BarChart3,
   Wallet,
   Menu,
   X,
@@ -20,6 +19,7 @@ import {
   Check,
   Activity,
   Shield,
+  Brain,
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useWalletStore } from '../store/walletStore';
@@ -72,11 +72,11 @@ const NavBar: React.FC<NavBarProps> = ({
   const displayBalance = `${balance.toFixed(4)} ${currentNetwork?.shortName || 'MNT'}`;
 
   const navLinks = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/loans', icon: CreditCard, label: 'Loans' },
-    { to: '/flashloan', icon: Zap, label: 'Flash Loans' },
-    { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-    { to: '/marketplace', icon: Sparkles, label: 'Marketplace' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Control' },
+    { to: '/loans', icon: CreditCard, label: 'Capital' },
+    { to: '/flashloan', icon: Zap, label: 'Flash' },
+    { to: '/ml-insights', icon: Brain, label: 'Intelligence' },
+    { to: '/marketplace', icon: Sparkles, label: 'Market' },
   ];
 
   const notifications = [
@@ -130,7 +130,7 @@ const NavBar: React.FC<NavBarProps> = ({
       <nav className="fixed top-0 left-0 right-0 z-50">
         {/* Blur Background with gradient line */}
         <div className="absolute inset-0 bg-lynq-darker/90 backdrop-blur-2xl" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5" />
 
         <div className="relative max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-[72px]">
@@ -139,11 +139,9 @@ const NavBar: React.FC<NavBarProps> = ({
               {/* Logo */}
               <Link to="/" className="flex items-center gap-3 group">
                 <motion.div
-                  whileHover={{ scale: 1.08, rotate: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-electric-blue via-neon-cyan to-deep-purple flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-md transition-shadow"
+                  className="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center group-hover:bg-neon-cyan transition-colors"
                 >
-                  <Zap className="w-5 h-5 text-white" />
+                  <Zap className="w-5 h-5 text-black" />
                   <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.div>
                 <div className="hidden sm:block">
@@ -238,8 +236,8 @@ const NavBar: React.FC<NavBarProps> = ({
                             key={network.id}
                             onClick={() => handleNetworkSwitch(network)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${currentNetwork?.id === network.id
-                                ? 'bg-glass-white'
-                                : 'hover:bg-glass-white/50'
+                              ? 'bg-glass-white'
+                              : 'hover:bg-glass-white/50'
                               }`}
                           >
                             <div
@@ -297,7 +295,7 @@ const NavBar: React.FC<NavBarProps> = ({
                           >
                             <div className="flex items-start gap-3">
                               <div className={`w-2.5 h-2.5 rounded-full mt-1.5 ${notif.type === 'warning' ? 'bg-warning' :
-                                  notif.type === 'success' ? 'bg-success' : 'bg-info'
+                                notif.type === 'success' ? 'bg-success' : 'bg-info'
                                 }`} />
                               <div className="flex-1">
                                 <p className="font-medium text-white text-sm">{notif.title}</p>
@@ -483,8 +481,8 @@ const NavBar: React.FC<NavBarProps> = ({
                         key={network.id}
                         onClick={() => handleNetworkSwitch(network)}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${currentNetwork?.id === network.id
-                            ? 'bg-glass-white text-white border border-neon-cyan/20'
-                            : 'bg-glass-white/30 text-gray-400 hover:text-white'
+                          ? 'bg-glass-white text-white border border-neon-cyan/20'
+                          : 'bg-glass-white/30 text-gray-400 hover:text-white'
                           }`}
                       >
                         <div

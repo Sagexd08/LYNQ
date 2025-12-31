@@ -8,54 +8,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Core Background
-        background: '#050810',
-        'lynq-dark': '#050810',
-        'lynq-darker': '#020408',
-        'lynq-card': '#0a0f1a',
-        'lynq-card-hover': '#0f1628',
-
-        // Primary Brand
-        'electric-blue': '#2979FF',
-        'neon-cyan': '#00E5FF',
-        'deep-purple': '#651FFF',
-        'magenta': '#D500F9',
-        'aurora-green': '#00FFA3',
-
-        // Glass Effects
-        'glass-white': 'rgba(255, 255, 255, 0.05)',
+        background: '#050505',
+        'void-black': '#050505',
+        'graphite': '#0F1115',
+        'glass-overlay': 'rgba(255, 255, 255, 0.06)',
+        'neon-cyan': '#22D3EE',
+        'risk-amber': '#FACC15',
+        'critical-red': '#EF4444',
+        'premium-violet': '#8B5CF6',
+        success: '#22D3EE',
+        warning: '#FACC15',
+        error: '#EF4444',
+        info: '#8B5CF6',
+        'lynq-dark': '#050505',
+        'lynq-darker': '#020202',
+        'lynq-card': '#0F1115',
         'glass-border': 'rgba(255, 255, 255, 0.1)',
-        'glass-strong': 'rgba(255, 255, 255, 0.15)',
-
-        // Semantic Colors
-        success: '#00E676',
-        warning: '#FFB300',
-        error: '#FF5252',
-        info: '#29B6F6',
-
-        // Trust Tiers
-        'tier-bronze': '#CD7F32',
-        'tier-silver': '#C0C0C0',
-        'tier-gold': '#FFD700',
-        'tier-platinum': '#E5E4E2',
-        'tier-diamond': '#B9F2FF',
-
-        // Risk Levels
-        'risk-low': '#00E676',
-        'risk-medium': '#FFB300',
-        'risk-high': '#FF5252',
-        'risk-critical': '#D50000',
-
-        // ML Confidence
-        'confidence-high': '#00E676',
-        'confidence-medium': '#FFB300',
-        'confidence-low': '#FF5252',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Space Grotesk', 'Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        display: ['Outfit', 'Space Grotesk', 'sans-serif'],
+        heading: ['Outfit', 'Inter', 'sans-serif'],
+        metrics: ['Space Mono', 'monospace'],
+        mono: ['Space Mono', 'monospace'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
       },
       fontSize: {
         'display-xl': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],

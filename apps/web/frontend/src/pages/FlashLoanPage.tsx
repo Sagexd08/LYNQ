@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap,
-
-  AlertTriangle,
   CheckCircle,
-  Info,
   Coins,
   Clock,
-  ArrowRight,
-  BarChart3,
-  Shield,
   Activity,
   HelpCircle,
+  BarChart3,
+  ChevronRight,
+  Plus,
+  Shield
 } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
-import { ConfidenceIndicator } from '../components/ml/MLInsights';
+import { ConfidenceRing } from '../components/lynq/ConfidenceRing';
 
-// Flash Loan Page
 const FlashLoanPage: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState('USDC');
   const [amount, setAmount] = useState('');
@@ -30,341 +26,255 @@ const FlashLoanPage: React.FC = () => {
     risks: string[];
   }>(null);
 
-  // Mock available assets
   const assets = [
-    { symbol: 'USDC', available: '2,450,000', apy: '0.09%', icon: '💵' },
+    { symbol: 'USDC', available: '2,450,000', apy: '0.05%', icon: '💵' },
     { symbol: 'ETH', available: '1,250', apy: '0.05%', icon: '⟠' },
-    { symbol: 'MNT', available: '5,000,000', apy: '0.12%', icon: '🔷' },
-    { symbol: 'USDT', available: '1,890,000', apy: '0.09%', icon: '💲' },
+    { symbol: 'MNT', available: '5,000,000', apy: '0.05%', icon: '🔷' },
+    { symbol: 'USDT', available: '1,890,000', apy: '0.05%', icon: '💲' },
   ];
-
-  // Mock user stats  
-  const userStats = {
-    totalFlashLoans: 12,
-    successRate: 100,
-    totalVolume: '$458,200',
-    trustScore: 847,
-    riskLevel: 'Low',
-  };
 
   const handleSimulate = async () => {
     setIsSimulating(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     setSimulationResult({
       success: true,
       estimatedGas: '0.0045 ETH',
-      premium: `${(parseFloat(amount || '0') * 0.0009).toFixed(2)} ${selectedAsset}`,
-      risks: amount && parseFloat(amount.replace(/,/g, '')) > 100000
+      premium: `${(parseFloat(amount.replace(/,/g, '') || '0') * 0.0005).toFixed(2)} ${selectedAsset}`,
+      risks: amount && parseFloat(amount.replace(/,/g, '')) > 500000
         ? ['Large amount may have slippage impact']
         : [],
     });
     setIsSimulating(false);
   };
 
-  return (
-    <div className="min-h-screen bg-lynq-dark">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-mesh opacity-30 pointer-events-none" />
+  const container = {
+    show: { transition: { staggerChildren: 0.1 } }
+  };
 
-      <div className="relative z-10 page-container">
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 rounded-xl bg-gradient-primary shadow-glow-sm">
-              <Zap className="w-6 h-6 text-white" />
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-5 h-5 text-neon-cyan animate-pulse" />
+              <span className="text-[10px] font-metrics tracking-[0.2em] text-gray-500 uppercase font-bold">Protocol: Atomic Liquidity</span>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold font-heading text-white">Flash Loans</h1>
-              <p className="text-gray-400">Uncollateralized instant liquidity for DeFi operations</p>
+            <h1 className="text-4xl font-heading font-bold tracking-tight">Flash Operations</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <span className="block text-[10px] text-gray-500 uppercase tracking-widest font-metrics">System Load</span>
+              <span className="text-xs font-bold text-neon-cyan uppercase font-metrics">OPTIMIZED</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Info Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid lg:grid-cols-12 gap-8"
         >
-          <GlassCard className="border-l-4 border-l-info">
-            <div className="flex items-start gap-4">
-              <Info className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
+          {/* Left: Configuration */}
+          <motion.div variants={item} className="lg:col-span-8 space-y-8">
+            {/* Asset Selection */}
+            <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
+              <h2 className="text-sm font-bold font-metrics uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2">
+                <Coins className="w-4 h-4" /> 01. Select Payload
+              </h2>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {assets.map((asset) => (
+                  <button
+                    key={asset.symbol}
+                    onClick={() => setSelectedAsset(asset.symbol)}
+                    className={`p-6 rounded-2xl border transition-all text-left relative overflow-hidden group ${selectedAsset === asset.symbol
+                      ? 'bg-white border-white text-black'
+                      : 'bg-[#050505] border-white/5 text-white hover:border-white/20'
+                      }`}
+                  >
+                    <span className={`block text-lg font-bold font-metrics mb-1 ${selectedAsset === asset.symbol ? 'text-black' : 'text-white'}`}>{asset.symbol}</span>
+                    <span className={`block text-[10px] font-metrics uppercase tracking-wider ${selectedAsset === asset.symbol ? 'text-black/60' : 'text-gray-500'}`}>
+                      {asset.available} Avail.
+                    </span>
+                    {selectedAsset === asset.symbol && (
+                      <div className="absolute top-2 right-2">
+                        <CheckCircle className="w-4 h-4" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Amount Input */}
+            <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
+              <h2 className="text-sm font-bold font-metrics uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2">
+                <Plus className="w-4 h-4" /> 02. Quantum Amount
+              </h2>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full bg-[#050505] border border-white/5 rounded-2xl px-8 py-6 text-4xl font-heading font-black italic focus:border-neon-cyan/50 outline-none transition-all placeholder:text-gray-800"
+                />
+                <div className="absolute right-8 top-1/2 -translate-y-1/2">
+                  <span className="text-xl font-black font-metrics text-gray-600 uppercase italic">{selectedAsset}</span>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {['25%', '50%', '75%', 'MAX'].map(p => (
+                  <button key={p} className="flex-1 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-metrics font-bold text-gray-400 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest">
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Simulation Block */}
+            <div className={`p-8 rounded-3xl border transition-all duration-500 ${simulationResult ? 'bg-neon-cyan/5 border-neon-cyan/20' : 'bg-[#0F1115] border-white/5 shadow-inner'
+              }`}>
+              <div className="flex justify-between items-center mb-10">
+                <h2 className="text-sm font-bold font-metrics uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                  <Activity className="w-4 h-4" /> 03. Execution Matrix
+                </h2>
+                {simulationResult && (
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neon-cyan text-black font-metrics text-[10px] font-black uppercase italic">
+                    <CheckCircle className="w-3 h-3" /> Target Acquired
+                  </div>
+                )}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {simulationResult ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="grid grid-cols-2 md:grid-cols-3 gap-10"
+                  >
+                    <div>
+                      <span className="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Fee Premium</span>
+                      <span className="text-xl font-bold font-metrics text-white">{simulationResult.premium}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Fuel Estimate</span>
+                      <span className="text-xl font-bold font-metrics text-white">{simulationResult.estimatedGas}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Protocol Fee</span>
+                      <span className="text-xl font-bold font-metrics text-neon-cyan">0.05%</span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="py-10 text-center flex flex-col items-center gap-4">
+                    <BarChart3 className="w-12 h-12 text-gray-800" />
+                    <p className="text-xs text-gray-600 font-metrics uppercase tracking-widest italic">Run simulation to verify transaction atomicity</p>
+                  </div>
+                )}
+              </AnimatePresence>
+
+              <div className="mt-10 pt-10 border-t border-white/5 flex flex-col md:flex-row gap-4">
+                <Button
+                  fullWidth
+                  variant="secondary"
+                  onClick={handleSimulate}
+                  loading={isSimulating}
+                  className="bg-white/5 border-white/10 font-metrics tracking-widest text-[11px] uppercase py-4"
+                >
+                  Simulate payload
+                </Button>
+                <Button
+                  fullWidth
+                  disabled={!simulationResult}
+                  className="bg-neon-cyan text-black font-black tracking-[0.2em] text-[11px] italic uppercase shadow-glow-sm py-4"
+                >
+                  Fire Transaction
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right: Surveillance */}
+          <motion.div variants={item} className="lg:col-span-4 space-y-8">
+            {/* Credit Surveillance */}
+            <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
+              <h3 className="text-sm font-bold font-heading mb-8 flex items-center justify-between">
+                USER REPUTATION
+                <Shield className="w-4 h-4 text-premium-violet" />
+              </h3>
+              <div className="flex items-center gap-8 mb-8">
+                <ConfidenceRing value={84} size={100} strokeWidth={8} />
+                <div className="space-y-4">
+                  <div>
+                    <span className="block text-[10px] text-gray-500 uppercase tracking-widest mb-1">Credit Power</span>
+                    <span className="text-xl font-bold font-metrics">847</span>
+                  </div>
+                  <div className="px-2 py-1 rounded bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan text-[10px] font-bold font-metrics uppercase inline-block italic">
+                    ELITE STATUS
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4 pt-8 border-t border-white/5 font-metrics">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest">History</span>
+                  <span className="text-xs font-bold">12 OPS</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest">Efficiency</span>
+                  <span className="text-xs font-bold text-neon-cyan">100%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Waves */}
+            <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
+              <h3 className="text-sm font-bold font-heading mb-6 flex items-center justify-between uppercase tracking-widest">
+                Recent Operations
+                <Clock className="w-4 h-4 text-gray-500" />
+              </h3>
+              <div className="space-y-4">
+                {[
+                  { asset: '50K USDC', time: '2h ago', status: 'Stable' },
+                  { asset: '120 ETH', time: '1d ago', status: 'Stable' },
+                  { asset: '1M MNT', time: '3d ago', status: 'Stable' },
+                ].map((op, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-[#050505] border border-white/5 group hover:border-white/10 transition-all">
+                    <div>
+                      <span className="block text-xs font-bold font-metrics text-white group-hover:text-neon-cyan transition-colors">{op.asset}</span>
+                      <span className="text-[10px] text-gray-600 font-metrics uppercase tracking-wider">{op.time}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-neon-cyan/5 text-neon-cyan text-[8px] font-black uppercase tracking-widest italic border border-neon-cyan/10">
+                      {op.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button className="w-full mt-6 text-center text-[10px] font-metrics font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-[0.2em]">
+                Open Command Logs <ChevronRight className="w-3 h-3 inline ml-1" />
+              </button>
+            </div>
+
+            {/* Help Info */}
+            <div className="p-6 rounded-3xl border border-white/5 bg-white/5 flex items-start gap-4">
+              <HelpCircle className="w-5 h-5 text-gray-500 mt-1" />
               <div>
-                <h3 className="font-semibold text-white mb-1">What are Flash Loans?</h3>
-                <p className="text-gray-400 text-sm">
-                  Flash loans allow you to borrow any amount of assets without collateral, as long as the
-                  liquidity is returned to the pool within the same transaction. Perfect for arbitrage,
-                  collateral swaps, and liquidations.
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-2 font-heading">Flash Protocol v1.0</h4>
+                <p className="text-[10px] text-gray-500 leading-relaxed font-metrics uppercase tracking-widest">
+                  Flash loans are zero-collateral assets that must be repaid within the same atomic transaction.
+                  Standard premium is 0.05% of the total payload.
                 </p>
               </div>
             </div>
-          </GlassCard>
+          </motion.div>
         </motion.div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Asset Selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <GlassCard>
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-neon-cyan" />
-                  Select Asset
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {assets.map((asset) => (
-                    <button
-                      key={asset.symbol}
-                      onClick={() => setSelectedAsset(asset.symbol)}
-                      className={`
-                        p-4 rounded-xl border transition-all
-                        ${selectedAsset === asset.symbol
-                          ? 'bg-glass-strong border-neon-cyan/50 shadow-glow-sm'
-                          : 'bg-glass-white border-glass-border hover:border-glass-strong'
-                        }
-                      `}
-                    >
-                      <div className="text-2xl mb-2">{asset.icon}</div>
-                      <p className="font-semibold text-white">{asset.symbol}</p>
-                      <p className="text-xs text-gray-500">{asset.available} available</p>
-                      <p className="text-xs text-success mt-1">{asset.apy} fee</p>
-                    </button>
-                  ))}
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            {/* Amount Input */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <GlassCard>
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-neon-cyan" />
-                  Loan Amount
-                </h2>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
-                      placeholder="Enter amount"
-                      className="input-glass text-2xl font-bold pr-20"
-                    />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <span className="text-gray-400 font-medium">{selectedAsset}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Available Liquidity</span>
-                    <span className="text-white font-medium">
-                      {assets.find(a => a.symbol === selectedAsset)?.available} {selectedAsset}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    {['25%', '50%', '75%', 'MAX'].map((pct) => (
-                      <button
-                        key={pct}
-                        onClick={() => {
-                          const available = parseFloat(
-                            assets.find(a => a.symbol === selectedAsset)?.available.replace(/,/g, '') || '0'
-                          );
-                          const percentage = pct === 'MAX' ? 1 : parseFloat(pct) / 100;
-                          setAmount((available * percentage).toLocaleString());
-                        }}
-                        className="flex-1 py-2 rounded-lg bg-glass-white hover:bg-glass-strong text-gray-300 text-sm font-medium transition-colors"
-                      >
-                        {pct}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            {/* Simulation Result */}
-            {simulationResult && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <GlassCard className={simulationResult.success ? 'border-success/30' : 'border-error/30'}>
-                  <div className="flex items-center gap-3 mb-4">
-                    {simulationResult.success ? (
-                      <CheckCircle className="w-6 h-6 text-success" />
-                    ) : (
-                      <AlertTriangle className="w-6 h-6 text-error" />
-                    )}
-                    <h3 className="text-lg font-semibold text-white">
-                      Simulation {simulationResult.success ? 'Successful' : 'Failed'}
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Estimated Gas</p>
-                      <p className="text-lg font-semibold text-white">{simulationResult.estimatedGas}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Premium (Fee)</p>
-                      <p className="text-lg font-semibold text-white">{simulationResult.premium}</p>
-                    </div>
-                  </div>
-                  {simulationResult.risks.length > 0 && (
-                    <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
-                      <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-warning mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-warning">Warnings</p>
-                          {simulationResult.risks.map((risk, i) => (
-                            <p key={i} className="text-sm text-gray-300">{risk}</p>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </GlassCard>
-              </motion.div>
-            )}
-
-            {/* Actions */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex gap-4"
-            >
-              <Button
-                variant="secondary"
-                size="lg"
-                fullWidth
-                onClick={handleSimulate}
-                loading={isSimulating}
-                icon={<BarChart3 className="w-5 h-5" />}
-              >
-                Simulate Transaction
-              </Button>
-              <Button
-                size="lg"
-                fullWidth
-                disabled={!simulationResult?.success}
-                icon={<Zap className="w-5 h-5" />}
-              >
-                Execute Flash Loan
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* Right Sidebar - Stats & Info */}
-          <div className="space-y-6">
-            {/* User Stats */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <GlassCard>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-deep-purple" />
-                  Your Stats
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Trust Score</span>
-                    <span className="text-xl font-bold text-white">{userStats.trustScore}</span>
-                  </div>
-                  <ConfidenceIndicator
-                    confidence={userStats.trustScore / 10}
-                    label="Risk Level"
-                    size="sm"
-                  />
-                  <div className="divider" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Total Loans</p>
-                      <p className="text-lg font-bold text-white">{userStats.totalFlashLoans}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Success Rate</p>
-                      <p className="text-lg font-bold text-success">{userStats.successRate}%</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-500">Total Volume</p>
-                      <p className="text-lg font-bold text-white">{userStats.totalVolume}</p>
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            {/* Recent History */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <GlassCard>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-neon-cyan" />
-                  Recent Flash Loans
-                </h3>
-                <div className="space-y-3">
-                  {[
-                    { amount: '50,000 USDC', time: '2h ago', success: true },
-                    { amount: '120 ETH', time: '1d ago', success: true },
-                    { amount: '1,000,000 MNT', time: '3d ago', success: true },
-                  ].map((tx, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-lynq-darker/50">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${tx.success ? 'bg-success' : 'bg-error'}`} />
-                        <span className="text-sm text-white">{tx.amount}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">{tx.time}</span>
-                    </div>
-                  ))}
-                </div>
-                <button className="w-full mt-4 text-center text-sm text-gray-400 hover:text-white transition-colors">
-                  View All History
-                </button>
-              </GlassCard>
-            </motion.div>
-
-            {/* Help */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <GlassCard className="border-glass-strong">
-                <div className="flex items-start gap-3">
-                  <HelpCircle className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-white mb-1">Need Help?</h4>
-                    <p className="text-sm text-gray-400 mb-3">
-                      Learn how to use flash loans effectively and safely.
-                    </p>
-                    <button className="text-sm text-neon-cyan font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                      Read Documentation
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ export const CONTRACT_ADDRESSES = {
     CollateralToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e', // Acts as WMNT/ETH
     StableToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e',     // Acts as USDC
   },
-  // Add other networks if needed, defaulting to Mantle Sepolia for now
   mantleSepolia: {
     LoanCore: '0x16fB626C9Ef59aa865366d086931FAcfDc70490F',
     CollateralVault: '0x8D65d4bbED41a9BbDDEdA63c5798e16058e31A4A',
