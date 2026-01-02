@@ -1,13 +1,10 @@
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
-/**
- * @title CreditScoreVerifier
- * @notice Verifies EIP-712 signed credit assessments and risk parameters
- */
+
 contract CreditScoreVerifier is EIP712 {
     using ECDSA for bytes32;
 
@@ -76,9 +73,7 @@ contract CreditScoreVerifier is EIP712 {
         emit TrustedSignerUpdated(oldSigner, _newSigner);
     }
 
-    /**
-     * Verify a signed credit assessment
-     */
+    
     function verifyCreditAssessment(
         address user,
         uint256 creditScore,
@@ -109,9 +104,7 @@ contract CreditScoreVerifier is EIP712 {
         return true;
     }
 
-    /**
-     * Verify a signed loan proposal
-     */
+    
     function verifyLoanProposal(
         address borrower,
         uint256 loanAmount,
@@ -162,9 +155,7 @@ contract CreditScoreVerifier is EIP712 {
         return true;
     }
 
-    /**
-     * Verify signed risk parameters from ML engine
-     */
+    
     function verifyRiskParameters(
         address user,
         uint256 anomalyScore,
@@ -195,9 +186,7 @@ contract CreditScoreVerifier is EIP712 {
         return true;
     }
 
-    /**
-     * Verify a signed refinance proposal
-     */
+    
     function verifyRefinanceProposal(
         address borrower,
         uint256 loanId,

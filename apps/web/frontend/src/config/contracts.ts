@@ -3,18 +3,18 @@ export const CONTRACT_ADDRESSES = {
     LoanCore: '0x28d19bce67566423719B2E471f578b765F4375BA',
     CollateralVault: '0x52F3f3C2d1610454E6c3345b5E02DA767dC4f4D2',
     CreditScoreVerifier: '0x146038F8b136596f9C3EaBb9e531d9548d593d62',
-    GovernanceToken: '0xeD42659476443dE01d113322E156913EA056332F', // ReputationPoints address from README used as placeholder or LYNQ
-    // Using MockToken for testing lending flows
-    CollateralToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e', // Acts as WMNT/ETH
-    StableToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e',     // Acts as USDC
+    GovernanceToken: '0xeD42659476443dE01d113322E156913EA056332F', 
+    
+    CollateralToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e', 
+    StableToken: '0xA386808b7ed83be964caB5c022A19d58cca8039e',     
   },
   mantleSepolia: {
     LoanCore: '0x16fB626C9Ef59aa865366d086931FAcfDc70490F',
     CollateralVault: '0x8D65d4bbED41a9BbDDEdA63c5798e16058e31A4A',
     CreditScoreVerifier: '0x47B887406f3773fdc45C50692ba8e37732036b01',
     GovernanceToken: '0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C',
-    CollateralToken: '0x12345Fb3Bb48c70a0feB5EF7487187AC298C537D', // Distinct Address
-    StableToken: '0x56789Fb3Bb48c70a0feB5EF7487187AC298C537E'  // Distinct Address
+    CollateralToken: '0x12345Fb3Bb48c70a0feB5EF7487187AC298C537D', 
+    StableToken: '0x56789Fb3Bb48c70a0feB5EF7487187AC298C537E'  
   }
 };
 

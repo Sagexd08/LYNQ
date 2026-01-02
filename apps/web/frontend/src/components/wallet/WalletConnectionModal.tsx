@@ -77,7 +77,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -86,7 +86,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
+          {}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -95,12 +95,12 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
             style={{ paddingTop: isLandingPage ? '80px' : '60px' }}
           >
             <div className="relative w-full max-w-md">
-              {/* Glow Effect */}
+              {}
               <div className="absolute -inset-1 bg-gradient-to-r from-electric-blue via-neon-cyan to-deep-purple rounded-3xl blur-xl opacity-30" />
 
-              {/* Modal Content */}
+              {}
               <div className="relative bg-lynq-card/95 backdrop-blur-2xl rounded-2xl border border-glass-border shadow-2xl overflow-hidden">
-                {/* Header */}
+                {}
                 <div className="relative px-6 py-5 border-b border-glass-border/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -121,7 +121,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                   </div>
                 </div>
 
-                {/* Security Badge */}
+                {}
                 <div className="px-6 py-3 bg-neon-cyan/5 border-b border-glass-border/30">
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-neon-cyan" />
@@ -131,7 +131,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                   </div>
                 </div>
 
-                {/* Error Message */}
+                {}
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -150,9 +150,9 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                   )}
                 </AnimatePresence>
 
-                {/* Wallet List */}
+                {}
                 <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
-                  {/* Main Wallets */}
+                  {}
                   {walletProviders.map((wallet) => {
                     const isDetected = detectedWallets[wallet.id];
                     const isCurrentlyConnecting = isConnecting && selectedWallet === wallet.id;
@@ -175,12 +175,12 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                           disabled:cursor-not-allowed
                         `}
                       >
-                        {/* Wallet Icon */}
+                        {}
                         <div className="w-12 h-12 rounded-xl bg-lynq-darker flex items-center justify-center text-3xl">
                           {wallet.icon}
                         </div>
 
-                        {/* Wallet Info */}
+                        {}
                         <div className="flex-1 text-left">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-white">{wallet.name}</span>
@@ -197,7 +197,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Status Indicator */}
+                        {}
                         {isCurrentlyConnecting ? (
                           <Loader2 className="w-5 h-5 text-neon-cyan animate-spin" />
                         ) : isDetecting ? (
@@ -211,14 +211,14 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                     );
                   })}
 
-                  {/* Divider */}
+                  {}
                   <div className="flex items-center gap-3 py-3">
                     <div className="flex-1 h-px bg-glass-border/50" />
                     <span className="text-xs text-gray-500 uppercase tracking-wider">For Testing</span>
                     <div className="flex-1 h-px bg-glass-border/50" />
                   </div>
 
-                  {/* Test Wallet */}
+                  {}
                   <motion.button
                     onClick={handleTestWalletConnect}
                     disabled={isConnecting}
@@ -239,7 +239,7 @@ const WalletConnectionModal: React.FC<WalletConnectionModalProps> = ({
                   </motion.button>
                 </div>
 
-                {/* Footer Info */}
+                {}
                 <div className="px-6 py-4 bg-lynq-darker/50 border-t border-glass-border/50">
                   <div className="flex items-start gap-3">
                     <div className="p-1.5 rounded-lg bg-electric-blue/10">

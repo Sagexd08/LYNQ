@@ -142,7 +142,7 @@ export const FlashLoanForm: React.FC = () => {
     <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
       <h2 className="text-xl font-bold text-white mb-6">Request Flash Loan</h2>
       
-      {/* Receiver Address */}
+      {}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-2">
           Receiver Contract Address
@@ -159,7 +159,7 @@ export const FlashLoanForm: React.FC = () => {
         </p>
       </div>
 
-      {/* Assets */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <label className="block text-sm font-medium text-gray-300">
@@ -216,7 +216,7 @@ export const FlashLoanForm: React.FC = () => {
         ))}
       </div>
 
-      {/* Parameters */}
+      {}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-2">
           Parameters (Optional)
@@ -233,7 +233,7 @@ export const FlashLoanForm: React.FC = () => {
         </p>
       </div>
 
-      {/* Action Buttons */}
+      {}
       <div className="flex space-x-4">
         <button
           type="button"
@@ -274,7 +274,7 @@ export const FlashLoanForm: React.FC = () => {
         </button>
       </div>
 
-      {/* Eligibility Check */}
+      {}
       {eligibility && (
         <div className={`mt-6 p-4 rounded-lg ${eligibility.eligible ? 'bg-green-900/30 border border-green-700' : 'bg-red-900/30 border border-red-700'}`}>
           <div className="flex items-center">
@@ -299,14 +299,14 @@ export const FlashLoanForm: React.FC = () => {
         </div>
       )}
 
-      {/* Quote Display */}
+      {}
       {quote && (
         <div className="mt-6">
           <FlashLoanQuote quote={quote} />
         </div>
       )}
 
-      {/* Educational Info */}
+      {}
       <div className="mt-8 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
         <h3 className="font-medium text-blue-300 mb-2">Beginner Tips</h3>
         <ul className="text-sm text-blue-200 space-y-1">

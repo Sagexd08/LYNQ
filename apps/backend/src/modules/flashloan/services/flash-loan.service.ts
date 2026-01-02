@@ -46,7 +46,7 @@ export class FlashLoanService {
     private flashLoanContract: ethers.Contract | null = null;
     private contractAddress: string = '';
 
-    // Flash Loan Provider ABI (simplified)
+    
     private readonly flashLoanABI = [
         'function flashLoan(address receiverAddress, address[] calldata assets, uint256[] calldata amounts, bytes calldata params) external',
         'function getFlashLoanQuote(address[] calldata assets, uint256[] calldata amounts) external view returns (uint256[] memory premiums, uint256[] memory totalCosts, uint8 riskLevel, uint256 estimatedGas)',
@@ -139,7 +139,7 @@ export class FlashLoanService {
 
     async getUserStats(userAddress: string): Promise<UserStats> {
         if (!this.flashLoanContract) {
-            // Return default stats if contract not initialized
+            
             return {
                 totalFlashLoans: 0,
                 successfulFlashLoans: 0,

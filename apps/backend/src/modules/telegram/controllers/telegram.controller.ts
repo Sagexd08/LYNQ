@@ -31,7 +31,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 export class TelegramController {
     constructor(private readonly telegramService: TelegramService) { }
 
-    // ============ PUBLIC ENDPOINTS ============
+    
 
     @Get('status')
     @ApiOperation({ summary: 'Check Telegram bot status' })
@@ -52,7 +52,7 @@ export class TelegramController {
         };
     }
 
-    // ============ AUTHENTICATED ENDPOINTS ============
+    
 
     @Post('register')
     @UseGuards(JwtAuthGuard)
@@ -72,7 +72,7 @@ export class TelegramController {
             dto.username
         );
 
-        // Send welcome message
+        
         await this.telegramService.sendWelcome(dto.chatId);
 
         return {
@@ -176,22 +176,22 @@ export class TelegramController {
         };
     }
 
-    // ============ WEBHOOK ENDPOINTS ============
+    
 
     @Post('webhook')
     @ApiOperation({ summary: 'Receive Telegram webhook updates' })
     @ApiResponse({ status: 200, description: 'Webhook processed' })
     @HttpCode(HttpStatus.OK)
     async handleWebhook(@Body() update: any) {
-        // Handle incoming updates from Telegram
-        // This is where you'd process commands like /start, /help, etc.
+        
+        
 
         if (update.message?.text) {
             const chatId = update.message.chat.id.toString();
             const text = update.message.text;
             const username = update.message.from?.username;
 
-            // Handle commands
+            
             if (text === '/start') {
                 await this.telegramService.sendMessage(
                     chatId,

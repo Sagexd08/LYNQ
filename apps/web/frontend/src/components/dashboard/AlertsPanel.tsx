@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './AlertsPanel.css';
 
-/**
- * Alerts & Warnings Panel Component
- * Displays real-time transaction warnings and system alerts
- */
+
 
 export enum AlertSeverity {
   INFO = 'INFO',
@@ -39,7 +36,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    // Show new alerts
+    
     const newAlerts = new Set(visibleAlerts);
     alerts.forEach((alert) => {
       if (!dismissedAlerts.has(alert.id)) {
@@ -48,7 +45,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({
     });
     setVisibleAlerts(newAlerts);
 
-    // Auto-hide info alerts
+    
     if (autoHideDuration > 0) {
       const timers = alerts
         .filter((a) => a.severity === AlertSeverity.INFO && visibleAlerts.has(a.id))
@@ -96,7 +93,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({
         </div>
       ) : (
         <>
-          {/* Summary Bar */}
+          {}
           <div className="alerts-summary">
             {criticalCount > 0 && (
               <div className="summary-badge critical">
@@ -112,7 +109,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({
             )}
           </div>
 
-          {/* Alerts List */}
+          {}
           <div className="alerts-list">
             {visibleAlertsList.map((alert) => (
               <AlertItem
@@ -123,7 +120,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({
             ))}
           </div>
 
-          {/* Hidden Alerts Count */}
+          {}
           {hiddenCount > 0 && (
             <div className="alerts-hidden">
               <p>+{hiddenCount} more alerts (scroll or check logs)</p>

@@ -6,7 +6,7 @@ task("health", "Reports Hardhat environment health")
     console.log("Node:", process.version);
     console.log("Solidity:", hre.config.solidity?.version);
 
-    // Compile to ensure toolchain is healthy
+    
     await hre.run("compile");
 
     const accounts = await hre.ethers.getSigners();

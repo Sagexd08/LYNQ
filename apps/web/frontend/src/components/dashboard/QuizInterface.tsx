@@ -164,7 +164,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
           </button>
         </div>
 
-        {/* Answer Breakdown */}
+        {}
         <div className="answer-breakdown">
           <h3>Answer Review</h3>
           {result.breakdown.map((item, index) => {
@@ -210,7 +210,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      {/* Quiz Header */}
+      {}
       <div className="quiz-header">
         <div className="quiz-info">
           <h2>{title}</h2>
@@ -221,7 +221,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {}
       <div className="quiz-progress">
         <div className="progress-bar">
           <div
@@ -234,7 +234,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
         </span>
       </div>
 
-      {/* Question Container */}
+      {}
       <motion.div
         className="question-container"
         key={question.id}
@@ -247,7 +247,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
           <span className="points-info">+{question.points} points</span>
         </div>
 
-        {/* Question Type: Multiple Choice */}
+        {}
         {question.type === 'multiple-choice' && question.options && (
           <div className="options-list">
             {question.options.map((option, index) => (
@@ -265,7 +265,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
           </div>
         )}
 
-        {/* Question Type: True/False */}
+        {}
         {question.type === 'true-false' && (
           <div className="options-list">
             {['True', 'False'].map(option => (
@@ -283,7 +283,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
           </div>
         )}
 
-        {/* Question Type: Short Answer */}
+        {}
         {question.type === 'short-answer' && (
           <textarea
             className="short-answer-input"
@@ -294,7 +294,7 @@ export const QuizInterface: React.FC<QuizProps> = ({
         )}
       </motion.div>
 
-      {/* Navigation Buttons */}
+      {}
       <div className="quiz-navigation">
         <button
           className="btn-nav"

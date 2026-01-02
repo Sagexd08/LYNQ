@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, ShieldCheck, AlertCircle, ArrowRight } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
 import { Button } from '../ui/Button';
-import { loanApi } from '../../services/api/loans';
+import { loanApi } from '../../services/api/loanApi';
 import { contractService } from '../../services/contractService';
 import toast from 'react-hot-toast';
 
 interface RefinanceModalProps {
     isOpen: boolean;
     onClose: () => void;
-    loanId: string; // Backend UUID
+    loanId: string;
     currentRate: number;
 }
 

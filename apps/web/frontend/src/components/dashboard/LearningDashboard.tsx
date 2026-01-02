@@ -86,7 +86,7 @@ export const LearningDashboard: React.FC = () => {
         <p>Expand your knowledge and earn rewards</p>
       </motion.div>
 
-      {/* User Stats Cards */}
+      {}
       <motion.div
         className="stats-grid"
         initial={{ opacity: 0 }}
@@ -126,7 +126,7 @@ export const LearningDashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Category Filter */}
+      {}
       <div className="category-filter">
         {['All', 'Beginner', 'Intermediate', 'Advanced'].map(cat => (
           <button
@@ -139,7 +139,7 @@ export const LearningDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Modules Grid */}
+      {}
       <div className="modules-section">
         <h2>Available Modules</h2>
         {loading ? (
@@ -200,7 +200,7 @@ export const LearningDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Badges Section */}
+      {}
       <div className="badges-section">
         <h2>Badges & Achievements</h2>
         <div className="badges-grid">
@@ -222,7 +222,7 @@ export const LearningDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Recommended Section */}
+      {}
       <div className="recommended-section">
         <h2>Recommended For You</h2>
         <p className="recommended-subtitle">Based on your progress and interests</p>

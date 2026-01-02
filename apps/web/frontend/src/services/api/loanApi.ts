@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '../../types/schemas';
 import apiClient from './client';
 
 export interface CreateLoanRequest {
@@ -7,7 +8,7 @@ export interface CreateLoanRequest {
   collateralAmount: string;
   durationDays: number;
   transactionHash?: string;
-  onChainLoanId?: string;
+  onChainId?: string;
   interestRate?: string;
 }
 
@@ -52,29 +53,39 @@ export interface RefinanceOffer {
 
 export const loanApi = {
 
-  async createLoan(data: CreateLoanRequest): Promise<LoanResponse> {
+  async create(data: CreateLoanRequest): Promise<LoanResponse> {
     const response = await apiClient.post<LoanResponse>('/loans', data);
     return response.data;
   },
 
-  async getUserLoans(status?: string): Promise<LoanResponse[]> {
-    const params = status ? { status } : {};
-    const response = await apiClient.get<LoanResponse[]>('/loans', { params });
+  async getMyLoans(status?: string, page: number = 1, limit: number = 20): Promise<PaginatedResponse<LoanResponse>> {
+    const params = { status, page, limit };
+    const response = await apiClient.get<PaginatedResponse<LoanResponse>>('/loans/my-loans', { params });
     return response.data;
   },
 
-  async getLoanById(id: string): Promise<LoanResponse> {
+  async getById(id: string): Promise<LoanResponse> {
     const response = await apiClient.get<LoanResponse>(`/loans/${id}`);
+    return response.data;
+  },
+
+  async checkEligibility(amount: number): Promise<any> {
+    const response = await apiClient.get('/loans/check-eligibility', { params: { amount } });
+    return response.data;
+  },
+
+  async repay(id: string, data: RepayLoanRequest): Promise<LoanResponse> {
+    const response = await apiClient.put<LoanResponse>(`/loans/${id}/repay`, data);
+    return response.data;
+  },
+
+  async refinance(id: string): Promise<any> {
+    const response = await apiClient.post(`/loans/${id}/refinance`);
     return response.data;
   },
 
   async checkRefinance(id: string): Promise<RefinanceOffer> {
     const response = await apiClient.post<RefinanceOffer>(`/loans/${id}/refinance-offer`);
-    return response.data;
-  },
-
-  async repayLoan(id: string, data: RepayLoanRequest): Promise<LoanResponse> {
-    const response = await apiClient.put<LoanResponse>(`/loans/${id}/repay`, data);
     return response.data;
   },
 
@@ -88,3 +99,4 @@ export const loanApi = {
 };
 
 export default loanApi;
+

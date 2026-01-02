@@ -85,32 +85,32 @@ export const UserStats: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {/* Total Flash Loans */}
+        {}
         <div className="bg-gray-900/50 rounded-lg p-4">
           <div className="text-gray-400 text-sm mb-1">Total Flash Loans</div>
           <div className="text-2xl font-bold text-white">{stats.totalFlashLoans}</div>
         </div>
 
-        {/* Success Rate */}
+        {}
         <div className="bg-gray-900/50 rounded-lg p-4">
           <div className="text-gray-400 text-sm mb-1">Success Rate</div>
           <div className="text-2xl font-bold text-white">{stats.successRate}%</div>
         </div>
 
-        {/* Successful Loans */}
+        {}
         <div className="bg-gray-900/50 rounded-lg p-4">
           <div className="text-gray-400 text-sm mb-1">Successful</div>
           <div className="text-2xl font-bold text-green-400">{stats.successfulFlashLoans}</div>
         </div>
 
-        {/* Failed Loans */}
+        {}
         <div className="bg-gray-900/50 rounded-lg p-4">
           <div className="text-gray-400 text-sm mb-1">Failed</div>
           <div className="text-2xl font-bold text-red-400">{stats.failedFlashLoans}</div>
         </div>
       </div>
 
-      {/* Risk Level */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-400">Risk Level</span>
@@ -134,7 +134,7 @@ export const UserStats: React.FC = () => {
         </div>
       </div>
 
-      {/* Trust Score */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-400">Trust Score</span>
@@ -148,7 +148,7 @@ export const UserStats: React.FC = () => {
         </div>
       </div>
 
-      {/* Total Volume */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center">
           <span className="text-gray-400">Total Volume Flash Loaned</span>
@@ -160,7 +160,7 @@ export const UserStats: React.FC = () => {
         </div>
       </div>
 
-      {/* Progress Visualization */}
+      {}
       <div className="pt-4 border-t border-gray-700">
         <h4 className="font-medium text-white mb-3">Performance Overview</h4>
         <div className="space-y-3">
@@ -200,7 +200,7 @@ export const UserStats: React.FC = () => {
         </div>
       </div>
 
-      {/* Tips */}
+      {}
       <div className="mt-6 p-4 bg-indigo-900/20 border border-indigo-700 rounded-lg">
         <h4 className="font-medium text-indigo-300 mb-2">Performance Tips</h4>
         <ul className="text-sm text-indigo-200 space-y-1">

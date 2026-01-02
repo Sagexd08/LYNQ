@@ -40,39 +40,39 @@ export class BlockchainService {
     private providers: Map<string, ethers.JsonRpcProvider> = new Map();
     private wallets: Map<string, ethers.Wallet> = new Map();
 
-    // Default RPC URLs (can be overridden via env vars)
+    
     private readonly defaultRpcUrls: Record<SupportedChain, string> = {
-        // Mantle
+        
         mantle: 'https://rpc.mantle.xyz',
         mantleSepolia: 'https://rpc.sepolia.mantle.xyz',
-        // Ethereum
+        
         ethereum: 'https://eth.llamarpc.com',
         sepolia: 'https://rpc.sepolia.org',
-        // Polygon
+        
         polygon: 'https://polygon-rpc.com',
         polygonAmoy: 'https://rpc-amoy.polygon.technology',
-        // Arbitrum
+        
         arbitrum: 'https://arb1.arbitrum.io/rpc',
         arbitrumSepolia: 'https://sepolia-rollup.arbitrum.io/rpc',
-        // Optimism
+        
         optimism: 'https://mainnet.optimism.io',
         optimismSepolia: 'https://sepolia.optimism.io',
-        // Base
+        
         base: 'https://mainnet.base.org',
         baseSepolia: 'https://sepolia.base.org',
-        // BSC
+        
         bsc: 'https://bsc-dataseed.binance.org',
         bscTestnet: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-        // Avalanche
+        
         avalanche: 'https://api.avax.network/ext/bc/C/rpc',
         avalancheFuji: 'https://api.avax-test.network/ext/bc/C/rpc',
-        // Local
+        
         localhost: 'http://localhost:8545',
     };
 
-    // Supported chains configuration
+    
     private readonly chains: Record<SupportedChain, ChainConfig> = {
-        // Mantle
+        
         mantle: {
             name: 'Mantle',
             chainId: 5000,
@@ -89,7 +89,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'Mantle', symbol: 'MNT', decimals: 18 },
             isTestnet: true,
         },
-        // Ethereum
+        
         ethereum: {
             name: 'Ethereum',
             chainId: 1,
@@ -106,7 +106,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
-        // Polygon
+        
         polygon: {
             name: 'Polygon',
             chainId: 137,
@@ -123,7 +123,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
             isTestnet: true,
         },
-        // Arbitrum
+        
         arbitrum: {
             name: 'Arbitrum One',
             chainId: 42161,
@@ -140,7 +140,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
-        // Optimism
+        
         optimism: {
             name: 'Optimism',
             chainId: 10,
@@ -157,7 +157,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
-        // Base
+        
         base: {
             name: 'Base',
             chainId: 8453,
@@ -174,7 +174,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
-        // BSC
+        
         bsc: {
             name: 'BNB Smart Chain',
             chainId: 56,
@@ -191,7 +191,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 },
             isTestnet: true,
         },
-        // Avalanche
+        
         avalanche: {
             name: 'Avalanche C-Chain',
             chainId: 43114,
@@ -208,7 +208,7 @@ export class BlockchainService {
             nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
             isTestnet: true,
         },
-        // Local
+        
         localhost: {
             name: 'Localhost',
             chainId: 31337,
@@ -219,7 +219,7 @@ export class BlockchainService {
         },
     };
 
-    // Environment variable mapping for RPC URLs
+    
     private readonly envVarMapping: Record<SupportedChain, string> = {
         mantle: 'MANTLE_RPC_URL',
         mantleSepolia: 'MANTLE_SEPOLIA_RPC_URL',
@@ -247,7 +247,7 @@ export class BlockchainService {
     private initializeProviders(): void {
         const privateKey = this.configService.get<string>('PRIVATE_KEY');
 
-        // Initialize providers for all chains
+        
         for (const [chainKey, chainConfig] of Object.entries(this.chains)) {
             const envVar = this.envVarMapping[chainKey as SupportedChain];
             const rpcUrl = this.configService.get<string>(envVar, chainConfig.rpcUrl);
@@ -256,7 +256,7 @@ export class BlockchainService {
                 const provider = new ethers.JsonRpcProvider(rpcUrl);
                 this.providers.set(chainKey, provider);
 
-                // Initialize wallet if private key is available
+                
                 if (privateKey) {
                     this.wallets.set(chainKey, new ethers.Wallet(privateKey, provider));
                 }
@@ -275,30 +275,22 @@ export class BlockchainService {
         }
     }
 
-    /**
-     * Get all supported chains
-     */
+    
     getSupportedChains(): ChainConfig[] {
         return Object.values(this.chains);
     }
 
-    /**
-     * Get testnet chains only
-     */
+    
     getTestnetChains(): ChainConfig[] {
         return Object.values(this.chains).filter(c => c.isTestnet);
     }
 
-    /**
-     * Get mainnet chains only
-     */
+    
     getMainnetChains(): ChainConfig[] {
         return Object.values(this.chains).filter(c => !c.isTestnet);
     }
 
-    /**
-     * Get provider for a specific chain
-     */
+    
     getProvider(chain: SupportedChain = 'mantleSepolia'): ethers.JsonRpcProvider {
         const provider = this.providers.get(chain);
         if (!provider) {
@@ -307,9 +299,7 @@ export class BlockchainService {
         return provider;
     }
 
-    /**
-     * Get wallet for a specific chain
-     */
+    
     getWallet(chain: SupportedChain = 'mantleSepolia'): ethers.Wallet {
         const wallet = this.wallets.get(chain);
         if (!wallet) {
@@ -318,9 +308,7 @@ export class BlockchainService {
         return wallet;
     }
 
-    /**
-     * Get chain configuration
-     */
+    
     getChainConfig(chain: SupportedChain): ChainConfig {
         const config = this.chains[chain];
         if (!config) {
@@ -329,9 +317,7 @@ export class BlockchainService {
         return config;
     }
 
-    /**
-     * Get chain by chain ID
-     */
+    
     getChainByChainId(chainId: number): { key: SupportedChain; config: ChainConfig } | null {
         for (const [key, config] of Object.entries(this.chains)) {
             if (config.chainId === chainId) {
@@ -341,35 +327,27 @@ export class BlockchainService {
         return null;
     }
 
-    /**
-     * Get native balance
-     */
+    
     async getBalance(address: string, chain: SupportedChain = 'mantleSepolia'): Promise<string> {
         const provider = this.getProvider(chain);
         const balance = await provider.getBalance(address);
         return ethers.formatEther(balance);
     }
 
-    /**
-     * Get current block number
-     */
+    
     async getBlockNumber(chain: SupportedChain = 'mantleSepolia'): Promise<number> {
         const provider = this.getProvider(chain);
         return provider.getBlockNumber();
     }
 
-    /**
-     * Get gas price in gwei
-     */
+    
     async getGasPrice(chain: SupportedChain = 'mantleSepolia'): Promise<string> {
         const provider = this.getProvider(chain);
         const feeData = await provider.getFeeData();
         return ethers.formatUnits(feeData.gasPrice || 0, 'gwei');
     }
 
-    /**
-     * Get contract instance
-     */
+    
     getContract(
         address: string,
         abi: ethers.InterfaceAbi,
@@ -384,9 +362,7 @@ export class BlockchainService {
         return new ethers.Contract(address, abi, provider);
     }
 
-    /**
-     * Send a transaction
-     */
+    
     async sendTransaction(
         to: string,
         value: string,
@@ -403,9 +379,7 @@ export class BlockchainService {
         return tx;
     }
 
-    /**
-     * Wait for transaction confirmation
-     */
+    
     async waitForTransaction(
         txHash: string,
         chain: SupportedChain = 'mantleSepolia',
@@ -415,9 +389,7 @@ export class BlockchainService {
         return provider.waitForTransaction(txHash, confirmations);
     }
 
-    /**
-     * Check if a chain is healthy (can connect)
-     */
+    
     async isChainHealthy(chain: SupportedChain): Promise<boolean> {
         try {
             const provider = this.getProvider(chain);
@@ -428,9 +400,7 @@ export class BlockchainService {
         }
     }
 
-    /**
-     * Get health status of all chains
-     */
+    
     async getAllChainsHealth(): Promise<Record<string, boolean>> {
         const health: Record<string, boolean> = {};
         for (const chain of Object.keys(this.chains) as SupportedChain[]) {

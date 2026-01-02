@@ -4,12 +4,9 @@ module.exports = {
   rootDir: '.',
   testRegex: '.*(\\.spec|\\.e2e-spec)\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
-  },
-  globals: {
-    'ts-jest': {
+    '^.+\\.(t|j)s$': ['ts-jest', {
       tsconfig: '<rootDir>/tsconfig.spec.json',
-    },
+    }],
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup-jest.ts'],
   collectCoverageFrom: [
@@ -23,6 +20,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   roots: ['<rootDir>/src/', '<rootDir>/test/'],
 };

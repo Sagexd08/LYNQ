@@ -65,7 +65,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Address Section */}
+        {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Address</label>
           <div
@@ -81,7 +81,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Balance Section */}
+        {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold flex justify-between">
             <span>Holdings</span>
@@ -100,7 +100,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Network Info */}
+        {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Network</label>
           <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
@@ -114,7 +114,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           </div>
         </div>
 
-        {/* Trust Score Mini */}
+        {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Reputation</label>
           <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 bg-gradient-to-r from-transparent to-yellow-500/5">

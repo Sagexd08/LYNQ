@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
 
-// API Base URL
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
-// Create axios instance
+
 const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: 30000,
@@ -12,7 +12,7 @@ const apiClient: AxiosInstance = axios.create({
     },
 });
 
-// Request interceptor for auth
+
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('auth_token');
     if (token) {
@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config) => {
     return config;
 });
 
-// Response interceptor for error handling
+
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -30,9 +30,9 @@ apiClient.interceptors.response.use(
     }
 );
 
-// ============================================================================
-// Auth API
-// ============================================================================
+
+
+
 
 export interface RegisterRequest {
     email: string;
@@ -73,9 +73,9 @@ export const authApi = {
         apiClient.post<AuthResponse>('/auth/wallet-connect', data),
 };
 
-// ============================================================================
-// User API
-// ============================================================================
+
+
+
 
 export interface User {
     id: string;
@@ -104,9 +104,9 @@ export const userApi = {
         apiClient.patch<User>('/users/me', data),
 };
 
-// ============================================================================
-// Loan API
-// ============================================================================
+
+
+
 
 export type LoanStatus = 'pending' | 'active' | 'repaid' | 'defaulted' | 'liquidated';
 
@@ -129,7 +129,7 @@ export interface CreateLoanRequest {
     amount: string;
     collateralType: string;
     collateralAmount: string;
-    duration: number; // in days
+    duration: number; 
 }
 
 export interface RepayLoanRequest {
@@ -164,9 +164,9 @@ export const loanApi = {
         apiClient.post<Loan>(`/loans/${loanId}/refinance/${offerId}`),
 };
 
-// ============================================================================
-// Flash Loan API
-// ============================================================================
+
+
+
 
 export interface FlashLoanQuote {
     amount: string;
@@ -213,9 +213,9 @@ export const flashLoanApi = {
         apiClient.get('/flashloan/history'),
 };
 
-// ============================================================================
-// Health API
-// ============================================================================
+
+
+
 
 export interface HealthStatus {
     status: string;
@@ -228,9 +228,9 @@ export const healthApi = {
         apiClient.get<HealthStatus>('/health'),
 };
 
-// ============================================================================
-// Blockchain API (for chain health)
-// ============================================================================
+
+
+
 
 export interface ChainHealth {
     chain: string;

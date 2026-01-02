@@ -18,7 +18,7 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
 
-  // Deploy TrustScore
+  
   console.log("\nDeploying TrustScore...");
   const TrustScore = await ethers.getContractFactory("TrustScore");
   const trustScore = await TrustScore.deploy(deployer.address);
@@ -26,7 +26,7 @@ async function main() {
   const trustScoreAddress = await trustScore.getAddress();
   console.log("TrustScore deployed to:", trustScoreAddress);
 
-  // Deploy CollateralManager
+  
   console.log("\nDeploying CollateralManager...");
   const CollateralManager = await ethers.getContractFactory("CollateralManager");
   const collateralManager = await CollateralManager.deploy(deployer.address);
@@ -34,7 +34,7 @@ async function main() {
   const collateralManagerAddress = await collateralManager.getAddress();
   console.log("CollateralManager deployed to:", collateralManagerAddress);
 
-  // Deploy InterestRateModel
+  
   console.log("\nDeploying InterestRateModel...");
   const InterestRateModel = await ethers.getContractFactory("InterestRateModel");
   const interestRateModel = await InterestRateModel.deploy(deployer.address);
@@ -42,7 +42,7 @@ async function main() {
   const interestRateModelAddress = await interestRateModel.getAddress();
   console.log("InterestRateModel deployed to:", interestRateModelAddress);
 
-  // Deploy LoanPlatform
+  
   console.log("\nDeploying LoanPlatform...");
   const LoanPlatform = await ethers.getContractFactory("LoanPlatform");
   const loanPlatform = await LoanPlatform.deploy(
@@ -54,7 +54,7 @@ async function main() {
   const loanPlatformAddress = await loanPlatform.getAddress();
   console.log("LoanPlatform deployed to:", loanPlatformAddress);
 
-  // Transfer ownership of supporting contracts to LoanPlatform
+  
   console.log("\nTransferring ownership...");
   await trustScore.transferOwnership(loanPlatformAddress);
   await collateralManager.transferOwnership(loanPlatformAddress);
@@ -71,7 +71,7 @@ async function main() {
   console.log(`VITE_COLLATERAL_MANAGER_ADDRESS=${collateralManagerAddress}`);
   console.log(`VITE_INTEREST_RATE_MODEL_ADDRESS=${interestRateModelAddress}`);
 
-  // Save deployment info
+  
   const fs = require("fs");
   const deploymentsDir = __dirname + "/../deployments";
   if (!fs.existsSync(deploymentsDir)) {

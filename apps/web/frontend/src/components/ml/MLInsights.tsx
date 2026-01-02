@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { HelpCircle, TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface ConfidenceIndicatorProps {
-    confidence: number; // 0-100
+    confidence: number; 
     label?: string;
     showPercentage?: boolean;
     size?: 'sm' | 'md' | 'lg';
@@ -57,7 +57,7 @@ interface MLInsightCardProps {
     confidence: number;
     factors: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }>;
     recommendation?: string;
-    modelAgreement?: number; // 0-100, how many models agree
+    modelAgreement?: number; 
     onExplainClick?: () => void;
 }
 
@@ -76,7 +76,7 @@ export const MLInsightCard: React.FC<MLInsightCardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="ml-insight-card"
         >
-            {/* Header */}
+            {}
             <div className="flex items-start justify-between mb-4">
                 <div>
                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -94,10 +94,10 @@ export const MLInsightCard: React.FC<MLInsightCardProps> = ({
                 </button>
             </div>
 
-            {/* Main Insight */}
+            {}
             <p className="text-white text-base mb-4">{insight}</p>
 
-            {/* Confidence & Model Agreement */}
+            {}
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <ConfidenceIndicator confidence={confidence} label="Confidence" size="sm" />
                 <div className="space-y-2">
@@ -119,7 +119,7 @@ export const MLInsightCard: React.FC<MLInsightCardProps> = ({
                 </div>
             </div>
 
-            {/* Contributing Factors */}
+            {}
             <div className="mb-4">
                 <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">
                     Key Factors
@@ -148,7 +148,7 @@ export const MLInsightCard: React.FC<MLInsightCardProps> = ({
                 </div>
             </div>
 
-            {/* Recommendation */}
+            {}
             {recommendation && (
                 <div className="p-3 rounded-lg bg-neon-cyan/10 border border-neon-cyan/20">
                     <div className="flex items-start gap-2">

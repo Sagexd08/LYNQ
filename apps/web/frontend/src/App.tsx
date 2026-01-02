@@ -7,8 +7,6 @@ import HealthIndicator from './components/HealthIndicator';
 import { useWalletStore } from './store/walletStore';
 import { getSavedWalletConnection } from './components/wallet/walletConfig';
 import { getNativeBalance, getChainByChainId, SUPPORTED_CHAINS } from './services/blockchain';
-
-// Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LoansPage = lazy(() => import('./pages/LoansPage'));
@@ -16,10 +14,14 @@ const FlashLoanPage = lazy(() => import('./pages/FlashLoanPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const CreateLoanPage = lazy(() => import('./pages/CreateLoanPage'));
 const MLInsightsPage = lazy(() => import('./pages/MLInsightsPage'));
+const ProtocolPage = lazy(() => import('./pages/ProtocolPage'));
+const RiskPage = lazy(() => import('./pages/RiskPage'));
+const GovernancePage = lazy(() => import('./pages/GovernancePage'));
+
+import { PulseBar } from './components/layout/PulseBar';
 
 import { RiskAlertDrawer } from './components/lynq/RiskAlertDrawer';
-
-// Loading Fallback
+import { DotGlobe } from './components/canvas/DotGlobe';
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#050505] flex items-center justify-center">
     <div className="flex flex-col items-center gap-4">
@@ -29,7 +31,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Layout wrapper that handles navigation
+
 const Layout = ({
   children,
   useTestnet,
@@ -47,7 +49,9 @@ const Layout = ({
   const isLanding = location.pathname === '/';
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen relative overflow-x-hidden">
+      {isLanding && <DotGlobe />}
+
       {!isLanding && (
         <NavBar
           useTestnet={useTestnet}
@@ -55,7 +59,13 @@ const Layout = ({
           onWalletConnect={onWalletConnect}
         />
       )}
-      <main>
+      {!isLanding && (
+        <div className="fixed top-[72px] left-0 right-0 z-40">
+          <PulseBar />
+        </div>
+      )}
+
+      <main className="relative z-10 w-full min-h-screen">
         {children}
       </main>
       {!isLanding && <RiskAlertDrawer />}
@@ -65,10 +75,10 @@ const Layout = ({
 };
 
 function App() {
-  const [useTestnet, setUseTestnet] = useState<boolean>(true); // Default to testnet for safety
+  const [useTestnet, setUseTestnet] = useState<boolean>(true); 
   const [currentChainKey, setCurrentChainKey] = useState<string>('mantleSepolia');
 
-  // Wallet store actions
+  
   const address = useWalletStore((state) => state.address);
   const connect = useWalletStore((state) => state.connect);
   const updateBalance = useWalletStore((state) => state.updateBalance);
@@ -76,7 +86,7 @@ function App() {
   const setLoadingBalance = useWalletStore((state) => state.setLoadingBalance);
   const setBalanceError = useWalletStore((state) => state.setBalanceError);
 
-  // Fetch real balance using ethers.js
+  
   const fetchBalance = useCallback(async (walletAddress: string, chainKey: string = currentChainKey) => {
     if (!walletAddress) {
       updateBalance(0);
@@ -97,9 +107,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching balance:', error);
       setBalanceError('Failed to fetch balance');
-      // Set a mock balance for demo addresses
+      
       if (walletAddress.startsWith('0x1234')) {
-        updateBalance(1.5); // Mock balance for test wallet
+        updateBalance(1.5); 
       } else {
         updateBalance(0);
       }
@@ -108,7 +118,7 @@ function App() {
     }
   }, [currentChainKey, updateBalance, setLoadingBalance, setBalanceError]);
 
-  // Handle wallet connection
+  
   interface WalletData {
     address: string;
     chainId?: string;
@@ -125,7 +135,7 @@ function App() {
     if (walletData?.address) {
       console.log('Wallet connected:', walletData);
 
-      // Determine chain key from chainId
+      
       let chainKey = currentChainKey;
       if (walletData.chainId) {
         const chainInfo = getChainByChainId(walletData.chainId);
@@ -147,17 +157,17 @@ function App() {
         social: !!walletData.social,
       });
 
-      // Fetch real balance
+      
       fetchBalance(walletData.address, chainKey);
     }
   }, [connect, fetchBalance, currentChainKey]);
 
-  // Handle network toggle
+  
   const handleToggleNetwork = useCallback(() => {
     const newTestnetState = !useTestnet;
     setUseTestnet(newTestnetState);
 
-    // Switch between mainnet and testnet
+    
     const newChainKey = newTestnetState ? 'mantleSepolia' : 'mantle';
     setCurrentChainKey(newChainKey);
 
@@ -166,19 +176,19 @@ function App() {
       updateNetwork(config.chainId.toString(), config.name);
     }
 
-    // Refetch balance with new network
+    
     if (address) {
       fetchBalance(address, newChainKey);
     }
   }, [useTestnet, address, fetchBalance, updateNetwork]);
 
-  // Restore wallet connection on mount
+  
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection?.address) {
       console.log('Restoring saved wallet connection:', savedConnection);
 
-      // Determine chain key from saved chainId
+      
       let chainKey = 'mantleSepolia';
       if (savedConnection.chainId) {
         const chainInfo = getChainByChainId(savedConnection.chainId);
@@ -200,11 +210,11 @@ function App() {
     }
   }, [connect, fetchBalance]);
 
-  // Refetch balance periodically
+  
   useEffect(() => {
     if (!address) return;
 
-    // Refetch every 30 seconds
+    
     const interval = setInterval(() => {
       fetchBalance(address, currentChainKey);
     }, 30000);
@@ -229,8 +239,11 @@ function App() {
             <Route path="/flashloan/*" element={<FlashLoanPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
             <Route path="/ml-insights" element={<MLInsightsPage />} />
+            <Route path="/protocol" element={<ProtocolPage />} />
+            <Route path="/risk" element={<RiskPage />} />
+            <Route path="/governance" element={<GovernancePage />} />
             <Route path="/analytics" element={<MLInsightsPage />} />
-            {/* Catch all - redirect to dashboard */}
+            {}
             <Route path="*" element={<DashboardPage />} />
           </Routes>
         </Suspense>

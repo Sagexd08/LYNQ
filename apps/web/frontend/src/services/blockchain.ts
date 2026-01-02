@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-// Chain configurations
+
 export interface ChainConfig {
     chainId: number;
     chainIdHex: string;
@@ -72,12 +72,10 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
     },
 };
 
-// Provider cache
+
 const providerCache: Map<string, ethers.JsonRpcProvider> = new Map();
 
-/**
- * Get a provider for a specific chain
- */
+
 export function getProvider(chainKey: string = 'mantleSepolia'): ethers.JsonRpcProvider {
     if (providerCache.has(chainKey)) {
         return providerCache.get(chainKey)!;
@@ -93,9 +91,7 @@ export function getProvider(chainKey: string = 'mantleSepolia'): ethers.JsonRpcP
     return provider;
 }
 
-/**
- * Get chain config by chain ID
- */
+
 export function getChainByChainId(chainId: number | string): { key: string; config: ChainConfig } | null {
     const numericChainId = typeof chainId === 'string' ? parseInt(chainId) : chainId;
 
@@ -107,9 +103,7 @@ export function getChainByChainId(chainId: number | string): { key: string; conf
     return null;
 }
 
-/**
- * Get native token balance for an address
- */
+
 export async function getNativeBalance(
     address: string,
     chainKey: string = 'mantleSepolia'
@@ -132,9 +126,7 @@ export async function getNativeBalance(
     }
 }
 
-/**
- * Get ERC20 token balance
- */
+
 export async function getTokenBalance(
     address: string,
     tokenAddress: string,
@@ -169,26 +161,20 @@ export async function getTokenBalance(
     }
 }
 
-/**
- * Get current block number
- */
+
 export async function getBlockNumber(chainKey: string = 'mantleSepolia'): Promise<number> {
     const provider = getProvider(chainKey);
     return provider.getBlockNumber();
 }
 
-/**
- * Get gas price in gwei
- */
+
 export async function getGasPrice(chainKey: string = 'mantleSepolia'): Promise<string> {
     const provider = getProvider(chainKey);
     const feeData = await provider.getFeeData();
     return ethers.formatUnits(feeData.gasPrice || 0, 'gwei');
 }
 
-/**
- * Estimate gas for a transaction
- */
+
 export async function estimateGas(
     tx: ethers.TransactionRequest,
     chainKey: string = 'mantleSepolia'
@@ -198,9 +184,7 @@ export async function estimateGas(
     return gasEstimate.toString();
 }
 
-/**
- * Watch for new blocks
- */
+
 export function watchBlocks(
     callback: (blockNumber: number) => void,
     chainKey: string = 'mantleSepolia'
@@ -214,9 +198,7 @@ export function watchBlocks(
     };
 }
 
-/**
- * Get transaction receipt
- */
+
 export async function getTransactionReceipt(
     txHash: string,
     chainKey: string = 'mantleSepolia'
@@ -225,9 +207,7 @@ export async function getTransactionReceipt(
     return provider.getTransactionReceipt(txHash);
 }
 
-/**
- * Wait for transaction confirmation
- */
+
 export async function waitForTransaction(
     txHash: string,
     chainKey: string = 'mantleSepolia',
@@ -237,32 +217,24 @@ export async function waitForTransaction(
     return provider.waitForTransaction(txHash, confirmations);
 }
 
-/**
- * Check if an address is valid
- */
+
 export function isValidAddress(address: string): boolean {
     return ethers.isAddress(address);
 }
 
-/**
- * Format address for display
- */
+
 export function formatAddress(address: string, chars: number = 4): string {
     if (!address) return '';
     return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
 }
 
-/**
- * Format balance with proper decimals
- */
+
 export function formatBalance(balance: string | number, decimals: number = 4): string {
     const num = typeof balance === 'string' ? parseFloat(balance) : balance;
     return num.toFixed(decimals);
 }
 
-/**
- * Get explorer URL for address or transaction
- */
+
 export function getExplorerUrl(
     hashOrAddress: string,
     type: 'address' | 'tx' = 'address',

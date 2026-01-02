@@ -27,7 +27,7 @@ export const FlashLoanQuote: React.FC<FlashLoanQuoteProps> = ({ quote }) => {
       <h3 className="text-lg font-bold text-white mb-4">Flash Loan Quote</h3>
       
       <div className="space-y-4">
-        {/* Risk Level */}
+        {}
         <div className="flex justify-between items-center py-2 border-b border-gray-700">
           <span className="text-gray-400">Risk Level</span>
           <span className={`font-medium ${
@@ -39,25 +39,25 @@ export const FlashLoanQuote: React.FC<FlashLoanQuoteProps> = ({ quote }) => {
           </span>
         </div>
 
-        {/* Fee */}
+        {}
         <div className="flex justify-between items-center py-2 border-b border-gray-700">
           <span className="text-gray-400">Flash Loan Fee</span>
           <span className="text-white">{(quote.feeBps / 100).toFixed(2)}%</span>
         </div>
 
-        {/* Gas Estimate */}
+        {}
         <div className="flex justify-between items-center py-2 border-b border-gray-700">
           <span className="text-gray-400">Estimated Gas</span>
           <span className="text-white">{parseInt(quote.estimatedGas).toLocaleString()} units</span>
         </div>
 
-        {/* Gas Cost */}
+        {}
         <div className="flex justify-between items-center py-2 border-b border-gray-700">
           <span className="text-gray-400">Estimated Gas Cost</span>
           <span className="text-white">{formatGasCost(quote.estimatedGasCost)} ETH</span>
         </div>
 
-        {/* Assets Breakdown */}
+        {}
         <div className="pt-4">
           <h4 className="font-medium text-white mb-3">Assets Breakdown</h4>
           <div className="space-y-3">
@@ -86,7 +86,7 @@ export const FlashLoanQuote: React.FC<FlashLoanQuoteProps> = ({ quote }) => {
           </div>
         </div>
 
-        {/* Total */}
+        {}
         <div className="pt-4 border-t border-gray-700">
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Total Fees</span>

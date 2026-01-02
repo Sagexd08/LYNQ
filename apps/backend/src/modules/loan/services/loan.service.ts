@@ -1,24 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef, Logger } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
-import { Loan, LoanStatus } from '../entities/loan.entity';
+import { Loan, LoanStatus } from '../../../common/types/database.types';
 import { CreateLoanDto } from '../dto/create-loan.dto';
 import { RepayLoanDto } from '../dto/repay-loan.dto';
 import { UserService } from '../../user/services/user.service';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { TelegramService } from '../../telegram/services/telegram.service';
-import { MLService } from '../../ml/ml.service';
+import { RiskScoringService } from '../../risk-scoring/risk-scoring.service';
+import { LoanEligibilityService } from './loan-eligibility.service';
 
 @Injectable()
-@Injectable()
 export class LoanService {
+  private readonly logger = new Logger(LoanService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly telegramService: TelegramService,
     private readonly supabaseService: SupabaseService,
-    @Inject(forwardRef(() => MLService))
-    private readonly mlService: MLService,
+    @Inject(forwardRef(() => RiskScoringService))
+    private readonly riskScoringService: RiskScoringService,
+    private readonly loanEligibilityService: LoanEligibilityService,
   ) { }
 
   private get supabase() {
@@ -37,7 +40,7 @@ export class LoanService {
       (1 + parseFloat(interestRate) / 100)
     ).toFixed(8);
 
-    const loanData = {
+    const loanData: Partial<Loan> = {
       userId,
       amount: createLoanDto.amount,
       outstandingAmount,
@@ -50,13 +53,23 @@ export class LoanService {
       dueDate,
       status: createLoanDto.transactionHash ? LoanStatus.ACTIVE : LoanStatus.PENDING,
       transactionHash: createLoanDto.transactionHash,
-      metadata: createLoanDto.onChainId ? { onChainId: createLoanDto.onChainId } : undefined,
+      metadata: createLoanDto.onChainId ? { onChainId: createLoanDto.onChainId } : {},
     };
+
+    const eligibilityCheck = await this.loanEligibilityService.check(userId, parseFloat(createLoanDto.amount));
+    if (!eligibilityCheck.eligible) {
+      throw new BadRequestException(eligibilityCheck.message);
+    }
 
     const eligibility = await this.checkEligibility(userId, parseFloat(createLoanDto.amount)).catch(() => ({ eligible: false, flags: ['CHECK_FAILED'] }));
 
     if (!eligibility.eligible) {
-      loanData.metadata = { ...(loanData.metadata || {}), riskFlags: ['MANUAL_REVIEW_REQUIRED', ...eligibility.flags] } as any;
+      if (!eligibility.eligible) {
+        loanData.metadata = {
+          ...(loanData.metadata || {}),
+          riskFlags: ['MANUAL_REVIEW_REQUIRED', ...eligibility.flags]
+        };
+      }
     }
 
     const { data: savedLoan, error } = await this.supabase
@@ -69,7 +82,7 @@ export class LoanService {
       throw new Error(`Failed to create loan: ${error?.message}`);
     }
 
-    // Send Telegram notification
+    
     await this.telegramService.notifyLoanCreated(userId, savedLoan);
 
     return savedLoan as Loan;
@@ -86,24 +99,49 @@ export class LoanService {
       throw new NotFoundException('Loan not found');
     }
 
-    // Transform user data structure if necessary, depending on how `user:users(*)` returns it.
-    // Supabase returns nested object for relations.
+    
+    
     return data as Loan;
   }
 
-  async findByUser(userId: string, status?: string): Promise<Loan[]> {
+  async findByUser(userId: string, status?: string, page: number = 1, limit: number = 20): Promise<{ data: Loan[]; count: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
     let query = this.supabase
       .from('loans')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('userId', userId)
-      .order('createdAt', { ascending: false });
+      .order('createdAt', { ascending: false })
+      .range(from, to);
 
     if (status) {
       query = query.eq('status', status);
     }
 
-    const { data, error } = await query;
-    if (error) return [];
+    const { data, error, count } = await query;
+
+    if (error) {
+      this.logger.error(`Failed to fetch user loans: ${error.message}`);
+      throw new Error(`Failed to fetch loans: ${error.message}`);
+    }
+
+    return { data: data as Loan[], count: count || 0 };
+  }
+
+  
+  async findAllByUser(userId: string): Promise<Loan[]> {
+    const { data, error } = await this.supabase
+      .from('loans')
+      .select('*')
+      .eq('userId', userId)
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      this.logger.error(`Failed to fetch all user loans: ${error.message}`);
+      throw new Error(`Failed to fetch loans: ${error.message}`);
+    }
+
     return data as Loan[];
   }
 
@@ -147,7 +185,7 @@ export class LoanService {
       throw new Error('Failed to update loan repayment');
     }
 
-    // Send Telegram notification for full repayment
+    
     if (savedLoan.status === LoanStatus.REPAID) {
       await this.telegramService.notifyLoanRepaid(loan.userId, {
         ...savedLoan,
@@ -176,7 +214,7 @@ export class LoanService {
 
     if (error || !savedLoan) throw new Error('Liquidation update failed');
 
-    // Send Telegram notification for liquidation
+    
     await this.telegramService.notifyLoanLiquidated(loan.userId, savedLoan);
 
     return savedLoan as Loan;
@@ -305,23 +343,7 @@ export class LoanService {
 
   async checkEligibility(userId: string, amount: number): Promise<any> {
     const user = await this.userService.findById(userId);
-    const userLoans = await this.findByUser(userId);
-    const loans24h = userLoans.filter(l =>
-      (Date.now() - new Date(l.createdAt).getTime()) < 24 * 60 * 60 * 1000
-    ).length;
-
-    const amounts = userLoans.map(l => parseFloat(l.amount)).sort((a, b) => a - b);
-    const medianAmount = amounts.length > 0 ? amounts[Math.floor(amounts.length / 2)] : 0;
-
-    const fraudResult = this.mlService.runFraudDetection({
-      loanAmount: amount,
-      medianUserLoanAmt: medianAmount,
-      loans24h: loans24h,
-      accountAgeDays: Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 3600 * 24)),
-      isBlacklisted: false,
-      suspiciousPatterns: false,
-      reputationScore: user.reputationPoints,
-    });
+    const fraudResult = await this.riskScoringService.detectFraudRisk(userId, amount);
 
     if (fraudResult.recommendation === 'REJECT') {
       throw new BadRequestException(`Loan eligibility failed: ${fraudResult.flags.join(', ')}`);

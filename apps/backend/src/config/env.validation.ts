@@ -7,6 +7,7 @@ enum Environment {
     Test = 'test',
 }
 
+
 export class EnvironmentVariables {
     @IsEnum(Environment)
     @IsOptional()
@@ -75,6 +76,36 @@ export class EnvironmentVariables {
     @IsString()
     @IsOptional()
     SUPABASE_SERVICE_ROLE_KEY?: string;
+
+    
+    @IsString()
+    @IsOptional()
+    PRIVATE_KEY?: string;
+
+    @IsString()
+    @IsOptional()
+    FLASH_LOAN_OPERATOR_PRIVATE_KEY?: string;
+
+    @IsString()
+    @IsOptional()
+    RPC_URL?: string;
+
+    @IsNumber()
+    @IsOptional()
+    CHAIN_ID?: number;
+
+    @IsString()
+    @IsOptional()
+    CREDIT_SCORE_VERIFIER_ADDRESS?: string;
+
+    
+    @IsString()
+    @IsOptional()
+    JWT_SECRET?: string;
+
+    @IsString()
+    @IsOptional()
+    JWT_EXPIRATION?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
@@ -87,5 +118,37 @@ export function validate(config: Record<string, unknown>) {
     if (errors.length > 0) {
         throw new Error(errors.toString());
     }
+
+    
+    if (validatedConfig.NODE_ENV === Environment.Production) {
+        const sensitiveKeys = ['PRIVATE_KEY', 'FLASH_LOAN_OPERATOR_PRIVATE_KEY', 'JWT_SECRET', 'SUPABASE_SERVICE_ROLE_KEY'];
+        const missingSensitive: string[] = [];
+
+        for (const key of sensitiveKeys) {
+            if (!config[key]) {
+                missingSensitive.push(key);
+            }
+        }
+
+        if (missingSensitive.length > 0) {
+            console.warn('⚠️  SECURITY WARNING: Missing sensitive environment variables in production:');
+            console.warn(`   ${missingSensitive.join(', ')}`);
+            console.warn('   Application may not function correctly or securely.');
+        }
+
+        
+        if (config['JWT_SECRET'] === 'your-secret-key' || config['JWT_SECRET'] === 'secret') {
+            console.error('❌ CRITICAL: Using default JWT_SECRET in production! This is a severe security risk.');
+            throw new Error('Default JWT_SECRET not allowed in production');
+        }
+
+        
+        if (config['PRIVATE_KEY']) {
+            console.warn('⚠️  SECURITY WARNING: PRIVATE_KEY detected in environment variables.');
+            console.warn('   Consider using a secrets management service (AWS Secrets Manager, Vault, etc.)');
+            console.warn('   Never commit private keys to version control.');
+        }
+    }
+
     return validatedConfig;
 }

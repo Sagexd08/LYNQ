@@ -1,4 +1,4 @@
-/* Quiz Interface Styles */
+
 
 .quiz-interface {
   max-width: 900px;
@@ -54,7 +54,7 @@
   50% { opacity: 0.7; }
 }
 
-/* Progress Bar */
+
 .quiz-progress {
   margin-bottom: 2rem;
 }
@@ -81,7 +81,7 @@
   display: block;
 }
 
-/* Question Container */
+
 .question-container {
   margin-bottom: 2rem;
   animation: slideIn 0.3s ease;
@@ -125,7 +125,7 @@
   white-space: nowrap;
 }
 
-/* Options List */
+
 .options-list {
   display: flex;
   flex-direction: column;
@@ -166,7 +166,7 @@
   flex: 1;
 }
 
-/* Short Answer Input */
+
 .short-answer-input {
   width: 100%;
   padding: 1rem;
@@ -185,7 +185,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Navigation Buttons */
+
 .quiz-navigation {
   display: flex;
   justify-content: space-between;
@@ -241,7 +241,7 @@
   cursor: not-allowed;
 }
 
-/* Answer Indicators */
+
 .answer-indicators {
   display: flex;
   gap: 0.5rem;
@@ -283,7 +283,7 @@
   border-color: #667eea;
 }
 
-/* Quiz Results */
+
 .quiz-results {
   max-width: 900px;
   margin: 0 auto;
@@ -403,7 +403,7 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Answer Breakdown */
+
 .answer-breakdown {
   background: white;
   border-radius: 12px;
@@ -499,7 +499,7 @@
   padding-left: 1rem;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .quiz-interface {
     padding: 1rem;

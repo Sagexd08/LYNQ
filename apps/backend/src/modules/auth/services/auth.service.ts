@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { ethers } from 'ethers';
 import * as bcrypt from 'bcrypt';
-import { User, ReputationTier } from '../../user/entities/user.entity';
+import { User, ReputationTier } from '../../../common/types/database.types';
 import { UserService } from '../../user/services/user.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
@@ -61,16 +61,16 @@ export class AuthService {
         const payload = { sub: user.id, email: user.email };
         const access_token = this.jwtService.sign(payload);
 
-        // Remove password from response
-        const { password: _, ...result } = user as any;
+        
+        const { password: _pwd, ...result } = user;
         return { access_token, user: result };
     }
 
     async login(loginDto: LoginDto): Promise<{ access_token: string; user: any }> {
         const { email, password } = loginDto;
 
-        // We need password which is usually hidden, or we explicitly select it.
-        // In Supabase, usually you construct a query.
+        
+        
         const { data: userWithPassword, error } = await this.supabase
             .from('users')
             .select('*')
@@ -84,7 +84,7 @@ export class AuthService {
         const payload = { sub: userWithPassword.id, email: userWithPassword.email };
         const access_token = this.jwtService.sign(payload);
 
-        const { password: _, ...result } = userWithPassword as any;
+        const { password: _p, ...result } = userWithPassword;
 
         return { access_token, user: result };
     }
@@ -99,8 +99,8 @@ export class AuthService {
                 throw new UnauthorizedException('Invalid signature');
             }
 
-            // Use safe lookup suited for SQLite/Postgres hybrid
-            let user = await this.userService.findByWalletAddress(walletAddress);
+            
+            let user = await this.userService.findByWalletAddress(walletAddress, chain);
 
             if (!user) {
                 const newUser = {
@@ -125,7 +125,7 @@ export class AuthService {
             const payload = { sub: user.id, wallet: walletAddress };
             const access_token = this.jwtService.sign(payload);
 
-            const { password: _, ...result } = user as any;
+            const { password: _pwd, ...result } = user;
 
             return { access_token, user: result };
         } catch (error) {

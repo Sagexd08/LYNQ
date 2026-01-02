@@ -24,15 +24,15 @@ async function main() {
   await reputationPoints.waitForDeployment();
   console.log("ReputationPoints deployed to:", await reputationPoints.getAddress());
 
-  // Deploy MockToken for LiquidatorProtocol (if needed, or use existing)
-  // For testnet, we'll deploy a new MockToken to act as the stablecoin
+  
+  
   const MockToken = await ethers.getContractFactory("MockToken");
   const mockToken = await MockToken.deploy("Mock Stablecoin", "mUSD");
   await mockToken.waitForDeployment();
   console.log("MockToken (Stablecoin) deployed to:", await mockToken.getAddress());
 
   const LiquidatorProtocol = await ethers.getContractFactory("LiquidatorProtocol");
-  // Constructor args: _stablecoin, _treasury
+  
   const liquidatorProtocol = await LiquidatorProtocol.deploy(
     await mockToken.getAddress(),
     deployer.address
@@ -40,26 +40,26 @@ async function main() {
   await liquidatorProtocol.waitForDeployment();
   console.log("LiquidatorProtocol deployed to:", await liquidatorProtocol.getAddress());
 
-  // Deploy CreditScoreVerifier (trusted signer = deployer for testnet)
+  
   const CreditScoreVerifier = await ethers.getContractFactory("CreditScoreVerifier");
   const creditScoreVerifier = await CreditScoreVerifier.deploy(deployer.address);
   await creditScoreVerifier.waitForDeployment();
   console.log("CreditScoreVerifier deployed to:", await creditScoreVerifier.getAddress());
 
-  // Deploy SocialStaking (staking token = mock stablecoin for testnet)
+  
   const SocialStaking = await ethers.getContractFactory("SocialStaking");
   const socialStaking = await SocialStaking.deploy(await mockToken.getAddress());
   await socialStaking.waitForDeployment();
   console.log("SocialStaking deployed to:", await socialStaking.getAddress());
 
-  // Wire contracts
+  
   await (await loanCore.setCollateralVault(await collateralVault.getAddress())).wait();
   await (await loanCore.setReputationPoints(await reputationPoints.getAddress())).wait();
   await (await loanCore.setSocialStaking(await socialStaking.getAddress())).wait();
   await (await loanCore.setCreditScoreVerifier(await creditScoreVerifier.getAddress())).wait();
   await (await socialStaking.setLoanCore(await loanCore.getAddress())).wait();
 
-  // Allow LoanCore to award/record reputation
+  
   await (await reputationPoints.transferOwnership(await loanCore.getAddress())).wait();
 
   console.log("Contracts wired successfully");

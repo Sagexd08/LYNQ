@@ -96,20 +96,7 @@ export const validateEnv = (): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
 
-  /*
-  const requiredParticleVars = [
-    'PARTICLE_PROJECT_ID',
-    'PARTICLE_CLIENT_KEY', 
-    'PARTICLE_APP_ID'
-  ] as const;
   
-  for (const varName of requiredParticleVars) {
-    const value = ENV_CONFIG[varName];
-    if (!value || value.startsWith('your_particle_')) {
-      errors.push(`Missing or invalid ${varName}`);
-    }
-  }
-  */
 
 
   if (!['mainnet', 'testnet'].includes(ENV_CONFIG.DEFAULT_NETWORK)) {

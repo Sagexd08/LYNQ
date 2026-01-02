@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { AuditLog } from './entities/audit-log.entity';
+import { AuditLog } from '../../common/types/database.types';
 
-@Injectable()
 @Injectable()
 export class AuditService {
   constructor(private readonly supabaseService: SupabaseService) { }
@@ -19,8 +18,6 @@ export class AuditService {
       .single();
 
     if (error) {
-      // Audit log failure should ideally not break the main flow, or maybe it should.
-      // For now, logging error is safer.
       console.error('Audit log failed', error);
       return null;
     }

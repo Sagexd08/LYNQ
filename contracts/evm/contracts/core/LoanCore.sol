@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -26,14 +26,14 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
     mapping(uint256 => Loan) public loans;
     mapping(address => uint256[]) public userLoans;
-    mapping(address => address) public tokenPriceFeed; // Token address => Chainlink Price Feed address
+    mapping(address => address) public tokenPriceFeed; 
     uint256 public loanCounter;
     
     address public collateralVault;
     SocialStaking public socialStaking;
     CreditScoreVerifier public creditScoreVerifier;
     ReputationPoints public reputationPoints;
-    uint256 public constant LIQUIDATION_THRESHOLD = 120; // 120%
+    uint256 public constant LIQUIDATION_THRESHOLD = 120; 
 
     event LoanCreated(
         uint256 indexed loanId,
@@ -92,7 +92,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
     function getCollateralValue(address token, uint256 amount) public view returns (uint256) {
         uint256 price = getLatestPrice(token);
-        return (amount * price) / 1e8; // Assuming 8 decimals from Chainlink
+        return (amount * price) / 1e8; 
     }
 
     function createLoan(
@@ -161,7 +161,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.ACTIVE, "Loan not active");
         
-        // Check if loan is overdue OR collateral value has fallen below threshold
+        
         bool isOverdue = block.timestamp > loan.startTime + loan.duration;
         bool isUndercollateralized = false;
         
@@ -216,7 +216,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         require(loan.status == LoanStatus.ACTIVE, "Loan not active");
         require(address(creditScoreVerifier) != address(0), "Verifier not set");
 
-        // Verify signature
+        
         require(
             creditScoreVerifier.verifyRefinanceProposal(
                 msg.sender,
@@ -229,22 +229,22 @@ contract LoanCore is Ownable, ReentrancyGuard {
             "Invalid refinance signature"
         );
 
-        // Calculate accrued interest
+        
         uint256 timePassed = block.timestamp - loan.startTime;
         if (timePassed > loan.duration) timePassed = loan.duration;
         
         uint256 oldTotalInterest = (loan.amount * loan.interestRate) / 10000;
         uint256 accruedInterest = (oldTotalInterest * timePassed) / loan.duration;
         
-        // Capitalize interest into new principal
+        
         loan.amount += accruedInterest;
         
-        // Update terms
+        
         loan.interestRate = newInterestRate;
         loan.duration = newDuration;
         loan.startTime = block.timestamp;
         
-        // Recalculate outstanding amount
+        
         uint256 newTotalInterest = (loan.amount * newInterestRate) / 10000;
         loan.outstandingAmount = loan.amount + newTotalInterest;
         

@@ -30,7 +30,7 @@ export class TelegramService implements OnModuleInit {
     private readonly botToken: string;
     private isEnabled: boolean = false;
 
-    // In-memory storage for demo - use database in production
+    
     private readonly users: Map<string, TelegramUser> = new Map();
     private readonly walletToChatId: Map<string, string> = new Map();
 
@@ -56,23 +56,17 @@ export class TelegramService implements OnModuleInit {
         }
     }
 
-    /**
-     * Check if Telegram notifications are enabled
-     */
+    
     isNotificationsEnabled(): boolean {
         return this.isEnabled;
     }
 
-    /**
-     * Get bot information
-     */
+    
     async getMe(): Promise<TelegramApiResponse> {
         return this.apiRequest('getMe');
     }
 
-    /**
-     * Send a text message to a chat
-     */
+    
     async sendMessage(
         chatId: string,
         text: string,
@@ -95,9 +89,7 @@ export class TelegramService implements OnModuleInit {
         return this.apiRequest('sendMessage', payload);
     }
 
-    /**
-     * Send a notification based on type and data
-     */
+    
     async sendNotification(payload: NotificationPayload): Promise<boolean> {
         try {
             const chatId = payload.chatId || this.getChatIdByUserId(payload.userId);
@@ -106,7 +98,7 @@ export class TelegramService implements OnModuleInit {
                 return false;
             }
 
-            // Check user preferences
+            
             if (payload.userId) {
                 const user = this.users.get(payload.userId);
                 if (user && !this.shouldSendNotification(payload.type, user.preferences)) {
@@ -131,9 +123,7 @@ export class TelegramService implements OnModuleInit {
         }
     }
 
-    /**
-     * Send a notification to a wallet address
-     */
+    
     async notifyByWallet(
         walletAddress: string,
         type: NotificationType,
@@ -148,11 +138,9 @@ export class TelegramService implements OnModuleInit {
         return this.sendNotification({ type, chatId, data });
     }
 
-    // ============ CONVENIENCE METHODS ============
+    
 
-    /**
-     * Notify about loan creation
-     */
+    
     async notifyLoanCreated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_CREATED,
@@ -167,9 +155,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about loan approval
-     */
+    
     async notifyLoanApproved(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_APPROVED,
@@ -183,9 +169,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about loan activation
-     */
+    
     async notifyLoanActivated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_ACTIVATED,
@@ -201,9 +185,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about loan repayment
-     */
+    
     async notifyLoanRepaid(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_REPAID,
@@ -216,9 +198,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about loan liquidation
-     */
+    
     async notifyLoanLiquidated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_LIQUIDATED,
@@ -232,9 +212,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about health factor warning
-     */
+    
     async notifyHealthFactorWarning(userId: string, data: any): Promise<boolean> {
         const type = data.healthFactor < 1.2
             ? NotificationType.HEALTH_FACTOR_CRITICAL
@@ -253,9 +231,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about credit score update
-     */
+    
     async notifyCreditScoreUpdate(userId: string, data: any): Promise<boolean> {
         const type = data.newTier !== data.oldTier
             ? (data.newScore > data.oldScore
@@ -276,9 +252,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about vouch received
-     */
+    
     async notifyVouchReceived(userId: string, data: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.VOUCH_RECEIVED,
@@ -292,9 +266,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Notify about transaction confirmation
-     */
+    
     async notifyTransactionConfirmed(userId: string, data: any): Promise<boolean> {
         const type = data.type === 'deposit'
             ? NotificationType.DEPOSIT_CONFIRMED
@@ -313,9 +285,7 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    /**
-     * Send welcome message to new user
-     */
+    
     async sendWelcome(chatId: string): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.WELCOME,
@@ -324,11 +294,9 @@ export class TelegramService implements OnModuleInit {
         });
     }
 
-    // ============ USER MANAGEMENT ============
+    
 
-    /**
-     * Register a user for Telegram notifications
-     */
+    
     registerUser(
         userId: string,
         chatId: string,
@@ -352,9 +320,7 @@ export class TelegramService implements OnModuleInit {
         return user;
     }
 
-    /**
-     * Update user notification preferences
-     */
+    
     updatePreferences(userId: string, preferences: Partial<NotificationPreferences>): boolean {
         const user = this.users.get(userId);
         if (!user) return false;
@@ -364,9 +330,7 @@ export class TelegramService implements OnModuleInit {
         return true;
     }
 
-    /**
-     * Unregister a user from Telegram notifications
-     */
+    
     unregisterUser(userId: string): boolean {
         const user = this.users.get(userId);
         if (!user) return false;
@@ -376,14 +340,12 @@ export class TelegramService implements OnModuleInit {
         return true;
     }
 
-    /**
-     * Get user by ID
-     */
+    
     getUser(userId: string): TelegramUser | undefined {
         return this.users.get(userId);
     }
 
-    // ============ PRIVATE METHODS ============
+    
 
     private getChatIdByUserId(userId?: string): string | undefined {
         if (!userId) return undefined;
@@ -391,7 +353,7 @@ export class TelegramService implements OnModuleInit {
     }
 
     private shouldSendNotification(type: NotificationType, prefs: NotificationPreferences): boolean {
-        // Map notification types to preference keys
+        
         const prefMap: Partial<Record<NotificationType, keyof NotificationPreferences>> = {
             [NotificationType.LOAN_CREATED]: 'loanAlerts',
             [NotificationType.LOAN_APPROVED]: 'loanAlerts',
@@ -413,7 +375,7 @@ export class TelegramService implements OnModuleInit {
         };
 
         const prefKey = prefMap[type];
-        if (!prefKey) return true; // Allow unspecified notification types
+        if (!prefKey) return true; 
 
         return prefs[prefKey];
     }
@@ -444,23 +406,17 @@ export class TelegramService implements OnModuleInit {
         }
     }
 
-    /**
-     * Set webhook for receiving updates (optional - for bot commands)
-     */
+    
     async setWebhook(url: string): Promise<TelegramApiResponse> {
         return this.apiRequest('setWebhook', { url });
     }
 
-    /**
-     * Delete webhook
-     */
+    
     async deleteWebhook(): Promise<TelegramApiResponse> {
         return this.apiRequest('deleteWebhook');
     }
 
-    /**
-     * Get webhook info
-     */
+    
     async getWebhookInfo(): Promise<TelegramApiResponse> {
         return this.apiRequest('getWebhookInfo');
     }

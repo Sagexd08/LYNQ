@@ -31,7 +31,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Refinance State
+  
   const [refinanceLoading, setRefinanceLoading] = useState(false);
   const [refinanceOffer, setRefinanceOffer] = useState<RefinanceOffer | null>(null);
 
@@ -219,7 +219,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
 
 
 
-      {/* Refinance Section */}
+      {}
       {loanDetails && (
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
           <h3 className="text-lg font-semibold text-white">Refinance Options</h3>
@@ -258,7 +258,7 @@ const BigLoanCard: React.FC<BigLoanCardProps> = ({ loan }) => {
         </div>
       )}
 
-      {/* Error/Success */}
+      {}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
           {error}

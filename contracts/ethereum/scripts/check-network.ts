@@ -4,7 +4,7 @@ async function main() {
   console.log('🔍 Validating Network Connection...\n');
 
   try {
-    // Get network info
+    
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
     const network = await provider.getNetwork();
     console.log(`✅ Network: ${network.name}`);
@@ -12,7 +12,7 @@ async function main() {
     const rpcUrl = process.env.RPC_URL || 'Unknown';
     console.log(`✅ RPC URL: ${rpcUrl}\n`);
 
-    // Optional: check a specific account balance (no Hardhat runtime required)
+    
     const privateKey = process.env.PRIVATE_KEY;
     const signerAddressEnv = process.env.SIGNER_ADDRESS;
 

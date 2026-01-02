@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsBoolean, IsObject } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -9,6 +9,7 @@ export class UpdateUserDto {
 
     @ApiPropertyOptional()
     @IsOptional()
+    @IsObject()
     walletAddresses?: Record<string, string>;
 
     @ApiPropertyOptional()
@@ -18,5 +19,7 @@ export class UpdateUserDto {
 
     @ApiPropertyOptional()
     @IsOptional()
+    @IsObject()
     metadata?: Record<string, any>;
 }
+

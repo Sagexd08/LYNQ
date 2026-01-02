@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -93,7 +93,7 @@ const DashboardPage: React.FC = () => {
           animate="show"
           className="grid lg:grid-cols-12 gap-6"
         >
-          {/* Main Stats Row */}
+          {}
           <motion.div variants={item} className="lg:col-span-3">
             <MetricCard
               label="Net Position"
@@ -130,7 +130,7 @@ const DashboardPage: React.FC = () => {
             />
           </motion.div>
 
-          {/* Secondary Row: Risk & Intelligence */}
+          {}
           <motion.div variants={item} className="lg:col-span-4 h-full">
             <div className="h-full p-8 rounded-2xl bg-[#0F1115] border border-white/5 flex flex-col justify-between">
               <div>
@@ -193,7 +193,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Active Positions */}
+          {}
           <motion.div variants={item} className="lg:col-span-12 mt-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold font-heading">Active Command Positions</h3>

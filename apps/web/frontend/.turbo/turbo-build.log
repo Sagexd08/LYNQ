@@ -2,3 +2,8 @@
 > @lynq/frontend@1.0.0 build C:\Users\sohom\OneDrive\Desktop\Blockchain\LYNQ\apps\web\frontend
 > tsc && vite build
 
+src/App.tsx(17,40): error TS2307: Cannot find module './pages/ProtocolPage' or its corresponding type declarations.
+src/App.tsx(18,36): error TS2307: Cannot find module './pages/RiskPage' or its corresponding type declarations.
+src/App.tsx(19,42): error TS2307: Cannot find module './pages/GovernancePage' or its corresponding type declarations.
+src/App.tsx(21,26): error TS2307: Cannot find module './components/layout/PulseBar' or its corresponding type declarations.
+ ELIFECYCLE  Command failed with exit code 2.

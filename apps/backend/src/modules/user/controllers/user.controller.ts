@@ -26,8 +26,11 @@ export class UserController {
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get user by ID' })
     async getUserById(@Param('id') id: string): Promise<any> {
         return this.userService.findById(id);
     }
+
 }

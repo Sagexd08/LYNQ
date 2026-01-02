@@ -10,10 +10,10 @@ const FlashLoanDashboard: React.FC = () => {
   const address = useWalletStore((state) => state.address);
   const [activeTab, setActiveTab] = useState<'request' | 'history' | 'stats' | 'pool'>('request');
 
-  // Load user data when wallet changes
+  
   useEffect(() => {
     if (address) {
-      // Data will be loaded by individual components
+      
     }
   }, [address]);
 
@@ -26,7 +26,7 @@ const FlashLoanDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Tabs */}
+      {}
       <div className="border-b border-gray-700 mb-8">
         <nav className="-mb-px flex space-x-8">
           <button
@@ -72,7 +72,7 @@ const FlashLoanDashboard: React.FC = () => {
         </nav>
       </div>
 
-      {/* Tab Content */}
+      {}
       <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
         {activeTab === 'request' && (
           <div className="space-y-8">

@@ -1,8 +1,6 @@
-/**
- * Notification types for the Telegram bot
- */
+
 export enum NotificationType {
-    // Loan Events
+    
     LOAN_CREATED = 'LOAN_CREATED',
     LOAN_APPROVED = 'LOAN_APPROVED',
     LOAN_ACTIVATED = 'LOAN_ACTIVATED',
@@ -11,29 +9,29 @@ export enum NotificationType {
     LOAN_DUE_SOON = 'LOAN_DUE_SOON',
     LOAN_OVERDUE = 'LOAN_OVERDUE',
 
-    // Refinance Events
+    
     REFINANCE_AVAILABLE = 'REFINANCE_AVAILABLE',
     REFINANCE_COMPLETED = 'REFINANCE_COMPLETED',
 
-    // Health Factor Alerts
+    
     HEALTH_FACTOR_WARNING = 'HEALTH_FACTOR_WARNING',
     HEALTH_FACTOR_CRITICAL = 'HEALTH_FACTOR_CRITICAL',
     LIQUIDATION_RISK = 'LIQUIDATION_RISK',
 
-    // Credit Score Events
+    
     CREDIT_SCORE_UPDATED = 'CREDIT_SCORE_UPDATED',
     TIER_UPGRADED = 'TIER_UPGRADED',
     TIER_DOWNGRADED = 'TIER_DOWNGRADED',
 
-    // Social/Vouching Events
+    
     VOUCH_RECEIVED = 'VOUCH_RECEIVED',
     VOUCH_UTILIZED = 'VOUCH_UTILIZED',
 
-    // Transaction Events
+    
     DEPOSIT_CONFIRMED = 'DEPOSIT_CONFIRMED',
     WITHDRAWAL_CONFIRMED = 'WITHDRAWAL_CONFIRMED',
 
-    // System Events
+    
     WELCOME = 'WELCOME',
     DAILY_SUMMARY = 'DAILY_SUMMARY',
     PRICE_ALERT = 'PRICE_ALERT',

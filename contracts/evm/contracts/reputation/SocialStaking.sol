@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,9 +11,9 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         uint256 timestamp;
     }
 
-    // Loan ID => Staker => Stake
+    
     mapping(uint256 => mapping(address => Stake)) public stakes;
-    // Loan ID => Total Staked
+    
     mapping(uint256 => uint256) public totalStaked;
     
     address public loanCore;
@@ -40,7 +40,7 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         require(amount > 0, "Amount must be > 0");
         require(loanCore != address(0), "LoanCore not set");
         
-        // Transfer tokens to this contract
+        
         require(stakingToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         
         stakes[loanId][msg.sender].amount += amount;
@@ -54,26 +54,26 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         Stake storage userStake = stakes[loanId][msg.sender];
         require(userStake.amount > 0, "No stake found");
         
-        // In a real implementation, we would check with LoanCore if the loan is repaid
-        // For now, we rely on LoanCore calling unlock/slash, or we can query LoanCore
-        // But to keep it simple: Users can only unstake if the loan is REPAID.
-        // We need an interface for LoanCore to check status.
         
-        // However, to prevent reentrancy loops or complex dependencies, 
-        // we will let LoanCore push the state change or we just allow unstake 
-        // if the loan is not active? 
         
-        // Better approach: 
-        // 1. LoanCore calls `unlock(loanId)` when loan is repaid. This sets a flag in SocialStaking.
-        // 2. LoanCore calls `slash(loanId)` when loan is liquidated. This sets a flag.
         
-        // Let's add state for loan status in this contract to track it locally
-        // or just trust LoanCore calls.
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
-    // Loan ID => bool isRepaid
+    
     mapping(uint256 => bool) public loanRepaid;
-    // Loan ID => bool isDefaulted
+    
     mapping(uint256 => bool) public loanDefaulted;
 
     function notifyRepayment(uint256 loanId) external onlyLoanCore {
@@ -84,9 +84,9 @@ contract SocialStaking is Ownable, ReentrancyGuard {
         loanDefaulted[loanId] = true;
         uint256 amountToSlash = totalStaked[loanId];
         if (amountToSlash > 0) {
-            // Burn or send to treasury
-            // For now, let's just keep them in the contract (effectively slashed for users)
-            // or transfer to owner/treasury
+            
+            
+            
             require(stakingToken.transfer(owner(), amountToSlash), "Transfer failed");
             emit Slashed(loanId, amountToSlash);
         }

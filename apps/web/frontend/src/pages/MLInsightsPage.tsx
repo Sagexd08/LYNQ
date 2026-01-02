@@ -22,7 +22,7 @@ const MLInsightsPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
+                {}
                 <div className="mb-12">
                     <div className="flex items-center gap-2 mb-2">
                         <Brain className="w-5 h-5 text-premium-violet" />
@@ -41,7 +41,7 @@ const MLInsightsPage: React.FC = () => {
                     animate="show"
                     className="grid lg:grid-cols-12 gap-6"
                 >
-                    {/* Section 1: Credit Score Breakdown (Radial Weights) */}
+                    {}
                     <motion.div variants={item} className="lg:col-span-4 h-full">
                         <div className="h-full p-8 rounded-2xl bg-[#0F1115] border border-white/5">
                             <div className="flex justify-between items-center mb-10">
@@ -78,7 +78,7 @@ const MLInsightsPage: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Section 2: Ensemble Model Agreement (Bar Chart) */}
+                    {}
                     <motion.div variants={item} className="lg:col-span-8">
                         <div className="p-8 rounded-2xl bg-[#0F1115] border border-white/5 h-full">
                             <div className="flex justify-between items-center mb-8">
@@ -129,7 +129,7 @@ const MLInsightsPage: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Section 3: Anomaly Timeline */}
+                    {}
                     <motion.div variants={item} className="lg:col-span-12">
                         <div className="p-8 rounded-2xl bg-[#0F1115] border border-white/5">
                             <div className="flex justify-between items-center mb-8">
@@ -169,7 +169,7 @@ const MLInsightsPage: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Section 4: Forecast Confidence Bands */}
+                    {}
                     <motion.div variants={item} className="lg:col-span-12">
                         <div className="p-8 rounded-2xl bg-gradient-to-r from-neon-cyan/5 to-transparent border border-white/5 overflow-hidden relative">
                             <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center">
@@ -192,12 +192,12 @@ const MLInsightsPage: React.FC = () => {
                                                 <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.05" />
                                             </linearGradient>
                                         </defs>
-                                        {/* Confidence Band */}
+                                        {}
                                         <path
                                             d="M0 75 Q 100 20, 200 80 T 400 40 T 600 90 T 800 50 L 800 120 Q 600 150, 400 100 T 200 140 T 0 110 Z"
                                             fill="url(#bandGradient)"
                                         />
-                                        {/* Center Line */}
+                                        {}
                                         <path
                                             d="M0 92 Q 100 37, 200 97 T 400 57 T 600 107 T 800 67"
                                             fill="none"

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { Star, Shield, Crown, Gem, Award, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
 
-// Tier configuration with enhanced styling
+
 const TIERS = {
     bronze: {
         name: 'Bronze',
@@ -77,7 +77,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
     const TierIcon = tierData.icon;
     const scoreChange = previousScore ? score - previousScore : 0;
 
-    // Size configurations
+    
     const sizeConfig = {
         sm: { ring: 140, stroke: 8, fontSize: '2rem', iconSize: 16 },
         md: { ring: 180, stroke: 10, fontSize: '2.5rem', iconSize: 20 },
@@ -89,7 +89,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
     const circumference = 2 * Math.PI * radius;
     const percentage = Math.min(score / 1000, 1);
 
-    // Animated score value
+    
     const springScore = useSpring(0, { stiffness: 50, damping: 20 });
     const displayScore = useTransform(springScore, (val) => Math.round(val));
     const [animatedScore, setAnimatedScore] = useState(0);
@@ -106,12 +106,12 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
 
     return (
         <div className="relative flex flex-col items-center">
-            {/* Main Ring Container */}
+            {}
             <div
                 className="relative"
                 style={{ width: config.ring, height: config.ring }}
             >
-                {/* Outer Glow Layer */}
+                {}
                 <div
                     className="absolute inset-0 rounded-full blur-2xl opacity-60"
                     style={{
@@ -120,7 +120,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                     }}
                 />
 
-                {/* Decorative outer ring */}
+                {}
                 <div
                     className="absolute inset-0 rounded-full"
                     style={{
@@ -129,13 +129,13 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                     }}
                 />
 
-                {/* SVG Ring */}
+                {}
                 <svg
                     width={config.ring}
                     height={config.ring}
                     className="relative z-10 transform -rotate-90"
                 >
-                    {/* Background Ring */}
+                    {}
                     <circle
                         cx={config.ring / 2}
                         cy={config.ring / 2}
@@ -145,7 +145,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                         strokeWidth={config.stroke}
                     />
 
-                    {/* Gradient Definition */}
+                    {}
                     <defs>
                         <linearGradient id={`scoreGradient-${tier}`} x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor={tierData.color} />
@@ -161,7 +161,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                         </filter>
                     </defs>
 
-                    {/* Progress Ring */}
+                    {}
                     <motion.circle
                         cx={config.ring / 2}
                         cy={config.ring / 2}
@@ -179,7 +179,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                         }}
                     />
 
-                    {/* End Cap Glow */}
+                    {}
                     <motion.circle
                         cx={config.ring / 2}
                         cy={config.ring / 2}
@@ -199,9 +199,9 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                     />
                 </svg>
 
-                {/* Center Content */}
+                {}
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                    {/* Score Value */}
+                    {}
                     <motion.div
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -222,7 +222,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                 </div>
             </div>
 
-            {/* Tier Badge */}
+            {}
             <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -250,7 +250,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
                 </div>
             </motion.div>
 
-            {/* Score Change Indicator */}
+            {}
             {scoreChange !== 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -273,7 +273,7 @@ export const CreditScoreDisplay: React.FC<CreditScoreDisplayProps> = ({
     );
 };
 
-// Enhanced Tier Progress Component
+
 interface TierProgressProps {
     currentTier: TierKey;
     currentScore: number;
@@ -289,7 +289,7 @@ export const TierProgress: React.FC<TierProgressProps> = ({
     const nextTierData = nextTier ? TIERS[nextTier] : null;
     const currentTierData = TIERS[currentTier];
 
-    // Calculate progress to next tier
+    
     const pointsToNext = nextTierData ? nextTierData.minScore - currentScore : 0;
     const tierRange = nextTierData
         ? nextTierData.minScore - currentTierData.minScore
@@ -300,7 +300,7 @@ export const TierProgress: React.FC<TierProgressProps> = ({
 
     return (
         <div className="w-full space-y-4">
-            {/* Progress Bar */}
+            {}
             <div className="relative">
                 <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                     <motion.div
@@ -316,7 +316,7 @@ export const TierProgress: React.FC<TierProgressProps> = ({
                 </div>
             </div>
 
-            {/* Tier Icons */}
+            {}
             <div className="flex justify-between items-center px-2">
                 {tierOrder.map((tierKey, index) => {
                     const tier = TIERS[tierKey];
@@ -369,7 +369,7 @@ export const TierProgress: React.FC<TierProgressProps> = ({
                 })}
             </div>
 
-            {/* Points to next tier */}
+            {}
             {nextTier && pointsToNext > 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}

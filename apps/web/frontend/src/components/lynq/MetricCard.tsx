@@ -41,7 +41,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ label, value, subValue, 
                 </div>
             )}
 
-            {/* Decorative gradient corners */}
+            {}
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-neon-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-tr-2xl" />
         </div>
     );

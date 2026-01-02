@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
-import { User, ReputationTier } from '../entities/user.entity';
+import { User, ReputationTier } from '../../../common/types/database.types';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
@@ -39,8 +39,8 @@ export class UserService {
     }
 
     async findByWallet(chain: string, address: string): Promise<User | null> {
-        // Find user by wallet address on specific chain
-        // Since walletAddresses is a jsonb column, we use the arrow operator
+
+
         const { data, error } = await this.supabase
             .from('users')
             .select('*')
@@ -51,28 +51,25 @@ export class UserService {
         return data as User;
     }
 
-    async findByWalletAddress(address: string): Promise<User | null> {
-        // This is tricky with JSONB if we don't know the key. 
-        // We might need to select all and filter in memory if the schema is dynamic
-        // Or search specific known chains.
-        // For now, let's try a common heuristic or fetch all (inefficient but safe for small scale)
-        const { data: users, error } = await this.supabase
-            .from('users')
-            .select('*');
+    async findByWalletAddress(address: string, chain?: string): Promise<User | null> {
+        let query = this.supabase.from('users').select('*');
 
-        if (error || !users) return null;
+        if (chain) {
 
-        for (const user of users) {
-            const u = user as User;
-            if (u.walletAddresses) {
-                for (const chain in u.walletAddresses) {
-                    if (u.walletAddresses[chain]?.toLowerCase() === address.toLowerCase()) {
-                        return u;
-                    }
-                }
-            }
+            query = query.eq(`walletAddresses->>${chain}`, address);
+        } else {
+
+
+
+            const commonChains = ['evm', 'ethereum', 'polygon', 'arbitrum', 'optimism', 'base', 'bsc', 'avalanche', 'aptos', 'flow', 'mantle', 'mantleSepolia'];
+            const conditions = commonChains.map(c => `walletAddresses->>${c}.eq.${address}`).join(',');
+            query = query.or(conditions);
         }
-        return null;
+
+        const { data, error } = await query.maybeSingle();
+
+        if (error || !data) return null;
+        return data as User;
     }
 
     async createFromWallet(walletAddress: string): Promise<User> {
@@ -100,9 +97,12 @@ export class UserService {
     }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+
+        const { kycVerified, reputationPoints, reputationTier, id: _id, email, ...updateData } = updateUserDto as any;
+
         const { data, error } = await this.supabase
             .from('users')
-            .update(updateUserDto)
+            .update(updateData)
             .eq('id', id)
             .select()
             .single();
@@ -112,6 +112,7 @@ export class UserService {
         }
         return data as User;
     }
+
 
     async updateReputationPoints(userId: string, points: number): Promise<User> {
         const user = await this.findById(userId);

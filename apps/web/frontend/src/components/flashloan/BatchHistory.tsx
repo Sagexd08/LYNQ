@@ -7,10 +7,7 @@ interface BatchHistoryProps {
   refreshInterval?: number;
 }
 
-/**
- * Batch History Component
- * Displays user's multi-wallet flash loan batch execution history
- */
+
 export const BatchHistory: React.FC<BatchHistoryProps> = ({
   userAddress,
   refreshInterval = 30000,
@@ -23,7 +20,7 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
 
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
 
-  // Fetch batches on mount and set up refresh interval
+  
   useEffect(() => {
     fetchUserBatches(userAddress);
     const interval = setInterval(() => {
@@ -32,17 +29,13 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
     return () => clearInterval(interval);
   }, [userAddress, refreshInterval, fetchUserBatches]);
 
-  /**
-   * Format timestamp to readable format
-   */
+  
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
     return date.toLocaleString();
   };
 
-  /**
-   * Format amount to readable format
-   */
+  
   const formatAmount = (amount: string): string => {
     try {
       return ethers.formatEther(amount);
@@ -51,9 +44,7 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
     }
   };
 
-  /**
-   * Get status badge color
-   */
+  
   const getStatusColor = (success: boolean): string => {
     return success ? 'status-success' : 'status-failed';
   };
@@ -116,7 +107,7 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
                 </button>
               </div>
 
-              {/* Expanded Details */}
+              {}
               {expandedBatch === batch.batchId && (
                 <div className="batch-details">
                   <div className="detail-section">

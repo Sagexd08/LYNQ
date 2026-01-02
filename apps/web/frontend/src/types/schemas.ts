@@ -104,3 +104,8 @@ export type CoinType = z.infer<typeof CoinSchema>;
 export type TransactionResultType = z.infer<typeof TransactionResultSchema>;
 export type LoanSettingsType = z.infer<typeof LoanSettingsSchema>;
 
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  count: number;
+}

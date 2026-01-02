@@ -91,7 +91,7 @@ const LoansPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -105,7 +105,7 @@ const LoansPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Stats Row */}
+        {}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <MetricCard
             label="Active Operations"
@@ -134,7 +134,7 @@ const LoansPage: React.FC = () => {
           />
         </div>
 
-        {/* Search & Filters */}
+        {}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
           <div className="relative w-full md:max-w-sm group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
@@ -163,7 +163,7 @@ const LoansPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Loans Grid */}
+        {}
         <motion.div
           variants={container}
           initial="hidden"
@@ -244,7 +244,7 @@ const LoansPage: React.FC = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Empty State */}
+        {}
         {filteredLoans.length === 0 && (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <div className="w-20 h-20 rounded-full bg-[#0F1115] border border-dashed border-white/10 flex items-center justify-center mb-6">

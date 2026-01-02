@@ -169,7 +169,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       setTxHash(tx.hash);
       await tx.wait();
 
-      await fetchLoans(); // Refresh list
+      await fetchLoans(); 
 
       const amountDisplay = newLoanAmount + ' ETH';
       void TelegramService.notifyLoanGranted({
@@ -213,7 +213,7 @@ const LoanManagementSystem: React.FC<LoanManagementSystemProps> = () => {
       setTxHash(tx.hash);
       await tx.wait();
 
-      await fetchLoans(); // Refresh list
+      await fetchLoans(); 
 
       setRepayLoanId("");
       setRepayAmount("");

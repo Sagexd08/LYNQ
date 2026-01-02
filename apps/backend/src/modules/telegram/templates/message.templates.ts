@@ -7,10 +7,7 @@ import {
     TransactionNotificationData,
 } from '../types/notification.types';
 
-/**
- * Telegram Message Templates with rich formatting
- * Uses Telegram's MarkdownV2 formatting
- */
+
 
 const escapeMarkdown = (text: string): string => {
     return text.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
@@ -159,7 +156,7 @@ Your loan payment is *OVERDUE*\\!
 [Repay Immediately](https://lynq.finance/loans/${data.loanId})
 `,
 
-    // ============ HEALTH FACTOR TEMPLATES ============
+    
 
     [NotificationType.HEALTH_FACTOR_WARNING]: (data: HealthFactorNotificationData): string => `
 🟡 *Health Factor Warning*
@@ -208,7 +205,7 @@ Your position will be *LIQUIDATED* if health factor drops below 1\\.0\\!
 [Emergency Repay](https://lynq.finance/loans/${data.loanId})
 `,
 
-    // ============ CREDIT SCORE TEMPLATES ============
+    
 
     [NotificationType.CREDIT_SCORE_UPDATED]: (data: CreditScoreNotificationData): string => {
         const change = data.newScore - data.oldScore;
@@ -259,7 +256,7 @@ ${getTierEmoji(data.oldTier)} ${escapeMarkdown(data.oldTier)} → ${getTierEmoji
 [View Analytics](https://lynq.finance/analytics)
 `,
 
-    // ============ VOUCH TEMPLATES ============
+    
 
     [NotificationType.VOUCH_RECEIVED]: (data: VouchNotificationData): string => `
 🤝 *New Vouch Received\\!*
@@ -289,7 +286,7 @@ Your vouch has been used to back a loan\\.
 💡 _Your stake is securing this loan\\. You'll be notified of any status changes\\._
 `,
 
-    // ============ TRANSACTION TEMPLATES ============
+    
 
     [NotificationType.DEPOSIT_CONFIRMED]: (data: TransactionNotificationData): string => `
 💰 *Deposit Confirmed*
@@ -317,7 +314,7 @@ Your withdrawal has been successfully processed\\.
 ✅ _Funds have been sent to your wallet\\._
 `,
 
-    // ============ REFINANCE TEMPLATES ============
+    
 
     [NotificationType.REFINANCE_AVAILABLE]: (data: LoanNotificationData): string => `
 💡 *Refinance Opportunity Available\\!*
@@ -347,7 +344,7 @@ Your loan has been successfully refinanced\\.
 💰 _You're now saving on interest payments\\!_
 `,
 
-    // ============ SYSTEM TEMPLATES ============
+    
 
     [NotificationType.WELCOME]: (): string => `
 👋 *Welcome to LYNQ\\!*

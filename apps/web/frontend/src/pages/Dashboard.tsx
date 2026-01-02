@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
               <LazyPersonalDetails {...walletData} />
             </Suspense>
           </div>
-          {/* Transaction History */}
+          {}
           <Suspense fallback={<LoadingFallback minHeight="200px" />}>
             <LazyTransaction />
           </Suspense>

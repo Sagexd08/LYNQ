@@ -2,12 +2,13 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { LoanController } from './controllers/loan.controller';
 import { LoanService } from './services/loan.service';
-import { Loan } from './entities/loan.entity';
-import { Repayment } from './entities/repayment.entity';
+import { LoanEligibilityService } from './services/loan-eligibility.service';
+
+
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { TelegramModule } from '../telegram/telegram.module';
-import { MLModule } from '../ml/ml.module';
+import { RiskScoringModule } from '../risk-scoring/risk-scoring.module';
 
 @Module({
     imports: [
@@ -15,11 +16,11 @@ import { MLModule } from '../ml/ml.module';
         UserModule,
         AuthModule,
         TelegramModule,
-        forwardRef(() => MLModule),
+        forwardRef(() => RiskScoringModule),
     ],
     controllers: [LoanController],
-    providers: [LoanService],
-    exports: [LoanService],
+    providers: [LoanService, LoanEligibilityService],
+    exports: [LoanService, LoanEligibilityService],
 })
 export class LoanModule { }
 

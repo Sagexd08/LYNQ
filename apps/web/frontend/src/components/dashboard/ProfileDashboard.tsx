@@ -13,7 +13,7 @@ const ProfileDashboard: React.FC = () => {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        // TODO: Load profile from API
+        
         setTrustScore(75);
         setEthBalance(0);
         setError(null);

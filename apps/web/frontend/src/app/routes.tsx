@@ -4,7 +4,7 @@ import { LandingPage, MarketplacePage, DashboardPage, LoansPage, FlashLoanPage }
 import HealthIndicator from '../components/HealthIndicator';
 import { useWalletStore } from '../store/walletStore';
 
-// Loading fallback component
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -13,7 +13,7 @@ function PageLoader() {
   );
 }
 
-// Protected route wrapper
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const address = useWalletStore((state) => state.address);
   
@@ -25,7 +25,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppRoutes() {
-  // State removed as it was unused or handled internally by pages
+  
 
   return (
     <BrowserRouter>

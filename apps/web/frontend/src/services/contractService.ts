@@ -9,7 +9,7 @@ export class ContractService {
 
     constructor() {
 
-        // Default to mantleSepolia for now as per README
+        
         this.addresses = CONTRACT_ADDRESSES.mantleSepolia;
     }
 
@@ -26,11 +26,11 @@ export class ContractService {
             const signer = await this.getSigner();
             const userAddress = await signer.getAddress();
 
-            // 1. Check Allowance
+            
             const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
             const loanCoreAddress = this.addresses.LoanCore;
 
-            const parsedAmount = ethers.parseUnits(amount, 18); // Assuming 18 decimals for now
+            const parsedAmount = ethers.parseUnits(amount, 18); 
             const allowance = await (tokenContract as any).allowance(userAddress, loanCoreAddress);
 
             if (allowance < parsedAmount) {
@@ -40,7 +40,7 @@ export class ContractService {
                 toast.success('Token approval successful!', { id: 'approve' });
             }
 
-            // 2. Repay Loan
+            
             const loanCoreContract = new ethers.Contract(loanCoreAddress, LOAN_CORE_ABI, signer);
 
             toast.loading('Processing repayment...', { id: 'repay' });
@@ -84,7 +84,7 @@ export class ContractService {
             const userAddress = await signer.getAddress();
             const loanCoreAddress = this.addresses.LoanCore;
 
-            // 1. Approve Collateral
+            
             const collateralToken = new ethers.Contract(collateralTokenAddress, ERC20_ABI, signer);
             const parsedCollateral = ethers.parseUnits(collateralAmount, 18);
 
@@ -97,9 +97,9 @@ export class ContractService {
                 toast.success('Collateral approved!', { id: 'create_loan' });
             }
 
-            // 2. Create Loan
+            
             const loanCoreContract = new ethers.Contract(loanCoreAddress, LOAN_CORE_ABI, signer);
-            const parsedAmount = ethers.parseUnits(amount, 18); // Borrow amount
+            const parsedAmount = ethers.parseUnits(amount, 18); 
 
             toast.loading('Creating loan request...', { id: 'create_loan' });
             const tx = await (loanCoreContract as any).createLoan(parsedAmount, parsedCollateral, collateralTokenAddress);
@@ -108,7 +108,7 @@ export class ContractService {
             const receipt = await tx.wait();
             let loanId = null;
 
-            // Parse logs to find LoanCreated event
+            
             if (receipt && receipt.logs) {
                 for (const log of receipt.logs) {
                     try {
@@ -118,7 +118,7 @@ export class ContractService {
                             break;
                         }
                     } catch (e) {
-                        // Ignore parse errors for other events
+                        
                     }
                 }
             }
@@ -138,10 +138,10 @@ export class ContractService {
             const provider = getProvider('mantleSepolia');
             const loanCore = new ethers.Contract(this.addresses.LoanCore, LOAN_CORE_ABI, provider);
 
-            // Query LoanCreated events for this user
+            
             const filter = (loanCore as any).filters.LoanCreated(null, userAddress);
-            // Limit to last 10000 blocks or from deployment block if known. 
-            // For now, simple query (might be slow on mainnets, fine for testnet/local)
+            
+            
             const events = await loanCore.queryFilter(filter, -10000);
 
             const loans = await Promise.all(events.map(async (event: any) => {
@@ -151,13 +151,13 @@ export class ContractService {
 
                     return {
                         id: loanId.toString(),
-                        amount: ethers.formatUnits(loanData.amount || 0, 18), // Assume 18 decimals
+                        amount: ethers.formatUnits(loanData.amount || 0, 18), 
                         collateral: ethers.formatUnits(loanData.collateral || 0, 18),
-                        interestRate: Number(loanData.interestRate || 0) / 100, // Basis points? Assume % * 100
+                        interestRate: Number(loanData.interestRate || 0) / 100, 
                         dueDate: new Date(Number(loanData.dueDate) * 1000).toLocaleDateString(),
                         status: this.mapStatus(Number(loanData.status)),
                         rawStatus: Number(loanData.status),
-                        assetAddress: CONTRACT_ADDRESSES.mantleSepolia.StableToken, // TODO: Store/fetch distinct asset if possible
+                        assetAddress: CONTRACT_ADDRESSES.mantleSepolia.StableToken, 
                     };
                 } catch (e) {
                     console.error(`Error fetching loan ${event.args[0]}:`, e);

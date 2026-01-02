@@ -21,9 +21,9 @@ export class HealthController {
         let dbLatencyMs = 0;
         try {
             const { error } = await this.supabase.from('users').select('id').limit(1).single();
-            // It's okay if no users exist, as long as it's not a connection error. 
-            // single() returns error 'BGJSON' if 0 rows, which is distinct from network error.
-            if (error && error.code !== 'PGRST116') { // PGRST116 is JSON object not found (no rows)
+            
+            
+            if (error && error.code !== 'PGRST116') { 
                 throw error;
             }
             dbLatencyMs = Date.now() - started;

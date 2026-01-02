@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -6,13 +6,10 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/**
- * @title LiquidatorProtocol
- * @dev Advanced liquidation system with Dutch auction and competitive bidding
- */
+
 contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     
-    // ============ Enums ============
+    
     enum LiquidatorStatus {
         INACTIVE,
         ACTIVE,
@@ -48,7 +45,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         LIQUIDATION_FAILED
     }
 
-    // ============ Structs ============
+    
     
     struct Liquidator {
         address wallet;
@@ -105,16 +102,16 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         uint256 timestamp;
     }
 
-    // ============ Constants ============
+    
     
     uint256 private constant AUCTION_DURATION_HOURS = 24;
-    uint256 private constant MIN_LIQUIDATOR_BOND = 10 ether; // 10 tokens minimum
+    uint256 private constant MIN_LIQUIDATOR_BOND = 10 ether; 
     uint256 private constant MAX_SUSPENSION_SCORE = 100;
     uint256 private constant SUSPENSION_THRESHOLD = 70;
     uint256 private constant MAX_FAILURES_BEFORE_SUSPENSION = 3;
-    uint256 private constant PLATFORM_FEE_PERCENTAGE = 250; // 2.5% (in basis points)
+    uint256 private constant PLATFORM_FEE_PERCENTAGE = 250; 
 
-    // ============ State Variables ============
+    
     
     mapping(address => Liquidator) public liquidators;
     mapping(uint256 => LiquidationAuction) public auctions;
@@ -131,11 +128,11 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     address public platformTreasury;
     IERC20 public stablecoin;
 
-    // Auction configuration
-    // Stored as basis points per hour (e.g., 200 = 2% per hour)
+    
+    
     uint256 public defaultPriceDecayBpsPerHour = 200;
 
-    // ============ Events ============
+    
     
     event LiquidatorRegistered(
         address indexed liquidator,
@@ -188,7 +185,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         uint256 timestamp
     );
 
-    // ============ Modifiers ============
+    
     
     modifier onlyActiveLiquidator() {
         require(
@@ -211,7 +208,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         _;
     }
 
-    // ============ Constructor ============
+    
     
     constructor(address _stablecoin, address _treasury) Ownable(msg.sender) {
         require(_stablecoin != address(0), "Invalid stablecoin address");
@@ -222,16 +219,14 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
     }
 
     function setDefaultPriceDecayBpsPerHour(uint256 bpsPerHour) external onlyOwner {
-        // sanity bounds: (0, 5000] => at most 50% decay per hour
+        
         require(bpsPerHour > 0 && bpsPerHour <= 5000, "Invalid decay");
         defaultPriceDecayBpsPerHour = bpsPerHour;
     }
 
-    // ============ Liquidator Management ============
     
-    /**
-     * Register a new liquidator
-     */
+    
+    
     function registerLiquidator(uint256 bondAmount) external nonReentrant {
         require(
             liquidators[msg.sender].wallet == address(0),
@@ -239,7 +234,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         );
         require(bondAmount >= MIN_LIQUIDATOR_BOND, "Bond amount too low");
 
-        // Transfer bond from liquidator
+        
         require(
             stablecoin.transferFrom(msg.sender, address(this), bondAmount),
             "Bond transfer failed"
@@ -264,9 +259,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         emit LiquidatorRegistered(msg.sender, bondAmount, block.timestamp);
     }
 
-    /**
-     * Deactivate a liquidator (enables bond withdrawal)
-     */
+    
     function deactivateLiquidator(address liquidator)
         external
         onlyOwner
@@ -277,9 +270,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         liq.status = LiquidatorStatus.DEACTIVATED;
     }
 
-    /**
-     * Suspend a liquidator for poor performance
-     */
+    
     function suspendLiquidator(address liquidator, string memory reason)
         external
         onlyOwner
@@ -297,9 +288,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         );
     }
 
-    /**
-     * Reinstate a suspended liquidator
-     */
+    
     function reinstateLiquidator(address liquidator)
         external
         onlyOwner
@@ -313,9 +302,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         liq.failureCount = 0;
     }
 
-    /**
-     * Get liquidator statistics
-     */
+    
     function getLiquidatorStats(address liquidator)
         external
         view
@@ -325,11 +312,9 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return liquidators[liquidator];
     }
 
-    // ============ Auction Management ============
     
-    /**
-     * Create a new liquidation auction
-     */
+    
+    
     function createAuction(
         uint256 loanId,
         address collateralToken,
@@ -380,9 +365,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return auctionId;
     }
 
-    /**
-     * Calculate current price with Dutch auction decay
-     */
+    
     function calculateCurrentPrice(uint256 auctionId)
         public
         view
@@ -397,13 +380,13 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
 
         uint256 hoursElapsed = (block.timestamp - auction.auctionStartTime) / 1 hours;
         
-        // Prevent underflow
+        
         if (hoursElapsed >= AUCTION_DURATION_HOURS) {
             return auction.minimumPrice;
         }
 
-        // Calculate decay (bps per hour): startPrice * (1 - bps/10000)^hoursElapsed
-        // e.g. 200 bps => 2% per hour
+        
+        
         require(auction.priceDecayPercentPerHour > 0 && auction.priceDecayPercentPerHour <= 9900, "Invalid decay");
         uint256 decayFactorBps = 10000 - auction.priceDecayPercentPerHour;
         uint256 decayedPrice = auction.startPrice;
@@ -412,7 +395,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             decayedPrice = (decayedPrice * decayFactorBps) / 10000;
         }
 
-        // Price should not go below minimum
+        
         if (decayedPrice < auction.minimumPrice) {
             return auction.minimumPrice;
         }
@@ -420,9 +403,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return decayedPrice;
     }
 
-    /**
-     * Activate an auction to start receiving bids
-     */
+    
     function activateAuction(uint256 auctionId)
         external
         onlyOwner
@@ -445,9 +426,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         );
     }
 
-    /**
-     * Place a bid on an active auction
-     */
+    
     function placeBid(
         uint256 auctionId,
         uint256 bidAmount
@@ -464,7 +443,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             "Bid must be at least current price"
         );
 
-        // Check for existing bid from this liquidator
+        
         bool hasExistingBid = false;
         uint256 existingBidIdValue = 0;
 
@@ -479,7 +458,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         }
 
         if (hasExistingBid) {
-            // Update existing bid if higher
+            
             LiquidatorBid storage existingBid = bids[existingBidIdValue];
             require(
                 bidAmount > existingBid.bidAmount,
@@ -491,7 +470,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             return existingBidIdValue;
         }
 
-        // Create new bid
+        
         uint256 newBidId = ++_bidIdCounter;
         
         LiquidatorBid memory bid = LiquidatorBid({
@@ -509,7 +488,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         bids[newBidId] = bid;
         auctionBids[auctionId].push(newBidId);
 
-        // Update current price if this is the highest bid
+        
         if (bidAmount > auction.currentPrice) {
             auction.currentPrice = bidAmount;
         }
@@ -519,9 +498,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return newBidId;
     }
 
-    /**
-     * Execute an auction after bidding period ends
-     */
+    
     function executeAuction(uint256 auctionId, bytes32 transactionHash)
         external
         onlyOwner
@@ -536,7 +513,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             "Auction still ongoing"
         );
 
-        // Find winning bid
+        
         uint256 winningBidId = 0;
         uint256 winningBidAmount = 0;
 
@@ -551,7 +528,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         }
 
         if (winningBidId == 0) {
-            // No bids received
+            
             auction.status = AuctionStatus.FAILED;
             emit LiquidationFailed(auctionId, "No valid bids received", block.timestamp);
             return;
@@ -559,7 +536,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
 
         LiquidatorBid storage winningBid = bids[winningBidId];
 
-        // Validate bid meets reserve price
+        
         if (winningBidAmount < auction.minimumPrice) {
             auction.status = AuctionStatus.FAILED;
             emit LiquidationFailed(
@@ -570,7 +547,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             return;
         }
 
-        // Execute auction
+        
         auction.status = AuctionStatus.SOLD;
         auction.winningBidId = winningBidId;
         auction.winnerAddress = winningBid.liquidatorAddress;
@@ -581,17 +558,17 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         winningBid.executedAt = block.timestamp;
         winningBid.transactionHash = transactionHash;
 
-        // Update liquidator stats
+        
         Liquidator storage liquidator = liquidators[winningBid.liquidatorAddress];
         liquidator.successfulLiquidations++;
         liquidator.totalLiquidations++;
         liquidator.totalVolumeProcessed += winningBidAmount;
         liquidator.failureCount = 0;
 
-        // Calculate platform fee
+        
         uint256 platformFee = (winningBidAmount * auction.platformFeePercentage) / 10000;
 
-        // Ensure winner can actually pay (avoid reverting the whole settlement)
+        
         uint256 allowance = stablecoin.allowance(winningBid.liquidatorAddress, address(this));
         uint256 balance = stablecoin.balanceOf(winningBid.liquidatorAddress);
         if (allowance < winningBidAmount || balance < winningBidAmount) {
@@ -611,13 +588,13 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
             return;
         }
 
-        // Transfer winning bid amount
+        
         require(
             stablecoin.transferFrom(winningBid.liquidatorAddress, address(this), winningBidAmount),
             "Bid transfer failed"
         );
 
-        // Transfer platform fee to treasury
+        
         if (platformFee > 0) {
             require(
                 stablecoin.transfer(platformTreasury, platformFee),
@@ -634,9 +611,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         );
     }
 
-    /**
-     * Mark liquidation as failed and penalize liquidator
-     */
+    
     function markLiquidationFailed(
         uint256 auctionId,
         address liquidator,
@@ -651,7 +626,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         liq.totalLiquidations++;
         liq.failureCount++;
         
-        // Increase suspension score
+        
         if (liq.failureCount >= MAX_FAILURES_BEFORE_SUSPENSION) {
             liq.suspensionScore = MAX_SUSPENSION_SCORE;
             liq.status = LiquidatorStatus.SUSPENDED;
@@ -662,9 +637,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         emit LiquidationFailed(auctionId, reason, block.timestamp);
     }
 
-    /**
-     * Get auction bids
-     */
+    
     function getAuctionBids(uint256 auctionId)
         external
         view
@@ -681,9 +654,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return bidList;
     }
 
-    /**
-     * Get active auctions
-     */
+    
     function getActiveAuctions() external view returns (LiquidationAuction[] memory) {
         uint256 activeCount = 0;
         
@@ -706,9 +677,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         return activeAuctions;
     }
 
-    /**
-     * Withdraw bond (only for inactive liquidators)
-     */
+    
     function withdrawBond() external nonReentrant {
         Liquidator storage liq = liquidators[msg.sender];
         require(liq.wallet != address(0), "Liquidator not found");
@@ -726,26 +695,20 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         );
     }
 
-    /**
-     * Set platform treasury address
-     */
+    
     function setPlatformTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "Invalid treasury address");
         platformTreasury = _treasury;
     }
 
-    /**
-     * Recover accidentally sent native funds (ETH/MNT)
-     */
+    
     function recoverStuckNative(address payable to, uint256 amount) external onlyOwner {
         require(to != address(0), "Invalid recipient");
         (bool ok, ) = to.call{value: amount}('');
         require(ok, "Native transfer failed");
     }
 
-    /**
-     * Emergency pause/unpause
-     */
+    
     function pause() external onlyOwner {
         _pause();
     }
@@ -754,9 +717,7 @@ contract LiquidatorProtocol is Ownable, ReentrancyGuard, Pausable {
         _unpause();
     }
 
-    /**
-     * Recover stuck funds
-     */
+    
     function recoverStuckTokens(address token, uint256 amount) external onlyOwner {
         require(IERC20(token).transfer(msg.sender, amount), "Recovery failed");
     }

@@ -6,7 +6,7 @@ afterEach(() => {
   cleanup();
 });
 
-// Mock window.ethereum
+
 Object.defineProperty(window, 'ethereum', {
   value: {
     isMetaMask: true,

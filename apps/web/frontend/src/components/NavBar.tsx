@@ -25,7 +25,7 @@ import { Button } from './ui/Button';
 import { useWalletStore } from '../store/walletStore';
 import { clearSavedWalletConnection } from './wallet/walletConfig';
 
-// Lazy load wallet modal
+
 const WalletConnectionModal = React.lazy(() => import('./wallet/WalletConnectionModal'));
 
 interface NavBarProps {
@@ -34,7 +34,7 @@ interface NavBarProps {
   onToggleNetwork?: () => void;
 }
 
-// Network options
+
 const networks = [
   { id: 'mantle', name: 'Mantle', shortName: 'MNT', chainId: '5000', isTestnet: false, color: '#00D395' },
   { id: 'mantleSepolia', name: 'Mantle Sepolia', shortName: 'tMNT', chainId: '5003', isTestnet: true, color: '#F7931A' },
@@ -55,7 +55,7 @@ const NavBar: React.FC<NavBarProps> = ({
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
 
-  // Get wallet state from store
+  
   const address = useWalletStore((state) => state.address);
   const balance = useWalletStore((state) => state.balance);
   const walletType = useWalletStore((state) => state.walletType);
@@ -128,15 +128,15 @@ const NavBar: React.FC<NavBarProps> = ({
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50">
-        {/* Blur Background with gradient line */}
+        {}
         <div className="absolute inset-0 bg-lynq-darker/90 backdrop-blur-2xl" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5" />
 
         <div className="relative max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-[72px]">
-            {/* Left Section: Logo + Navigation */}
+            {}
             <div className="flex items-center gap-10">
-              {/* Logo */}
+              {}
               <Link to="/" className="flex items-center gap-3 group">
                 <motion.div
                   className="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center group-hover:bg-neon-cyan transition-colors"
@@ -153,7 +153,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 </div>
               </Link>
 
-              {/* Desktop Navigation */}
+              {}
               <div className="hidden lg:flex items-center">
                 <div className="flex items-center bg-lynq-card/40 backdrop-blur-sm rounded-2xl p-1.5 border border-glass-border/50">
                   {navLinks.map((link) => {
@@ -187,15 +187,15 @@ const NavBar: React.FC<NavBarProps> = ({
               </div>
             </div>
 
-            {/* Right Section: Network + Notifications + Wallet */}
+            {}
             <div className="flex items-center gap-3">
-              {/* Live Status Indicator */}
+              {}
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
                 <Activity className="w-3.5 h-3.5 text-success animate-pulse" />
                 <span className="text-xs font-medium text-success">Live</span>
               </div>
 
-              {/* Network Selector */}
+              {}
               <div className="relative">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -262,7 +262,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 </AnimatePresence>
               </div>
 
-              {/* Notifications */}
+              {}
               <div className="relative">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -316,7 +316,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 </AnimatePresence>
               </div>
 
-              {/* Wallet / Profile */}
+              {}
               {isConnected ? (
                 <div className="relative">
                   <motion.button
@@ -344,7 +344,7 @@ const NavBar: React.FC<NavBarProps> = ({
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 mt-2 w-72 rounded-2xl bg-lynq-card/98 backdrop-blur-xl border border-glass-border shadow-2xl overflow-hidden"
                       >
-                        {/* Header */}
+                        {}
                         <div className="p-4 border-b border-glass-border/50 bg-gradient-to-r from-electric-blue/10 to-deep-purple/10">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-deep-purple flex items-center justify-center">
@@ -360,7 +360,7 @@ const NavBar: React.FC<NavBarProps> = ({
                           </div>
                         </div>
 
-                        {/* Actions */}
+                        {}
                         <div className="p-2">
                           <button
                             onClick={handleCopyAddress}
@@ -394,7 +394,7 @@ const NavBar: React.FC<NavBarProps> = ({
                           </Link>
                         </div>
 
-                        {/* Disconnect */}
+                        {}
                         <div className="p-2 border-t border-glass-border/50">
                           <button
                             onClick={handleDisconnect}
@@ -418,7 +418,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 </Button>
               )}
 
-              {/* Mobile Menu Button */}
+              {}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -436,7 +436,7 @@ const NavBar: React.FC<NavBarProps> = ({
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -447,7 +447,7 @@ const NavBar: React.FC<NavBarProps> = ({
           >
             <div className="bg-lynq-darker/98 backdrop-blur-xl border-b border-glass-border shadow-2xl">
               <div className="max-w-7xl mx-auto px-6 py-4">
-                {/* Mobile Nav Links */}
+                {}
                 <div className="space-y-1 mb-4">
                   {navLinks.map((link) => {
                     const isActive = location.pathname === link.to;
@@ -472,7 +472,7 @@ const NavBar: React.FC<NavBarProps> = ({
                   })}
                 </div>
 
-                {/* Mobile Network Selector */}
+                {}
                 <div className="pt-4 border-t border-glass-border/50">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 px-2">Network</p>
                   <div className="grid grid-cols-2 gap-2">
@@ -500,7 +500,7 @@ const NavBar: React.FC<NavBarProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Click outside to close dropdowns */}
+      {}
       {(profileMenuOpen || notificationsOpen || networkMenuOpen) && (
         <div
           className="fixed inset-0 z-40"
@@ -512,7 +512,7 @@ const NavBar: React.FC<NavBarProps> = ({
         />
       )}
 
-      {/* Wallet Connection Modal */}
+      {}
       {showWalletModal && (
         <Suspense fallback={
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

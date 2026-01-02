@@ -12,16 +12,13 @@ interface MultiWalletFlashLoanFormProps {
   onError?: (error: string) => void;
 }
 
-/**
- * Multi-Wallet Flash Loan Form Component
- * Allows users to execute flash loans distributed to multiple recipients
- */
+
 export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> = ({
   userAddress,
   onSuccess,
   onError,
 }) => {
-  // Form state
+  
   const [asset, setAsset] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [recipients, setRecipients] = useState<Recipient[]>([
@@ -34,27 +31,21 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
   const [error, setError] = useState<string | null>(null);
   const [riskScore, setRiskScore] = useState<number | null>(null);
 
-  /**
-   * Add a new recipient input field
-   */
+  
   const addRecipient = useCallback(() => {
     if (recipients.length < 20) {
       setRecipients([...recipients, { address: '', amount: '' }]);
     }
   }, [recipients]);
 
-  /**
-   * Remove a recipient by index
-   */
+  
   const removeRecipient = useCallback((index: number) => {
     if (recipients.length > 1) {
       setRecipients(recipients.filter((_, i) => i !== index));
     }
   }, [recipients]);
 
-  /**
-   * Update recipient address
-   */
+  
   const updateRecipientAddress = useCallback(
     (index: number, address: string) => {
       const updated = [...recipients];
@@ -66,9 +57,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     [recipients]
   );
 
-  /**
-   * Update recipient amount
-   */
+  
   const updateRecipientAmount = useCallback(
     (index: number, amount: string) => {
       const updated = [...recipients];
@@ -82,9 +71,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     [recipients]
   );
 
-  /**
-   * Calculate total from recipient amounts
-   */
+  
   const calculateTotal = (recipientList: Recipient[]) => {
     try {
       const total = recipientList.reduce((sum, r) => {
@@ -98,9 +85,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     }
   };
 
-  /**
-   * Validate form inputs
-   */
+  
   const validateForm = (): boolean => {
     setError(null);
 
@@ -150,7 +135,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
       return false;
     }
 
-    // Validate allocations sum to total
+    
     const allocationSum = recipients.reduce((sum, r) => {
       return sum + BigInt(ethers.parseEther(r.amount));
     }, 0n);
@@ -163,9 +148,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     return true;
   };
 
-  /**
-   * Assess risk before getting quote
-   */
+  
   const handleAssessRisk = useCallback(async () => {
     if (!validateForm()) return;
 
@@ -205,9 +188,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     }
   }, [asset, totalAmount, recipients, receiverContract, userAddress, onError]);
 
-  /**
-   * Fetch quote for the flash loan
-   */
+  
   const handleGetQuote = useCallback(async () => {
     if (!validateForm()) return;
 
@@ -239,9 +220,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     }
   }, [asset, totalAmount, recipients, onError]);
 
-  /**
-   * Execute the multi-wallet flash loan
-   */
+  
   const handleExecute = useCallback(async () => {
     if (!validateForm() || !quote) {
       setError('Please get a quote first');
@@ -284,10 +263,10 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
     <div className="multi-wallet-flash-loan-form">
       <h2>Multi-Wallet Flash Loan</h2>
 
-      {/* Error Display */}
+      {}
       {error && <div className="error-message">{error}</div>}
 
-      {/* Risk Score Display */}
+      {}
       {riskScore !== null && (
         <div className="risk-score">
           <label>Risk Score:</label>
@@ -295,7 +274,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         </div>
       )}
 
-      {/* Asset Input */}
+      {}
       <div className="form-group">
         <label htmlFor="asset">Asset Address *</label>
         <input
@@ -308,13 +287,13 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         />
       </div>
 
-      {/* Total Amount Display */}
+      {}
       <div className="form-group">
         <label>Total Amount</label>
         <div className="total-amount">{totalAmount || '0'}</div>
       </div>
 
-      {/* Recipients */}
+      {}
       <div className="recipients-section">
         <h3>Recipients ({recipients.length}/20)</h3>
         {recipients.map((recipient, index) => (
@@ -354,7 +333,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         </button>
       </div>
 
-      {/* Receiver Contract */}
+      {}
       <div className="form-group">
         <label htmlFor="receiver">Receiver Contract *</label>
         <input
@@ -367,7 +346,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         />
       </div>
 
-      {/* Quote Display */}
+      {}
       {quote && (
         <div className="quote-display">
           <h3>Quote</h3>
@@ -377,7 +356,7 @@ export const MultiWalletFlashLoanForm: React.FC<MultiWalletFlashLoanFormProps> =
         </div>
       )}
 
-      {/* Action Buttons */}
+      {}
       <div className="action-buttons">
         <button
           onClick={handleAssessRisk}

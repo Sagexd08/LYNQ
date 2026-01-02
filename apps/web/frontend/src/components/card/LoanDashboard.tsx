@@ -108,11 +108,11 @@ const LoanDashboard: React.FC = () => {
       if (!window.ethereum) throw new Error("Wallet not connected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       
-      // Check if contracts are deployed (basic check if code exists)
+      
       const code = await provider.getCode(REPUTATION_POINTS_ADDRESS);
       if (code === "0x") {
         console.warn("Reputation contract not deployed at address");
-        // Fallback to mock or empty if contract not found
+        
         setHasTrustScore(false);
         return;
       }

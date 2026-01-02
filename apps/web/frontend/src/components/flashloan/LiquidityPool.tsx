@@ -92,7 +92,7 @@ export const LiquidityPool: React.FC = () => {
         </button>
       </div>
 
-      {/* Pool Stats */}
+      {}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-gray-900/50 rounded-lg p-4">
           <div className="text-gray-400 text-sm mb-1">Total Assets</div>
@@ -108,7 +108,7 @@ export const LiquidityPool: React.FC = () => {
         </div>
       </div>
 
-      {/* Assets List */}
+      {}
       <div className="mb-6">
         <h4 className="font-medium text-white mb-3">Available Assets</h4>
         <div className="space-y-3">
@@ -132,7 +132,7 @@ export const LiquidityPool: React.FC = () => {
                 </div>
               </div>
               
-              {/* Progress Bar */}
+              {}
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-gray-400">Utilization</span>
@@ -150,7 +150,7 @@ export const LiquidityPool: React.FC = () => {
                 </div>
               </div>
               
-              {/* Max Amount */}
+              {}
               <div className="mt-2 text-xs text-gray-400">
                 Max flash loan: {formatAmount(asset.maxAmount)}
               </div>
@@ -159,7 +159,7 @@ export const LiquidityPool: React.FC = () => {
         </div>
       </div>
 
-      {/* Educational Info */}
+      {}
       <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
         <h4 className="font-medium text-blue-300 mb-2">About Liquidity</h4>
         <ul className="text-sm text-blue-200 space-y-1">

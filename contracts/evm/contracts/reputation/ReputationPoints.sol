@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -22,7 +22,7 @@ contract ReputationPoints is ERC721, Ownable {
     event BadgeMinted(address indexed user, uint256 tokenId, Tier tier);
     event AchievementUnlocked(address indexed user, uint256 achievementId);
 
-    // Achievement IDs
+    
     uint256 public constant ACHIEVEMENT_PERFECT_PAYER = 1;
     uint256 public constant ACHIEVEMENT_EARLY_ADOPTER = 2;
     uint256 public constant ACHIEVEMENT_SOCIAL_PILLAR = 3;
@@ -60,7 +60,7 @@ contract ReputationPoints is ERC721, Ownable {
             userAchievements[user][achievementId] = true;
             emit AchievementUnlocked(user, achievementId);
             
-            // Bonus points for achievements
+            
             if (achievementId == ACHIEVEMENT_PERFECT_PAYER) {
                 awardPoints(user, 500);
             } else if (achievementId == ACHIEVEMENT_SOCIAL_PILLAR) {
@@ -86,7 +86,7 @@ contract ReputationPoints is ERC721, Ownable {
         return reputations[user];
     }
 
-    // Soulbound Token Implementation
+    
     function transferFrom(address, address, uint256) public pure override(ERC721) {
         revert("Reputation is Soulbound");
     }

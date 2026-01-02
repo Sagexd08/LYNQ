@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface ConfidenceRingProps {
-    value: number; // 0 to 100
+    value: number; 
     size?: number;
     strokeWidth?: number;
 }
@@ -19,7 +19,7 @@ export const ConfidenceRing: React.FC<ConfidenceRingProps> = ({
     return (
         <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
             <svg width={size} height={size} className="transform -rotate-90">
-                {/* Background Circle */}
+                {}
                 <circle
                     cx={size / 2}
                     cy={size / 2}
@@ -29,7 +29,7 @@ export const ConfidenceRing: React.FC<ConfidenceRingProps> = ({
                     fill="transparent"
                     className="text-white/5"
                 />
-                {/* Progress Circle */}
+                {}
                 <motion.circle
                     cx={size / 2}
                     cy={size / 2}

@@ -4,9 +4,9 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import "./tasks/health";
 
-// Load environment variables from local .env file
+
 dotenv.config();
-// Load environment variables from root .env file (if not found locally)
+
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 type HardhatAccounts = string[] | { mnemonic: string } | undefined;
@@ -17,8 +17,8 @@ const getAccounts = (): HardhatAccounts => {
   const hasPrivateKey = typeof process.env.PRIVATE_KEY === "string" && process.env.PRIVATE_KEY.trim().length > 0;
   const allowMnemonic = process.env.USE_MNEMONIC === "1" || process.env.USE_MNEMONIC === "true";
 
-  // Never silently deploy from a known fallback key.
-  // If a non-local network is selected, require explicit credentials.
+  
+  
   if (selectedNetwork !== "hardhat" && !hasMnemonic && !hasPrivateKey) {
     throw new Error(
       `Missing deployer credentials. Set PRIVATE_KEY (preferred) or MNEMONIC before deploying to '${selectedNetwork}'.`
@@ -36,7 +36,7 @@ const getAccounts = (): HardhatAccounts => {
     return { mnemonic: process.env.MNEMONIC!.trim() };
   }
 
-  // Local hardhat network can use its default generated accounts.
+  
   return undefined;
 };
 
@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
-      // viaIR is required for this codebase to avoid stack-too-deep in verifier flows
+      
       viaIR: true,
     },
   },
@@ -100,7 +100,7 @@ const config: HardhatUserConfig = {
         network: "mantle",
         chainId: 5000,
         urls: {
-          // Mantlescan is powered by Etherscan; verification uses Etherscan V2 multi-chain endpoint.
+          
           apiURL: "https://api.etherscan.io/v2/api",
           browserURL: "https://mantlescan.xyz",
         },

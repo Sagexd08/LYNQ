@@ -1,3 +1,4 @@
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { LoanService } from '../src/modules/loan/services/loan.service';
 import { MLService } from '../src/modules/ml/ml.service';
@@ -56,7 +57,7 @@ describe('Loan Flow E2E (Simulated)', () => {
     });
 
     it('should calculate risk, check eligibility, and create a loan', async () => {
-        // 1. Setup User
+        
         const userId = 'user-1';
         const user = {
             id: userId,
@@ -67,35 +68,35 @@ describe('Loan Flow E2E (Simulated)', () => {
         };
         mockUserRepo.findOne.mockResolvedValue(user);
 
-        // 2. Setup ML Eligibility Check (Mocking internal ML logic calls)
-        // We want to ensure MLService.runFraudDetection is called logic-wise
-        // But since we are testing LoanService integration, we call create loop
+        
+        
+        
         jest.spyOn(mlService, 'calculateUserCreditScore').mockResolvedValue({
             score: 750,
             grade: 'A',
             breakdown: {} as any
         });
 
-        // 3. Create Loan DTO
+        
         const createLoanDto = {
             amount: '1000',
-            collateralAmount: '2', // 2 ETH
+            collateralAmount: '2', 
             collateralTokenAddress: '0xCollateral',
             durationDays: 30,
             chain: 'mantleSepolia',
             transactionHash: '0xTxHash',
         };
 
-        // 4. Exec
+        
         const result = await loanService.create(userId, createLoanDto);
 
-        // 5. Verify flow
+        
         expect(result).toBeDefined();
         expect(result.amount).toBe('1000');
         expect(result.status).toBe(LoanStatus.ACTIVE);
 
-        // ML Integration verification
-        // The loan creation calls checkEligibility internally
-        // If it didn't throw, it passed.
+        
+        
+        
     });
 });

@@ -94,7 +94,7 @@ export const RiskAssessment: React.FC = () => {
         </button>
       </div>
 
-      {/* Risk Score */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-400">Risk Score</span>
@@ -118,7 +118,7 @@ export const RiskAssessment: React.FC = () => {
         </div>
       </div>
 
-      {/* Risk Level */}
+      {}
       <div className={`mb-6 p-4 rounded-lg border ${getRiskBgColor(riskData.riskLevel)}`}>
         <div className="flex items-center">
           <div className={`mr-3 p-2 rounded-full ${
@@ -151,7 +151,7 @@ export const RiskAssessment: React.FC = () => {
         </div>
       </div>
 
-      {/* Trust Score */}
+      {}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-400">Trust Score</span>
@@ -165,7 +165,7 @@ export const RiskAssessment: React.FC = () => {
         </div>
       </div>
 
-      {/* Risk Factors */}
+      {}
       {riskData.factors.length > 0 && (
         <div className="mb-6">
           <h4 className="font-medium text-white mb-3">Risk Factors</h4>
@@ -196,7 +196,7 @@ export const RiskAssessment: React.FC = () => {
         </div>
       )}
 
-      {/* Recommendations */}
+      {}
       {riskData.recommendations.length > 0 && (
         <div>
           <h4 className="font-medium text-white mb-3">Recommendations</h4>
@@ -213,7 +213,7 @@ export const RiskAssessment: React.FC = () => {
         </div>
       )}
 
-      {/* Cooldown */}
+      {}
       {riskData.cooldownPeriod > 0 && (
         <div className="mt-6 pt-4 border-t border-gray-700">
           <div className="flex items-center text-sm text-orange-300">

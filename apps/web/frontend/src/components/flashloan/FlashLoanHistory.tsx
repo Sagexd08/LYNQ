@@ -238,7 +238,7 @@ export const FlashLoanHistory: React.FC = () => {
         </>
       )}
 
-      {/* Educational Info */}
+      {}
       <div className="mt-8 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
         <h4 className="font-medium text-blue-300 mb-2">Understanding Your History</h4>
         <ul className="text-sm text-blue-200 space-y-1">

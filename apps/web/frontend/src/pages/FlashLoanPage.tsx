@@ -59,7 +59,7 @@ const FlashLoanPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -82,9 +82,9 @@ const FlashLoanPage: React.FC = () => {
           animate="show"
           className="grid lg:grid-cols-12 gap-8"
         >
-          {/* Left: Configuration */}
+          {}
           <motion.div variants={item} className="lg:col-span-8 space-y-8">
-            {/* Asset Selection */}
+            {}
             <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
               <h2 className="text-sm font-bold font-metrics uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2">
                 <Coins className="w-4 h-4" /> 01. Select Payload
@@ -113,7 +113,7 @@ const FlashLoanPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Amount Input */}
+            {}
             <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
               <h2 className="text-sm font-bold font-metrics uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2">
                 <Plus className="w-4 h-4" /> 02. Quantum Amount
@@ -139,7 +139,7 @@ const FlashLoanPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Simulation Block */}
+            {}
             <div className={`p-8 rounded-3xl border transition-all duration-500 ${simulationResult ? 'bg-neon-cyan/5 border-neon-cyan/20' : 'bg-[#0F1115] border-white/5 shadow-inner'
               }`}>
               <div className="flex justify-between items-center mb-10">
@@ -202,9 +202,9 @@ const FlashLoanPage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Right: Surveillance */}
+          {}
           <motion.div variants={item} className="lg:col-span-4 space-y-8">
-            {/* Credit Surveillance */}
+            {}
             <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
               <h3 className="text-sm font-bold font-heading mb-8 flex items-center justify-between">
                 USER REPUTATION
@@ -234,7 +234,7 @@ const FlashLoanPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Recent Waves */}
+            {}
             <div className="p-8 rounded-3xl bg-[#0F1115] border border-white/5">
               <h3 className="text-sm font-bold font-heading mb-6 flex items-center justify-between uppercase tracking-widest">
                 Recent Operations
@@ -262,7 +262,7 @@ const FlashLoanPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Help Info */}
+            {}
             <div className="p-6 rounded-3xl border border-white/5 bg-white/5 flex items-start gap-4">
               <HelpCircle className="w-5 h-5 text-gray-500 mt-1" />
               <div>

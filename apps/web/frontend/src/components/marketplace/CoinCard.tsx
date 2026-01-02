@@ -94,7 +94,7 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin, onTrade }) => {
         </div>
       </div>
 
-      {/* Sparkline chart */}
+      {}
       <div className="h-24 mt-1">
         {coin.sparkline_in_7d?.price ? (
           <Line

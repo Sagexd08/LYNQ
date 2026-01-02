@@ -12,7 +12,7 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
     const nodeEnv = configService.get<string>('NODE_ENV', 'development');
     const port = configService.get<number>('PORT', 3000);
-    // Sentry removed
+    
 
     const allowedOrigins = Array.from(
         new Set(

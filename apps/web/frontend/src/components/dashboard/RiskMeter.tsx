@@ -1,10 +1,7 @@
 import React, { useMemo } from 'react';
 import './RiskMeter.css';
 
-/**
- * Risk Meter Visualization Component
- * Displays transaction risk scoring with visual feedback
- */
+
 
 export enum RiskLevel {
   LOW = 'LOW',
@@ -37,15 +34,15 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
   const riskColor = useMemo(() => {
     switch (level) {
       case RiskLevel.LOW:
-        return '#10b981'; // Green
+        return '#10b981'; 
       case RiskLevel.MEDIUM:
-        return '#f59e0b'; // Amber
+        return '#f59e0b'; 
       case RiskLevel.HIGH:
-        return '#ef4444'; // Red
+        return '#ef4444'; 
       case RiskLevel.CRITICAL:
-        return '#7c2d12'; // Dark red
+        return '#7c2d12'; 
       default:
-        return '#6b7280'; // Gray
+        return '#6b7280'; 
     }
   }, [level]);
 
@@ -103,7 +100,7 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
         </div>
       </div>
 
-      {/* Visual Meter */}
+      {}
       <div className="risk-meter-visual">
         <div className="risk-meter-scale">
           <div className="risk-scale-label">Low</div>
@@ -129,7 +126,7 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
         </div>
       </div>
 
-      {/* Risk Level and Confidence */}
+      {}
       <div className="risk-meter-stats">
         <div className="stat-item">
           <span className="stat-label">Risk Level</span>
@@ -143,7 +140,7 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
         </div>
       </div>
 
-      {/* Flags */}
+      {}
       {showDetails && flags.length > 0 && (
         <div className="risk-meter-flags">
           <h4 className="flags-title">Alerts</h4>
@@ -158,7 +155,7 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
         </div>
       )}
 
-      {/* Reasons */}
+      {}
       {showDetails && reasons.length > 0 && (
         <div className="risk-meter-reasons">
           <h4 className="reasons-title">Factors</h4>
@@ -177,7 +174,7 @@ export const RiskMeter: React.FC<RiskMeterProps> = ({
         </div>
       )}
 
-      {/* Recommendation Details */}
+      {}
       {showDetails && (
         <div className="risk-meter-action">
           {recommendation === 'APPROVE' && (

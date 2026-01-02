@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { contractService } from '../services/contractService';
 import { CONTRACT_ADDRESSES } from '../config/contracts';
-import { loanApi } from '../services/api/loans';
+import { loanApi } from '../services/api/loanApi';
 import { mlApi } from '../services/api/ml';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
@@ -35,7 +35,7 @@ const CreateLoanPage: React.FC = () => {
         if (step === 1) {
             if (!formData.amount || !formData.collateral) return;
 
-            // Fetch ML Review for this specific amount
+
             setIsSubmitting(true);
             try {
                 const res = await mlApi.getMyCreditScore();
@@ -100,7 +100,7 @@ const CreateLoanPage: React.FC = () => {
                     {step === 1 ? 'Cancel Operation' : 'Reverse Step'}
                 </Button>
 
-                {/* Progress Indicator */}
+                { }
                 <div className="flex gap-2 mb-12">
                     {[1, 2, 3].map(i => (
                         <div

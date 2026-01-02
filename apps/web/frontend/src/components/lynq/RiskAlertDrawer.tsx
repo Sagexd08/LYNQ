@@ -33,7 +33,7 @@ export const RiskAlertDrawer: React.FC = () => {
 
     return (
         <>
-            {/* Floating Trigger Button */}
+            {}
             <div className="fixed top-24 right-6 z-[60]">
                 <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -53,7 +53,7 @@ export const RiskAlertDrawer: React.FC = () => {
                 </motion.button>
             </div>
 
-            {/* Drawer */}
+            {}
             <AnimatePresence>
                 {isOpen && (
                     <>

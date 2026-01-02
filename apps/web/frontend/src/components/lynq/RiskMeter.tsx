@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface RiskMeterProps {
-    level: number; // 0 to 100
+    level: number; 
     label: string;
 }
 

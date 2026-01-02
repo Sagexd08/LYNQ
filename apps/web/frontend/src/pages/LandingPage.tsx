@@ -41,12 +41,12 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-neon-cyan/30 selection:text-white overflow-hidden">
-      {/* Cinematic Background */}
+      {}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.05),transparent_70%)]" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-        {/* Animated Gradient Mesh */}
+        {}
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
         />
       </div>
 
-      {/* Navigation */}
+      {}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {}
       <motion.section
         style={{ opacity: heroOpacity, scale: heroScale }}
         className="relative pt-32 pb-20 px-6 z-10"
@@ -138,7 +138,7 @@ const LandingPage: React.FC = () => {
             </Link>
           </motion.div>
 
-          {/* Institutional Trust Strip */}
+          {}
           <div className="w-full max-w-4xl pt-10 border-t border-white/5 flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
             {['ETHEREUM', 'POLYGON', 'APTOS', 'FLOW', 'MANTLE'].map((chain) => (
               <span key={chain} className="font-metrics text-xs tracking-[0.3em] font-bold">{chain}</span>
@@ -147,7 +147,7 @@ const LandingPage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* Intelligence Cards Section */}
+      {}
       <section className="relative py-32 px-6 z-10 overflow-hidden" id="features">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -191,7 +191,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="relative">
-              {/* Feature Preview Cards */}
+              {}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 <FloatingElement delay={0} yOffset={15}>
                   <div className="p-6 rounded-2xl bg-[#0F1115] border border-white/10 shadow-2xl backdrop-blur-xl">
@@ -242,14 +242,14 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Background Glow */}
+              {}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-neon-cyan/5 blur-[120px] rounded-full -z-10" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust & Safety Footer Section */}
+      {}
       <section className="relative py-24 px-6 border-t border-white/5 bg-[#080808]">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -271,12 +271,12 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
+      {}
       <footer className="py-12 border-t border-white/5 text-center text-gray-600 text-[10px] tracking-[0.2em] uppercase font-metrics">
-        © 2025 LYNQ PROTOCOL // ALL SYSTEMS OPERATIONAL // LIQUID CONFIDENCE 1.0
+        © 2025 LYNQ PROTOCOL 
       </footer>
 
-      {/* Wallet Modal */}
+      {}
       {showWalletModal && (
         <Suspense fallback={null}>
           <WalletConnectionModal

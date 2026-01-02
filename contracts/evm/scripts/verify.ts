@@ -20,7 +20,7 @@ async function main() {
   const contracts = deployment.contracts || {};
   const deployer = deployment.deployer;
 
-  // Minimal, explicit list to avoid accidental verifies.
+  
   const verifyTargets: Array<{ name: string; address?: string; args: any[] }> = [
     { name: "LoanCore", address: contracts.LoanCore, args: [] },
     { name: "CollateralVault", address: contracts.CollateralVault, args: [] },
@@ -46,7 +46,7 @@ async function main() {
       console.log(`Verified ${target.name}`);
     } catch (err: any) {
       const message = err?.message || String(err);
-      // Common case: already verified.
+      
       if (message.toLowerCase().includes("already verified")) {
         console.log(`${target.name} already verified`);
         continue;

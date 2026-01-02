@@ -1,16 +1,7 @@
 import { Module } from '@nestjs/common';
 import { IndexerModule } from './modules/indexer/indexer.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
-
 import { validate } from './config/env.validation';
-
-// Entities
-import { User } from './modules/user/entities/user.entity';
-import { Loan } from './modules/loan/entities/loan.entity';
-import { Repayment } from './modules/loan/entities/repayment.entity';
-
-// Modules
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoanModule } from './modules/loan/loan.module';
@@ -24,7 +15,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AuditModule } from './modules/audit/audit.module';
 import { MetricsController } from './common/metrics/metrics.controller';
 import { CollateralModule } from './modules/collateral/collateral.module';
-import { MLModule } from './modules/ml/ml.module';
+import { RiskScoringModule } from './modules/risk-scoring/risk-scoring.module';
+import { EducationModule } from './modules/education/education.module';
 import { SupabaseModule } from './modules/supabase/supabase.module';
 
 @Module({
@@ -34,19 +26,20 @@ import { SupabaseModule } from './modules/supabase/supabase.module';
             envFilePath: '.env',
             validate,
         }),
-        // TypeOrmModule removed as per request
-        // Entities are now managed via SupabaseService or raw SQL if needed.
-        // Core Modules
+        
+        
+        
         UserModule,
         AuthModule,
         LoanModule,
         CollateralModule,
-        MLModule,
-        // Scheduling & Throttling
+        RiskScoringModule,
+        EducationModule,
+        
         ScheduleModule.forRoot(),
         ThrottlerModule.forRoot({ ttl: 60, limit: 30 }),
         AuditModule,
-        // Infrastructure Modules
+        
         BlockchainModule,
         FlashLoanModule,
         HealthModule,

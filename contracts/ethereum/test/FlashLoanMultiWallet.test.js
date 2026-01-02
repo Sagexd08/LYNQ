@@ -14,26 +14,26 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
   beforeEach(async function () {
     [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
 
-    // Deploy test token
+    
     const TestToken = await ethers.getContractFactory("TestToken");
     testToken = await TestToken.deploy("Test Token", "TEST", ethers.parseEther("10000"));
 
-    // Deploy TrustScore
+    
     const TrustScore = await ethers.getContractFactory("TrustScore");
     trustScore = await TrustScore.deploy();
 
-    // Deploy FlashLoanProvider
+    
     const FlashLoanProvider = await ethers.getContractFactory("FlashLoanProvider");
     flashLoanProvider = await FlashLoanProvider.deploy(trustScore.getAddress());
 
-    // Add supported asset
+    
     await flashLoanProvider.addSupportedAsset(testToken.getAddress(), ethers.parseEther("500"));
 
-    // Deposit liquidity
+    
     await testToken.approve(flashLoanProvider.getAddress(), INITIAL_LIQUIDITY);
     await flashLoanProvider.depositLiquidity(testToken.getAddress(), INITIAL_LIQUIDITY);
 
-    // Set trust scores for users (need at least 300)
+    
     await trustScore.updateTrustScore(addr1.getAddress(), 900);
     await trustScore.updateTrustScore(addr2.getAddress(), 900);
     await trustScore.updateTrustScore(addr3.getAddress(), 900);
@@ -42,7 +42,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
 
   describe("Basic Multi-Wallet Flash Loan", function () {
     it("should execute multi-wallet flash loan to 2 recipients", async function () {
-      // Deploy receiver contract
+      
       const MultiWalletReceiver = await ethers.getContractFactory("MultiWalletFlashLoanReceiverTest");
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
@@ -64,9 +64,9 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
         );
 
       const receipt = await tx.wait();
-      const batchId = receipt.logs[0].args?.[0]; // Get batchId from event
+      const batchId = receipt.logs[0].args?.[0]; 
 
-      // Verify batch was created
+      
       const batch = await flashLoanProvider.getMultiWalletBatch(batchId);
       expect(batch.initiator).to.equal(addr1.getAddress());
       expect(batch.asset).to.equal(testToken.getAddress());
@@ -116,7 +116,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const recipients = [addr2.getAddress(), addr3.getAddress()];
       const allocations = [
         ethers.parseEther("40"),
-        ethers.parseEther("40"), // Sum = 80, but totalAmount = 100
+        ethers.parseEther("40"), 
       ];
 
       await expect(
@@ -138,7 +138,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
       const recipients = [addr2.getAddress(), addr3.getAddress()];
-      const allocations = [ethers.parseEther("100")]; // Mismatch
+      const allocations = [ethers.parseEther("100")]; 
 
       await expect(
         flashLoanProvider
@@ -161,7 +161,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const recipients = [addr2.getAddress(), addr3.getAddress()];
       const allocations = [
         ethers.parseEther("100"),
-        ethers.parseEther("0"), // Zero allocation
+        ethers.parseEther("0"), 
       ];
 
       await expect(
@@ -182,7 +182,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const MultiWalletReceiver = await ethers.getContractFactory("MultiWalletFlashLoanReceiverTest");
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
-      // Create 21 recipients
+      
       const recipients = [];
       const allocations = [];
       for (let i = 0; i < 21; i++) {
@@ -211,7 +211,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
       const recipients = [addr2.getAddress()];
-      const allocations = [ethers.parseEther("2000")]; // More than available
+      const allocations = [ethers.parseEther("2000")]; 
 
       await expect(
         flashLoanProvider
@@ -236,10 +236,10 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const recipients = [addr2.getAddress()];
       const allocations = [FLASH_LOAN_AMOUNT];
 
-      // Get initial liquidity
+      
       const initialLiquidity = await flashLoanProvider.poolLiquidity(testToken.getAddress());
 
-      // Attempt flash loan that will fail
+      
       await expect(
         flashLoanProvider
           .connect(addr1)
@@ -253,7 +253,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
           )
       ).to.be.revertedWith("Multi-wallet flash loan failed");
 
-      // Verify liquidity is restored
+      
       const finalLiquidity = await flashLoanProvider.poolLiquidity(testToken.getAddress());
       expect(finalLiquidity).to.equal(initialLiquidity);
     });
@@ -277,11 +277,11 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
             "0x"
           );
       } catch (error) {
-        // Expected to fail
+        
       }
 
-      // Note: Without accessing internal state, we verify this by monitoring events
-      // This would be done via event filtering in a real test
+      
+      
     });
   });
 
@@ -306,7 +306,7 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
 
       const finalLiquidity = await flashLoanProvider.poolLiquidity(testToken.getAddress());
 
-      // Liquidity should be initial - FLASH_LOAN_AMOUNT + FLASH_LOAN_AMOUNT + premium
+      
       expect(finalLiquidity).to.equal(initialLiquidity + expectedPremium);
     });
   });
@@ -331,16 +331,16 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
 
       const updatedStats = await flashLoanProvider.getUserStats(addr1.getAddress());
 
-      expect(updatedStats[0]).to.equal(initialStats[0] + 1n); // totalFlashLoans
-      expect(updatedStats[1]).to.equal(initialStats[1] + 1n); // successfulFlashLoans
-      expect(updatedStats[4]).to.equal(0n); // Low risk level
+      expect(updatedStats[0]).to.equal(initialStats[0] + 1n); 
+      expect(updatedStats[1]).to.equal(initialStats[1] + 1n); 
+      expect(updatedStats[4]).to.equal(0n); 
     });
 
     it("should track multiple batches per user", async function () {
       const MultiWalletReceiver = await ethers.getContractFactory("MultiWalletFlashLoanReceiverTest");
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
-      // Execute two flash loans
+      
       const tx1 = await flashLoanProvider
         .connect(addr1)
         .flashLoanMultiWallet(
@@ -373,9 +373,9 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
       const MultiWalletReceiver = await ethers.getContractFactory("MultiWalletFlashLoanReceiverTest");
       const receiver = await MultiWalletReceiver.deploy(flashLoanProvider.getAddress(), testToken.getAddress());
 
-      // Create new user with low trust score
+      
       const lowTrustUser = addr4;
-      await trustScore.updateTrustScore(lowTrustUser.getAddress(), 100); // Below MIN_TRUST_SCORE (300)
+      await trustScore.updateTrustScore(lowTrustUser.getAddress(), 100); 
 
       await expect(
         flashLoanProvider
@@ -393,8 +393,8 @@ describe("FlashLoanProvider - Multi-Wallet Flash Loans", function () {
   });
 });
 
-// Helper: Test Receiver Contract
+
 const { ContractFactory } = require("ethers");
 
-// Note: These contracts would be deployed separately or included in the same file
-// For now, they're marked as needed for the test suite
+
+
