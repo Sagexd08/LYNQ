@@ -4,17 +4,78 @@ node_modules
 .idea
 .vscode
 .DS_Store
-# .env
-# .env.*
+
+# Environment files (SECURITY: Never commit secrets!)
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Build outputs
 dist
 build
 coverage
 .cache
 .next
-.next
 out
 .turbo
+
+# Smart contracts
 artifacts
 .typechain
 cache
 typechain-types
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ML artifacts
+*.pkl
+*.joblib
+mlruns/
+mlflow.db
+models/production/*.pkl
+models/production/*.joblib
+!models/production/.gitkeep
+packages/ml-service/data/*.csv
+!packages/ml-service/data/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
