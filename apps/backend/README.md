@@ -27,7 +27,9 @@ src/
 │   ├── user/            # User management
 │   ├── loan/            # Loan operations
 │   ├── collateral/      # Collateral management
-│   ├── ml/              # ML risk assessment
+│   ├── risk-scoring/    # Risk assessment (weighted algorithm)
+│   ├── compliance/      # Blacklist & compliance checking
+│   ├── oracle/          # Price feeds (Pyth, Chainlink)
 │   └── health/          # Health check endpoints
 ├── services/            # Shared services (blockchain, flash loans, etc.)
 ├── utils/               # Utility functions
@@ -137,9 +139,49 @@ pnpm --filter @lynq/backend run migration:revert
 - `GET /api/v1/collateral/user/:userId` - Get user collateral
 - `GET /api/v1/collateral/:id` - Get collateral by ID
 
-#### ML/Risk
-- `POST /api/v1/ml/assess-risk` - Assess loan risk
-- `GET /api/v1/ml/trust-score/:userId` - Get user trust score
+#### Risk Scoring
+- `POST /api/v1/risk/assess-loan/:loanId` - Assess loan risk
+- `GET /api/v1/risk/credit-score/:userId` - Get user credit score
+- `POST /api/v1/risk/fraud-check/:userId` - Run fraud detection
+
+### Risk Scoring Algorithm
+
+The risk scoring system uses a **weighted algorithm** (not ML) to assess creditworthiness:
+
+#### Credit Score Calculation (0-1000 scale)
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Payment History | 35% | On-time repayments vs defaults |
+| Utilization | 25% | Outstanding debt ratio |
+| Account Age | 15% | Time since account creation |
+| Reputation | 15% | Platform reputation points |
+| Diversification | 10% | Multi-chain activity |
+
+#### Credit Grades
+| Score Range | Grade |
+|-------------|-------|
+| 900-1000 | A+ |
+| 850-899 | A |
+| 800-849 | A- |
+| 750-799 | B+ |
+| 700-749 | B |
+| 650-699 | B- |
+| 600-649 | C+ |
+| 550-599 | C |
+| 400-549 | D |
+| 0-399 | F |
+
+#### Fraud Detection Flags
+- `BLACKLISTED` - Address on sanctions/blacklist
+- `UNUSUAL_AMOUNT` - Loan amount significantly above median
+- `HIGH_VELOCITY` - Too many loans in short period
+- `NEW_ACCOUNT` - Account less than 30 days old
+- `LOW_REPUTATION` - Reputation below threshold
+
+#### Loan Risk Assessment
+- **Default Probability**: Based on credit score and loan parameters
+- **Liquidation Risk**: Collateral value vs outstanding amount
+- **Collateral Health**: Current collateralization ratio
 
 #### Telegram Notifications
 - `GET /api/v1/telegram/status` - Check bot status

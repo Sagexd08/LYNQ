@@ -18,6 +18,7 @@ import { CollateralModule } from './modules/collateral/collateral.module';
 import { RiskScoringModule } from './modules/risk-scoring/risk-scoring.module';
 import { EducationModule } from './modules/education/education.module';
 import { SupabaseModule } from './modules/supabase/supabase.module';
+import { MLModule } from './modules/ml/ml.module';
 
 @Module({
     imports: [
@@ -35,6 +36,7 @@ import { SupabaseModule } from './modules/supabase/supabase.module';
         CollateralModule,
         RiskScoringModule,
         EducationModule,
+        MLModule,
         
         ScheduleModule.forRoot(),
         ThrottlerModule.forRoot({ ttl: 60, limit: 30 }),

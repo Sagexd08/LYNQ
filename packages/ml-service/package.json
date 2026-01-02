@@ -1,0 +1,22 @@
+{
+  "name": "@lynq/ml-service",
+  "version": "1.0.0",
+  "description": "ML service for credit scoring with synthetic data generation",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "python src/api/main.py",
+    "train": "python src/training/train_model.py",
+    "generate-data": "python src/data/synthetic_generator.py",
+    "evaluate": "python src/evaluation/evaluate_model.py",
+    "test": "pytest tests/",
+    "lint": "flake8 src/ tests/",
+    "format": "black src/ tests/"
+  },
+  "keywords": [
+    "machine-learning",
+    "credit-scoring",
+    "synthetic-data"
+  ],
+  "author": "LYNQ Team",
+  "license": "MIT"
+}

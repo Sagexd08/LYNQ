@@ -14,9 +14,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": {
-      "@*.ts", "***.ts"],
+    "incremental": true
+  },
   "exclude": ["node_modules"]
 }

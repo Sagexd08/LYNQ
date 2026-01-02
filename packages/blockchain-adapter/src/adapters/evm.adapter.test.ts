@@ -28,20 +28,20 @@ describe('EVMAdapter', () => {
     process.env.PRIVATE_KEY = '0x'.padEnd(66, '1');
   });
   it('formats balance via provider', async () => {
-    const adapter = new EVMAdapter('http:
+    const adapter = new EVMAdapter('http://localhost:8545');
     const balance = await adapter.getBalance('0xabc');
     expect(balance).toBe('1');
     expect(getBalanceMock).toHaveBeenCalledWith('0xabc');
-    expect((ethers.JsonRpcProvider as unknown as vi.Mock).mock.calls[0][0]).toBe('http:
+    expect(((ethers.JsonRpcProvider as any).mock.calls[0][0])).toBe('http://localhost:8545');
   });
   it('returns current block number', async () => {
-    const adapter = new EVMAdapter('http:
+    const adapter = new EVMAdapter('http://localhost:8545');
     const blockNumber = await adapter.getBlockNumber();
     expect(blockNumber).toBe(123);
     expect(getBlockNumberMock).toHaveBeenCalled();
   });
   it('sends a transaction with wallet signer', async () => {
-    const adapter = new EVMAdapter('http:
+    const adapter = new EVMAdapter('http://localhost:8545');
     const hash = await adapter.sendTransaction({ to: '0xdef', value: '1' });
     expect(hash).toBe('0xhash');
     expect(sendTransactionMock).toHaveBeenCalled();
