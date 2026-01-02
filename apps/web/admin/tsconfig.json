@@ -17,10 +17,6 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["vitest/globals"]
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+      "@*.ts", "***.ts"],
   "exclude": ["node_modules"]
 }

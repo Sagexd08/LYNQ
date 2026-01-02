@@ -1,33 +1,25 @@
 import { ethers } from 'ethers';
-
 async function main() {
   console.log('🔍 Validating Network Connection...\n');
-
   try {
-    
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
     const network = await provider.getNetwork();
     console.log(`✅ Network: ${network.name}`);
     console.log(`✅ Chain ID: ${network.chainId}`);
     const rpcUrl = process.env.RPC_URL || 'Unknown';
     console.log(`✅ RPC URL: ${rpcUrl}\n`);
-
-    
     const privateKey = process.env.PRIVATE_KEY;
     const signerAddressEnv = process.env.SIGNER_ADDRESS;
-
     const address = privateKey
       ? new ethers.Wallet(privateKey).address
       : signerAddressEnv || null;
-
     if (address) {
       const balance = await provider.getBalance(address);
       console.log(`👤 Address: ${address}`);
       console.log(`💰 Account Balance: ${ethers.formatEther(balance)} ETH\n`);
-
       if (balance < ethers.parseEther('0.1')) {
         console.warn('⚠️  WARNING: Low balance. You may not have enough ETH for deployment.');
-        console.log('Get testnet ETH from: https://sepoliafaucet.com\n');
+        console.log('Get testnet ETH from: https:
       }
     } else {
       console.log('ℹ️  No PRIVATE_KEY or SIGNER_ADDRESS provided; skipping balance check.');
@@ -41,16 +33,13 @@ async function main() {
       console.warn(`⚠️  WARNING: Expected chain ID ${expectedChainId}, but got ${network.chainId}`);
       console.log('Check your RPC_URL configuration\n');
     }
-
     console.log('✨ Network validation complete!\n');
-    
   } catch (error: any) {
     console.error('❌ Network validation failed:');
     console.error(error.message);
     process.exit(1);
   }
 }
-
 main()
   .then(() => process.exit(0))
   .catch((error) => {

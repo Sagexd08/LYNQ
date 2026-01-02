@@ -24,24 +24,18 @@ import {
 import { Button } from './ui/Button';
 import { useWalletStore } from '../store/walletStore';
 import { clearSavedWalletConnection } from './wallet/walletConfig';
-
-
 const WalletConnectionModal = React.lazy(() => import('./wallet/WalletConnectionModal'));
-
 interface NavBarProps {
   onWalletConnect?: (walletData: any) => void;
   useTestnet?: boolean;
   onToggleNetwork?: () => void;
 }
-
-
 const networks = [
   { id: 'mantle', name: 'Mantle', shortName: 'MNT', chainId: '5000', isTestnet: false, color: '#00D395' },
   { id: 'mantleSepolia', name: 'Mantle Sepolia', shortName: 'tMNT', chainId: '5003', isTestnet: true, color: '#F7931A' },
   { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', chainId: '1', isTestnet: false, color: '#627EEA' },
   { id: 'sepolia', name: 'Sepolia', shortName: 'SEP', chainId: '11155111', isTestnet: true, color: '#CFB53B' },
 ];
-
 const NavBar: React.FC<NavBarProps> = ({
   onWalletConnect,
   useTestnet = false,
@@ -54,23 +48,17 @@ const NavBar: React.FC<NavBarProps> = ({
   const [networkMenuOpen, setNetworkMenuOpen] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
-
-  
   const address = useWalletStore((state) => state.address);
   const balance = useWalletStore((state) => state.balance);
   const walletType = useWalletStore((state) => state.walletType);
   const chainId = useWalletStore((state) => state.chainId);
   const disconnect = useWalletStore((state) => state.disconnect);
   const connect = useWalletStore((state) => state.connect);
-
   const isConnected = !!address;
   const displayAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
-
   const currentNetwork = networks.find(n => n.chainId === chainId) ||
     (useTestnet ? networks[1] : networks[0]);
-
   const displayBalance = `${balance.toFixed(4)} ${currentNetwork?.shortName || 'MNT'}`;
-
   const navLinks = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Control' },
     { to: '/loans', icon: CreditCard, label: 'Capital' },
@@ -78,13 +66,11 @@ const NavBar: React.FC<NavBarProps> = ({
     { to: '/ml-insights', icon: Brain, label: 'Intelligence' },
     { to: '/marketplace', icon: Sparkles, label: 'Market' },
   ];
-
   const notifications = [
     { id: 1, title: 'Health Factor Warning', message: 'Position at 1.3 HF', time: '5m ago', type: 'warning' },
     { id: 2, title: 'Loan Approved', message: '$5,000 USDC ready', time: '1h ago', type: 'success' },
     { id: 3, title: 'Score Updated', message: '+24 points this week', time: '2h ago', type: 'info' },
   ];
-
   const handleWalletConnect = (walletData: any) => {
     if (walletData?.address) {
       connect({
@@ -103,13 +89,11 @@ const NavBar: React.FC<NavBarProps> = ({
     }
     setShowWalletModal(false);
   };
-
   const handleDisconnect = () => {
     disconnect();
     clearSavedWalletConnection();
     setProfileMenuOpen(false);
   };
-
   const handleCopyAddress = async () => {
     if (address) {
       await navigator.clipboard.writeText(address);
@@ -117,21 +101,18 @@ const NavBar: React.FC<NavBarProps> = ({
       setTimeout(() => setCopiedAddress(false), 2000);
     }
   };
-
   const handleNetworkSwitch = (network: typeof networks[0]) => {
     if (onToggleNetwork && network.isTestnet !== useTestnet) {
       onToggleNetwork();
     }
     setNetworkMenuOpen(false);
   };
-
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50">
         {}
         <div className="absolute inset-0 bg-lynq-darker/90 backdrop-blur-2xl" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5" />
-
         <div className="relative max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-[72px]">
             {}
@@ -152,7 +133,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   </div>
                 </div>
               </Link>
-
               {}
               <div className="hidden lg:flex items-center">
                 <div className="flex items-center bg-lynq-card/40 backdrop-blur-sm rounded-2xl p-1.5 border border-glass-border/50">
@@ -186,7 +166,6 @@ const NavBar: React.FC<NavBarProps> = ({
                 </div>
               </div>
             </div>
-
             {}
             <div className="flex items-center gap-3">
               {}
@@ -194,7 +173,6 @@ const NavBar: React.FC<NavBarProps> = ({
                 <Activity className="w-3.5 h-3.5 text-success animate-pulse" />
                 <span className="text-xs font-medium text-success">Live</span>
               </div>
-
               {}
               <div className="relative">
                 <motion.button
@@ -214,7 +192,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   )}
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${networkMenuOpen ? 'rotate-180' : ''}`} />
                 </motion.button>
-
                 <AnimatePresence>
                   {networkMenuOpen && (
                     <motion.div
@@ -261,7 +238,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   )}
                 </AnimatePresence>
               </div>
-
               {}
               <div className="relative">
                 <motion.button
@@ -273,7 +249,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   <Bell className="w-5 h-5 text-gray-300" />
                   <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error border-2 border-lynq-darker" />
                 </motion.button>
-
                 <AnimatePresence>
                   {notificationsOpen && (
                     <motion.div
@@ -315,7 +290,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   )}
                 </AnimatePresence>
               </div>
-
               {}
               {isConnected ? (
                 <div className="relative">
@@ -334,7 +308,6 @@ const NavBar: React.FC<NavBarProps> = ({
                     </div>
                     <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180' : ''}`} />
                   </motion.button>
-
                   <AnimatePresence>
                     {profileMenuOpen && (
                       <motion.div
@@ -359,7 +332,6 @@ const NavBar: React.FC<NavBarProps> = ({
                             </div>
                           </div>
                         </div>
-
                         {}
                         <div className="p-2">
                           <button
@@ -376,7 +348,7 @@ const NavBar: React.FC<NavBarProps> = ({
                             </span>
                           </button>
                           <a
-                            href={`https://explorer.mantle.xyz/address/${address}`}
+                            href={`https:
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-glass-white/50 transition-colors group"
@@ -393,7 +365,6 @@ const NavBar: React.FC<NavBarProps> = ({
                             <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Settings</span>
                           </Link>
                         </div>
-
                         {}
                         <div className="p-2 border-t border-glass-border/50">
                           <button
@@ -417,7 +388,6 @@ const NavBar: React.FC<NavBarProps> = ({
                   Connect
                 </Button>
               )}
-
               {}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -435,7 +405,6 @@ const NavBar: React.FC<NavBarProps> = ({
           </div>
         </div>
       </nav>
-
       {}
       <AnimatePresence>
         {mobileMenuOpen && (
@@ -471,7 +440,6 @@ const NavBar: React.FC<NavBarProps> = ({
                     );
                   })}
                 </div>
-
                 {}
                 <div className="pt-4 border-t border-glass-border/50">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 px-2">Network</p>
@@ -499,7 +467,6 @@ const NavBar: React.FC<NavBarProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
       {}
       {(profileMenuOpen || notificationsOpen || networkMenuOpen) && (
         <div
@@ -511,7 +478,6 @@ const NavBar: React.FC<NavBarProps> = ({
           }}
         />
       )}
-
       {}
       {showWalletModal && (
         <Suspense fallback={
@@ -529,5 +495,4 @@ const NavBar: React.FC<NavBarProps> = ({
     </>
   );
 };
-
 export default NavBar;

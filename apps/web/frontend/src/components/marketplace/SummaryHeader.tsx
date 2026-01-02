@@ -1,11 +1,9 @@
 import React from "react";
-
 interface SummaryHeaderProps {
   marketSize: number;
   totalBorrowed: number;
   lentOut: string;
 }
-
 const SummaryHeader: React.FC<SummaryHeaderProps> = ({ marketSize, totalBorrowed, lentOut }) => {
   return (
     <div className="flex flex-col gap-6 mb-10 w-full max-w-7xl mx-auto px-4 sm:px-6 mt-20">
@@ -43,11 +41,10 @@ const SummaryHeader: React.FC<SummaryHeaderProps> = ({ marketSize, totalBorrowed
           </div>
         ))}
       </div>
-
       {}
       <div className="w-full flex justify-center lg:justify-end">
         <a
-          href="https://bridge.example.com"
+          href="https:
           target="_blank"
           rel="noopener noreferrer"
           className="w-full sm:w-auto text-center bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg transition-all"
@@ -58,5 +55,4 @@ const SummaryHeader: React.FC<SummaryHeaderProps> = ({ marketSize, totalBorrowed
     </div>
   );
 };
-
 export default SummaryHeader;

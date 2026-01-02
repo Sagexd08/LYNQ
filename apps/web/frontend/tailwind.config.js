@@ -2,7 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
@@ -58,7 +58,6 @@ export default {
         'glow-success': '0 0 20px rgba(0, 230, 118, 0.5)',
       },
       backgroundImage: {
-        
         'gradient-primary': 'linear-gradient(135deg, #2979FF 0%, #00E5FF 100%)',
         'gradient-secondary': 'linear-gradient(135deg, #651FFF 0%, #D500F9 100%)',
         'gradient-success': 'linear-gradient(135deg, #00E676 0%, #00FFA3 100%)',
@@ -67,7 +66,6 @@ export default {
         'gradient-radial-glow': 'radial-gradient(ellipse at center, rgba(0, 229, 255, 0.08) 0%, transparent 70%)',
         'gradient-radial-purple': 'radial-gradient(ellipse at center, rgba(101, 31, 255, 0.08) 0%, transparent 70%)',
         'gradient-mesh': 'radial-gradient(at 40% 20%, rgba(0, 229, 255, 0.1) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(101, 31, 255, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(0, 255, 163, 0.05) 0px, transparent 50%)',
-        
         'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
         'glass-shimmer': 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%)',
       },
@@ -77,28 +75,21 @@ export default {
         '3xl': '64px',
       },
       animation: {
-        
         'fade-in': 'fadeIn 0.5s ease-out forwards',
         'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
         'fade-in-down': 'fadeInDown 0.6s ease-out forwards',
         'scale-in': 'scaleIn 0.4s ease-out forwards',
         'slide-in-right': 'slideInRight 0.5s ease-out forwards',
         'slide-in-left': 'slideInLeft 0.5s ease-out forwards',
-
-        
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 6s ease-in-out infinite',
         'spin-slow': 'spin 20s linear infinite',
         'gradient-shift': 'gradientShift 8s ease infinite',
-
-        
         'bounce-subtle': 'bounceSubtle 0.5s ease-out',
         'shake': 'shake 0.5s ease-in-out',
         'ripple': 'ripple 0.6s linear',
-
-        
         'score-reveal': 'scoreReveal 1.5s ease-out forwards',
         'tier-upgrade': 'tierUpgrade 0.8s ease-out forwards',
         'confidence-pulse': 'confidencePulse 2s ease-in-out infinite',

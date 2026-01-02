@@ -5,16 +5,9 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "contracts/*"
+    "contracts"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "dev:apps": "turbo run dev --filter=@lynq/backend --filter=@lynq/frontend --filter=@lynq/admin",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
-    "smoke": "turbo run smoke --filter=@lynq/contracts-evm --filter=@lynq/backend",
-    "clean": "rimraf **/dist",
     "format": "prettier -w ."
   },
   "devDependencies": {

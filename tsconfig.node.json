@@ -17,6 +17,6 @@
     "tailwind.config.js", 
     "postcss.config.js",
     "eslint.config.js",
-    "scripts/**/*"
+    "scripts*"
   ]
 }

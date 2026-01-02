@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { configureFCL, fcl } from '../../config/flow';
-
 export interface WalletResponse {
   address: string;
   publicKey?: string;
@@ -11,7 +10,6 @@ export interface WalletResponse {
   networkName?: string;
   chainId?: string;
 }
-
 export interface WalletProvider {
   id: string;
   name: string;
@@ -21,7 +19,6 @@ export interface WalletProvider {
   detectMethod: () => boolean;
   connect: () => Promise<WalletResponse>;
 }
-
 export interface SavedWalletConnection {
   address: string;
   walletType: string;
@@ -35,37 +32,29 @@ export interface SavedWalletConnection {
   name?: string;
   social?: boolean;
 }
-
-
 const coinbaseWallet = new CoinbaseWalletSDK({
   appName: 'LYNQ',
   appLogoUrl: ''
 });
-
 const coinbaseProvider = coinbaseWallet.makeWeb3Provider();
-
-
 export const walletProviders: WalletProvider[] = [
   {
     id: 'metamask',
     name: 'MetaMask',
     icon: '🦊',
     description: 'The most popular Ethereum wallet',
-    downloadUrl: 'https://metamask.io/',
+    downloadUrl: 'https:
     detectMethod: () => !!(window.ethereum && window.ethereum.isMetaMask),
     connect: async (): Promise<WalletResponse> => {
       const provider = await detectEthereumProvider();
       if (!provider || !window.ethereum) {
         throw new Error('MetaMask wallet not found');
       }
-      
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
       const chainId = await window.ethereum.request({ method: 'eth_chainId' }) as string;
-      
       if (!accounts || accounts.length === 0) {
         throw new Error('No accounts found');
       }
-      
       return {
         address: accounts[0] || '',
         walletName: 'MetaMask',
@@ -79,7 +68,7 @@ export const walletProviders: WalletProvider[] = [
     name: 'Coinbase Wallet',
     icon: '𝍮',
     description: 'Secure wallet by Coinbase',
-    downloadUrl: 'https://www.coinbase.com/wallet',
+    downloadUrl: 'https:
     detectMethod: () => !!(window.ethereum && (window.ethereum as any).isCoinbaseWallet),
     connect: async (): Promise<WalletResponse> => {
       try {
@@ -88,11 +77,9 @@ export const walletProviders: WalletProvider[] = [
         }
         const accounts = await (coinbaseProvider as any).request({ method: 'eth_requestAccounts' }) as string[];
         const chainId = await (coinbaseProvider as any).request({ method: 'eth_chainId' }) as string;
-        
         if (!accounts || accounts.length === 0) {
           throw new Error('No accounts found');
         }
-        
         return {
           address: accounts[0] || '',
           walletName: 'Coinbase Wallet',
@@ -109,7 +96,7 @@ export const walletProviders: WalletProvider[] = [
     name: 'Flow Wallet',
     icon: '🌊',
     description: 'Connect with Flow-compatible wallets via FCL',
-    downloadUrl: 'https://www.flow.com/',
+    downloadUrl: 'https:
     detectMethod: () => true,
     connect: async (): Promise<WalletResponse> => {
       configureFCL();
@@ -132,8 +119,6 @@ export const walletProviders: WalletProvider[] = [
     }
   }
 ];
-
-
 function getNetworkName(chainId: string): string {
   const networks: Record<string, string> = {
     '0x1': 'Ethereum Mainnet',
@@ -148,12 +133,9 @@ function getNetworkName(chainId: string): string {
   };
   return networks[chainId] || 'Unknown Network';
 }
-
-
 export const useWalletDetection = (): { detectedWallets: Record<string, boolean>; isDetecting: boolean } => {
   const [detectedWallets, setDetectedWallets] = useState<Record<string, boolean>>({});
   const [isDetecting, setIsDetecting] = useState<boolean>(true);
-
   useEffect(() => {
     let active = true;
     const detectWallets = () => {
@@ -183,18 +165,12 @@ export const useWalletDetection = (): { detectedWallets: Record<string, boolean>
   }, []);
   return { detectedWallets, isDetecting };
 };
-
-
 export const connectToWallet = async (walletId: string): Promise<WalletResponse> => {
   const wallet = walletProviders.find(w => w.id === walletId);
   if (!wallet) throw new Error('Wallet not supported');
   return wallet.connect();
 };
-
-
 const WALLET_CONNECTION_KEY = 'wallet_connection';
-
-
 export const saveWalletConnection = (connectionInfo: SavedWalletConnection): void => {
   if (!connectionInfo) return;
   try {
@@ -203,8 +179,6 @@ export const saveWalletConnection = (connectionInfo: SavedWalletConnection): voi
     console.error('Failed to save wallet connection:', error);
   }
 };
-
-
 export const getSavedWalletConnection = (): SavedWalletConnection | null => {
   try {
     const saved = localStorage.getItem(WALLET_CONNECTION_KEY);
@@ -214,8 +188,6 @@ export const getSavedWalletConnection = (): SavedWalletConnection | null => {
     return null;
   }
 };
-
-
 export const clearSavedWalletConnection = (): void => {
   try {
     localStorage.removeItem(WALLET_CONNECTION_KEY);

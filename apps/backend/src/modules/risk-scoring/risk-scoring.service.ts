@@ -4,6 +4,8 @@ import { UserService } from '../user/services/user.service';
 import { LoanService } from '../loan/services/loan.service';
 import { LoanStatus, Loan } from '../../common/types/database.types';
 import { BlacklistService } from '../compliance/blacklist.service';
+import { DecimalUtil, Decimal } from '../../common/utils/decimal.util';
+
 export enum RiskLevel {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
@@ -37,9 +39,9 @@ export interface FraudDetectionResult {
 export interface LoanRiskAssessment {
   loanId: string;
   riskLevel: RiskLevel;
-  defaultProbability: string; 
-  liquidationRisk: string;
-  collateralHealth: string;
+  defaultProbability: number;
+  liquidationRisk: number;
+  collateralHealth: number;
   recommendation: string;
   timestamp: Date;
 }
@@ -57,7 +59,6 @@ export class RiskScoringService {
     private readonly blacklistService: BlacklistService,
   ) { }
 
-
   async calculateUserCreditScore(userId: string): Promise<CreditScoreResult> {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
@@ -65,26 +66,27 @@ export class RiskScoringService {
     const loans = await this.loanService.findAllByUser(userId);
 
     const paymentHistory = this.calculatePaymentHistoryScore(loans);
-
     const utilization = this.calculateUtilizationScore(loans);
-
     const accountAge = this.calculateAccountAgeScore(user.createdAt);
-
     const reputation = this.calculateReputationScore(user.reputationPoints);
-
-    
     const diversification = this.calculateDiversificationScore(loans);
 
-    
-    const rawScore = (
-      (paymentHistory * 0.35) +
-      (utilization * 0.25) +
-      (accountAge * 0.15) +
-      (reputation * 0.15) +
-      (diversification * 0.10)
-    ) * 10; 
+    const rawScore = DecimalUtil.add(
+      DecimalUtil.add(
+        DecimalUtil.add(
+          DecimalUtil.add(
+            DecimalUtil.multiply(DecimalUtil.fromNumber(paymentHistory), '0.35'),
+            DecimalUtil.multiply(DecimalUtil.fromNumber(utilization), '0.25')
+          ),
+          DecimalUtil.multiply(DecimalUtil.fromNumber(accountAge), '0.15')
+        ),
+        DecimalUtil.multiply(DecimalUtil.fromNumber(reputation), '0.15')
+      ),
+      DecimalUtil.multiply(DecimalUtil.fromNumber(diversification), '0.10')
+    );
 
-    const score = Math.max(Math.min(Math.round(rawScore), 1000), 0);
+    const scaledScore = DecimalUtil.multiply(rawScore, '10');
+    const score = Math.max(Math.min(Math.round(DecimalUtil.toNumber(scaledScore)), 1000), 0);
     const grade = this.calculateGrade(score);
 
     const result: CreditScoreResult = {
@@ -101,7 +103,6 @@ export class RiskScoringService {
       method: 'ALGORITHM_V1'
     };
 
-    
     await this.persistCreditScore(userId, result);
 
     this.logger.log(
@@ -117,7 +118,7 @@ export class RiskScoringService {
     );
 
     if (completedLoans.length === 0) {
-      return 50; 
+      return 50;
     }
 
     const repaidCount = loans.filter(l => l.status === LoanStatus.REPAID).length;
@@ -125,39 +126,54 @@ export class RiskScoringService {
       [LoanStatus.DEFAULTED, LoanStatus.LIQUIDATED].includes(l.status)
     ).length;
 
-    
-    const successRate = (repaidCount / (repaidCount + defaultCount)) * 100;
+    const total = repaidCount + defaultCount;
+    if (total === 0) return 50;
+
+    const successRate = DecimalUtil.toNumber(
+      DecimalUtil.multiply(
+        DecimalUtil.divide(DecimalUtil.fromNumber(repaidCount), DecimalUtil.fromNumber(total)),
+        '100'
+      )
+    );
 
     return Math.max(Math.min(successRate, 100), 0);
   }
+
   private calculateUtilizationScore(loans: Loan[]): number {
     const activeLoans = loans.filter(l =>
       [LoanStatus.ACTIVE, LoanStatus.PENDING].includes(l.status)
     );
 
     if (activeLoans.length === 0) {
-      return 100; 
+      return 100;
     }
 
     const totalOutstanding = activeLoans.reduce(
-      (sum, l) => sum + parseFloat(l.outstandingAmount || '0'),
-      0
+      (sum: Decimal, l) => DecimalUtil.add(sum, l.outstandingAmount || '0'),
+      DecimalUtil.fromNumber(0)
     );
 
     const totalCollateral = activeLoans.reduce(
-      (sum, l) => sum + parseFloat(l.collateralAmount || '0'),
-      0
+      (sum: Decimal, l) => DecimalUtil.add(sum, l.collateralAmount || '0'),
+      DecimalUtil.fromNumber(0)
     );
 
-    if (totalCollateral === 0) {
+    if (DecimalUtil.isZero(totalCollateral)) {
       return 0;
     }
 
-    const ltv = (totalOutstanding / (totalCollateral * 0.8)) * 100;
+    const adjustedCollateral = DecimalUtil.multiply(totalCollateral, '0.8');
+    const ltv = DecimalUtil.toNumber(
+      DecimalUtil.multiply(
+        DecimalUtil.divide(totalOutstanding, adjustedCollateral),
+        '100'
+      )
+    );
     const score = Math.max(100 - ltv, 0);
 
     return Math.min(score, 100);
   }
+
   private calculateAccountAgeScore(createdAt: Date): number {
     const now = new Date();
     const ageMs = now.getTime() - new Date(createdAt).getTime();
@@ -168,12 +184,19 @@ export class RiskScoringService {
 
     return Math.min(score, 100);
   }
+
   private calculateReputationScore(reputationPoints: number): number {
-    return Math.min((reputationPoints / 1000) * 100, 100);
+    const score = DecimalUtil.toNumber(
+      DecimalUtil.multiply(
+        DecimalUtil.divide(DecimalUtil.fromNumber(reputationPoints), '1000'),
+        '100'
+      )
+    );
+    return Math.min(score, 100);
   }
 
   private calculateDiversificationScore(loans: Loan[]): number {
-    if (loans.length === 0) return 50; 
+    if (loans.length === 0) return 50;
 
     const uniqueChains = new Set(loans.map(l => l.chain)).size;
 
@@ -208,35 +231,35 @@ export class RiskScoringService {
     const flags: string[] = [];
 
     if (allLoans.length > 0) {
-      const amounts = allLoans.map(l => parseFloat(l.amount || '0'));
-      const medianAmount = amounts.sort((a, b) => a - b)[Math.floor(amounts.length / 2)];
+      const amounts = allLoans.map(l => DecimalUtil.fromString(l.amount || '0'));
+      const sortedAmounts = amounts.sort((a, b) => a.comparedTo(b));
+      const medianAmount = sortedAmounts[Math.floor(sortedAmounts.length / 2)];
 
-      if (medianAmount > 0 && loanAmount > medianAmount * 5) {
-        riskScore += 20;
-        flags.push('UNUSUAL_AMOUNT');
+      if (!DecimalUtil.isZero(medianAmount)) {
+        const threshold = DecimalUtil.multiply(medianAmount, '5');
+        if (DecimalUtil.greaterThan(DecimalUtil.fromNumber(loanAmount), threshold)) {
+          riskScore += 20;
+          flags.push('UNUSUAL_AMOUNT');
+        }
       }
     }
 
-    
     if (loansLast24h.length > 5) {
       riskScore += 25;
       flags.push('HIGH_VELOCITY');
     }
 
-    
     const accountAgeDays = this.getAccountAgeDays(user.createdAt);
     if (accountAgeDays < 30) {
       riskScore += 15;
       flags.push('NEW_ACCOUNT');
     }
 
-    
     if (user.reputationPoints < 100) {
       riskScore += 10;
       flags.push('LOW_REPUTATION');
     }
 
-    
     const isBlacklisted = await this.checkBlacklist(user.id);
     if (isBlacklisted) {
       riskScore = 100;
@@ -252,7 +275,6 @@ export class RiskScoringService {
       timestamp: new Date()
     };
 
-    
     await this.persistFraudCheck(userId, result);
 
     this.logger.log(
@@ -262,30 +284,47 @@ export class RiskScoringService {
     return result;
   }
 
-  
   async assessLoanRisk(loanId: string): Promise<LoanRiskAssessment> {
     const loan = await this.loanService.findById(loanId);
     const user = await this.userService.findById(loan.userId);
     const creditScore = await this.calculateUserCreditScore(user.id);
 
-    const collateralValue = parseFloat(loan.collateralAmount || '0');
-    const loanAmount = parseFloat(loan.amount || '0');
-    const outstandingAmount = parseFloat(loan.outstandingAmount || '0');
+    const collateralValue = DecimalUtil.fromString(loan.collateralAmount || '0');
+    const loanAmount = DecimalUtil.fromString(loan.amount || '0');
+    const outstandingAmount = DecimalUtil.fromString(loan.outstandingAmount || '0');
 
-    
-    
-    const defaultProbability = Math.max(0, Math.min(100,
-      ((900 - creditScore.score) / 900) * 100
-    ));
+    const defaultProbabilityRaw = DecimalUtil.toNumber(
+      DecimalUtil.multiply(
+        DecimalUtil.divide(
+          DecimalUtil.subtract(DecimalUtil.fromNumber(900), DecimalUtil.fromNumber(creditScore.score)),
+          '900'
+        ),
+        '100'
+      )
+    );
+    const defaultProbability = Math.max(0, Math.min(100, defaultProbabilityRaw));
 
-    
-    
-    const liquidationRisk = (loanAmount / (collateralValue || 1)) * 100;
+    const liquidationRisk = DecimalUtil.isZero(collateralValue) 
+      ? 100 
+      : DecimalUtil.toNumber(
+          DecimalUtil.multiply(
+            DecimalUtil.divide(loanAmount, collateralValue),
+            '100'
+          )
+        );
 
-    
-    const collateralHealth = ((collateralValue - outstandingAmount) / outstandingAmount) * 100;
+    const collateralHealth = DecimalUtil.isZero(outstandingAmount)
+      ? 100
+      : DecimalUtil.toNumber(
+          DecimalUtil.multiply(
+            DecimalUtil.divide(
+              DecimalUtil.subtract(collateralValue, outstandingAmount),
+              outstandingAmount
+            ),
+            '100'
+          )
+        );
 
-    
     let riskLevel = RiskLevel.LOW;
     if (defaultProbability > 50 || liquidationRisk > 120) {
       riskLevel = RiskLevel.CRITICAL;
@@ -300,54 +339,42 @@ export class RiskScoringService {
     const result: LoanRiskAssessment = {
       loanId,
       riskLevel,
-      defaultProbability: defaultProbability.toFixed(2),
-      liquidationRisk: liquidationRisk.toFixed(2),
-      collateralHealth: collateralHealth.toFixed(2),
+      defaultProbability: Number(DecimalUtil.toFixed(DecimalUtil.fromNumber(defaultProbability), 2)),
+      liquidationRisk: Number(DecimalUtil.toFixed(DecimalUtil.fromNumber(liquidationRisk), 2)),
+      collateralHealth: Number(DecimalUtil.toFixed(DecimalUtil.fromNumber(collateralHealth), 2)),
       recommendation,
       timestamp: new Date()
     };
 
-    
     await this.persistLoanRisk(loanId, result);
 
     return result;
   }
 
-  
   async collectTrainingData(loanId: string) {
     try {
       const loan = await this.loanService.findById(loanId);
       const user = await this.userService.findById(loan.userId);
       const creditScore = await this.calculateUserCreditScore(user.id);
-      const fraudCheck = await this.detectFraudRisk(user.id, parseFloat(loan.amount || '0'));
+      const fraudCheck = await this.detectFraudRisk(user.id, DecimalUtil.toNumber(DecimalUtil.fromString(loan.amount || '0')));
 
       const features = {
-        
         account_age_days: this.getAccountAgeDays(user.createdAt),
         reputation_points: user.reputationPoints,
         reputation_tier: user.reputationTier,
-
-        
-        loan_amount: parseFloat(loan.amount || '0'),
-        collateral_amount: parseFloat(loan.collateralAmount || '0'),
-        interest_rate: parseFloat(loan.interestRate || '0'),
+        loan_amount: DecimalUtil.toNumber(DecimalUtil.fromString(loan.amount || '0')),
+        collateral_amount: DecimalUtil.toNumber(DecimalUtil.fromString(loan.collateralAmount || '0')),
+        interest_rate: DecimalUtil.toNumber(DecimalUtil.fromString(loan.interestRate || '0')),
         duration_days: loan.durationDays,
         chain: loan.chain,
-
-        
         credit_score: creditScore.score,
         fraud_risk_score: fraudCheck.riskScore,
-
-        
         hour_of_day: new Date().getHours(),
         day_of_week: new Date().getDay(),
-
-        
-        outcome: null, 
+        outcome: null,
         outcome_date: null
       };
 
-      
       await this.supabase.getClient()
         .from('ml_training_data')
         .insert({
@@ -361,7 +388,6 @@ export class RiskScoringService {
     }
   }
 
-  
   async updateTrainingOutcome(loanId: string, outcome: 'REPAID' | 'DEFAULTED') {
     try {
       await this.supabase.getClient()
@@ -375,8 +401,6 @@ export class RiskScoringService {
       this.logger.error(`Failed to update training outcome for loan ${loanId}: ${error.message}`);
     }
   }
-
-  
 
   private async persistCreditScore(userId: string, result: CreditScoreResult) {
     try {
@@ -418,9 +442,9 @@ export class RiskScoringService {
         .insert({
           loanId,
           riskLevel: result.riskLevel,
-          defaultProbability: parseFloat(result.defaultProbability),
-          liquidationRisk: parseFloat(result.liquidationRisk),
-          collateralHealth: parseFloat(result.collateralHealth),
+          defaultProbability: result.defaultProbability,
+          liquidationRisk: result.liquidationRisk,
+          collateralHealth: result.collateralHealth,
           recommendation: result.recommendation,
           assessedAt: result.timestamp
         });
@@ -455,7 +479,6 @@ export class RiskScoringService {
     try {
       const user = await this.userService.findById(userId);
 
-      
       if (!user.walletAddresses) {
         return false;
       }
@@ -479,7 +502,6 @@ export class RiskScoringService {
       return false;
     } catch (error) {
       this.logger.error(`Blacklist check failed for user ${userId}: ${error.message}`);
-      
       return false;
     }
   }

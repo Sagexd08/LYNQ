@@ -15,12 +15,10 @@ export const COIN_LIST = [
   "solana",
   "toncoin"
 ].join(",");
-
 export const API_ENDPOINTS = {
-  MAINNET: "https://mainnet.infura.io/v3/",
-  TESTNET: "https://sepolia.infura.io/v3/",
-  COINGECKO: "https://api.coingecko.com/api/v3/coins/markets",
-  BACKEND: "http://localhost:3000/api/v1"
+  MAINNET: "https:
+  TESTNET: "https:
+  COINGECKO: "https:
+  BACKEND: "http:
 } as const;
-
 export const REQUEST_TIMEOUT = 10000;

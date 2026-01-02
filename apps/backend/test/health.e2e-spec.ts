@@ -2,10 +2,8 @@ import { describe, it, beforeAll, afterAll, expect } from '@jest/globals';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../src/app.module';
-
 describe('Health Check (e2e)', () => {
   let app: INestApplication;
-
   beforeAll(async () => {
     app = await NestFactory.create(AppModule, { logger: false });
     app.setGlobalPrefix('api/v1');
@@ -18,16 +16,14 @@ describe('Health Check (e2e)', () => {
     );
     await app.listen(0);
   });
-
   afterAll(async () => {
     await app.close();
   });
-
   it('/api/v1/health (GET)', async () => {
     const server = app.getHttpServer();
     const addr = server.address();
     const port = typeof addr === 'string' ? 80 : addr.port;
-    const res = await fetch(`http://127.0.0.1:${port}/api/v1/health`);
+    const res = await fetch(`http:
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveProperty('status', 'ok');

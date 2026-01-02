@@ -2,23 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useWalletStore } from '../../store/walletStore';
 import { flashLoanService } from '../../services/flashLoanService';
 import { toast } from 'react-hot-toast';
-
 export const FlashLoanHistory: React.FC = () => {
   const address = useWalletStore((state) => state.address);
   const [history, setHistory] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
-
   useEffect(() => {
     if (address) {
       loadHistory();
     }
   }, [address, page]);
-
   const loadHistory = async () => {
     if (!address) return;
-    
     setIsLoading(true);
     try {
       const data = await flashLoanService.getFlashLoanHistory(
@@ -34,7 +30,6 @@ export const FlashLoanHistory: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -44,7 +39,6 @@ export const FlashLoanHistory: React.FC = () => {
       minute: '2-digit'
     });
   };
-
   const formatAmount = (amount: string) => {
     try {
       return parseFloat(amount).toFixed(4);
@@ -52,7 +46,6 @@ export const FlashLoanHistory: React.FC = () => {
       return amount;
     }
   };
-
   const getAssetSymbol = (address: string) => {
     const assetMap: Record<string, string> = {
       '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2': 'WETH',
@@ -62,23 +55,21 @@ export const FlashLoanHistory: React.FC = () => {
     };
     return assetMap[address] || address.substring(0, 6) + '...' + address.substring(address.length - 4);
   };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <svg className="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-8 w-8 text-indigo-500" xmlns="http:
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       </div>
     );
   }
-
   if (!history) {
     return (
       <div className="text-center py-12">
         <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-8 max-w-md mx-auto">
-          <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http:
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="mt-4 text-lg font-medium text-white">No Transaction History</h3>
@@ -89,7 +80,6 @@ export const FlashLoanHistory: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div>
       <div className="mb-6">
@@ -98,11 +88,10 @@ export const FlashLoanHistory: React.FC = () => {
           View your flash loan transaction history and details
         </p>
       </div>
-
       {history.transactions.length === 0 ? (
         <div className="text-center py-12">
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-8 max-w-md mx-auto">
-            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http:
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h3 className="mt-4 text-lg font-medium text-white">No Transactions Found</h3>
@@ -144,7 +133,7 @@ export const FlashLoanHistory: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-gray-700 rounded-full flex items-center justify-center">
-                            <svg className="h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-5 w-5 text-gray-300" xmlns="http:
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                           </div>
@@ -204,8 +193,7 @@ export const FlashLoanHistory: React.FC = () => {
               </table>
             </div>
           </div>
-
-          {/* Pagination */}
+          {}
           <div className="mt-6 flex items-center justify-between">
             <div className="text-sm text-gray-400">
               Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, history.total)} of {history.total} results
@@ -237,7 +225,6 @@ export const FlashLoanHistory: React.FC = () => {
           </div>
         </>
       )}
-
       {}
       <div className="mt-8 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
         <h4 className="font-medium text-blue-300 mb-2">Understanding Your History</h4>

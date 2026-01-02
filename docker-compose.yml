@@ -1,7 +1,5 @@
 version: '3.9'
-
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: lynq-postgres
@@ -21,8 +19,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: lynq-redis
@@ -38,8 +34,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Backend NestJS Application
   backend:
     build:
       context: ./apps/backend
@@ -68,8 +62,6 @@ services:
     volumes:
       - ./apps/backend/src:/app/src
     command: npm run start:dev
-
-  # Frontend Application
   frontend:
     build:
       context: ./apps/web/frontend
@@ -87,8 +79,6 @@ services:
       - lynq-network
     volumes:
       - ./apps/web/frontend/src:/app/src
-
-  # Admin Dashboard
   admin:
     build:
       context: ./apps/web/admin
@@ -105,8 +95,6 @@ services:
       - lynq-network
     volumes:
       - ./apps/web/admin/src:/app/src
-
-  # PgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: lynq-pgadmin
@@ -121,8 +109,6 @@ services:
       - lynq-network
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-
-  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: lynq-nginx
@@ -138,11 +124,9 @@ services:
       - admin
     networks:
       - lynq-network
-
 networks:
   lynq-network:
     driver: bridge
-
 volumes:
   postgres_data:
   redis_data:

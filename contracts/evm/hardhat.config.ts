@@ -3,30 +3,20 @@ import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import "./tasks/health";
-
-
 dotenv.config();
-
 dotenv.config({ path: path.join(__dirname, "../../.env") });
-
 type HardhatAccounts = string[] | { mnemonic: string } | undefined;
-
 const getAccounts = (): HardhatAccounts => {
   const selectedNetwork = process.env.HARDHAT_NETWORK ?? "hardhat";
   const hasMnemonic = typeof process.env.MNEMONIC === "string" && process.env.MNEMONIC.trim().length > 0;
   const hasPrivateKey = typeof process.env.PRIVATE_KEY === "string" && process.env.PRIVATE_KEY.trim().length > 0;
   const allowMnemonic = process.env.USE_MNEMONIC === "1" || process.env.USE_MNEMONIC === "true";
-
-  
-  
   if (selectedNetwork !== "hardhat" && !hasMnemonic && !hasPrivateKey) {
     throw new Error(
       `Missing deployer credentials. Set PRIVATE_KEY (preferred) or MNEMONIC before deploying to '${selectedNetwork}'.`
     );
   }
-
   if (hasPrivateKey) return [process.env.PRIVATE_KEY!.trim()];
-
   if (hasMnemonic) {
     if (!allowMnemonic) {
       throw new Error(
@@ -35,11 +25,8 @@ const getAccounts = (): HardhatAccounts => {
     }
     return { mnemonic: process.env.MNEMONIC!.trim() };
   }
-
-  
   return undefined;
 };
-
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
@@ -48,7 +35,6 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
-      
       viaIR: true,
     },
   },
@@ -77,12 +63,12 @@ const config: HardhatUserConfig = {
       chainId: 56,
     },
     mantle: {
-      url: process.env.MANTLE_RPC_URL || "https://rpc.mantle.xyz",
+      url: process.env.MANTLE_RPC_URL || "https:
       accounts: getAccounts(),
       chainId: 5000,
     },
     mantleSepolia: {
-      url: process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz",
+      url: process.env.MANTLE_SEPOLIA_RPC_URL || "https:
       accounts: getAccounts(),
       chainId: 5003,
     },
@@ -100,21 +86,19 @@ const config: HardhatUserConfig = {
         network: "mantle",
         chainId: 5000,
         urls: {
-          
-          apiURL: "https://api.etherscan.io/v2/api",
-          browserURL: "https://mantlescan.xyz",
+          apiURL: "https:
+          browserURL: "https:
         },
       },
       {
         network: "mantleSepolia",
         chainId: 5003,
         urls: {
-          apiURL: "https://api.etherscan.io/v2/api",
-          browserURL: "https://sepolia.mantlescan.xyz",
+          apiURL: "https:
+          browserURL: "https:
         },
       },
     ],
   },
 };
-
 export default config;

@@ -1,59 +1,5 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState } from "react";
-
 interface SmallLoan {
   id: number;
   amount: string;
@@ -61,28 +7,19 @@ interface SmallLoan {
   dueDate: string;
   status: string;
 }
-
 interface SmallLoanCardProps {
   loan: SmallLoan;
 }
-
 const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
   const [isPaying, setIsPaying] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const handleRepayLoan = async () => {
-    
-    
-    
     setIsPaying(true);
     setError(null);
     setTxHash(null);
-
     try {
-      
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const mockTxHash = "0x" + Math.random().toString(16).substr(2, 40);
       setTxHash(mockTxHash);
       alert("✅ Repayment successful!");
@@ -94,7 +31,6 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
       setIsPaying(false);
     }
   };
-
   return (
     <div className="w-full bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md p-4 shadow-lg shadow-purple-500/10 transition-all hover:shadow-purple-500/20 hover:drop-shadow-glow flex flex-col justify-between h-full">
       {}
@@ -114,7 +50,6 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
           {loan?.status || 'Active'}
         </span>
       </div>
-
       {}
       <div className="space-y-2 text-sm text-white/80 mb-4">
         <div className="flex justify-between">
@@ -130,7 +65,6 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
           <span className="text-white font-semibold">{loan?.dueDate || 'TBD'}</span>
         </div>
       </div>
-
       {}
       <div>
         <button
@@ -140,12 +74,11 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
         >
           {isPaying ? "Processing..." : "Repay Loan"}
         </button>
-
         {txHash && (
           <p className="text-green-400 text-xs mt-2">
             Tx:{" "}
             <a
-              href={`https://etherscan.io/tx/${txHash}`}
+              href={`https:
               target="_blank"
               rel="noreferrer"
               className="underline"
@@ -159,5 +92,4 @@ const SmallLoanCard: React.FC<SmallLoanCardProps> = ({ loan }) => {
     </div>
   );
 };
-
 export default SmallLoanCard;

@@ -25,35 +25,26 @@ import {
     WebhookUpdateDto,
 } from '../dto/telegram.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-
 @ApiTags('Telegram')
 @Controller('telegram')
 export class TelegramController {
     constructor(private readonly telegramService: TelegramService) { }
-
-    
-
     @Get('status')
     @ApiOperation({ summary: 'Check Telegram bot status' })
     @ApiResponse({ status: 200, description: 'Bot status' })
     async getStatus() {
         const enabled = this.telegramService.isNotificationsEnabled();
         let botInfo = null;
-
         if (enabled) {
             const me = await this.telegramService.getMe();
             botInfo = me.ok ? me.result : null;
         }
-
         return {
             enabled,
             bot: botInfo,
             timestamp: new Date().toISOString(),
         };
     }
-
-    
-
     @Post('register')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -64,17 +55,13 @@ export class TelegramController {
         @Body() dto: RegisterTelegramDto
     ) {
         const userId = req.user.id || req.user.sub;
-
         const user = this.telegramService.registerUser(
             userId,
             dto.chatId,
             dto.walletAddress,
             dto.username
         );
-
-        
         await this.telegramService.sendWelcome(dto.chatId);
-
         return {
             success: true,
             message: 'Telegram notifications enabled',
@@ -85,7 +72,6 @@ export class TelegramController {
             },
         };
     }
-
     @Delete('unregister')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -95,7 +81,6 @@ export class TelegramController {
     async unregister(@Request() req: any) {
         const userId = req.user.id || req.user.sub;
         const success = this.telegramService.unregisterUser(userId);
-
         return {
             success,
             message: success
@@ -103,7 +88,6 @@ export class TelegramController {
                 : 'User not found',
         };
     }
-
     @Get('preferences')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -112,21 +96,18 @@ export class TelegramController {
     async getPreferences(@Request() req: any) {
         const userId = req.user.id || req.user.sub;
         const user = this.telegramService.getUser(userId);
-
         if (!user) {
             return {
                 registered: false,
                 preferences: null,
             };
         }
-
         return {
             registered: true,
             chatId: user.chatId,
             preferences: user.preferences,
         };
     }
-
     @Put('preferences')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -138,23 +119,19 @@ export class TelegramController {
     ) {
         const userId = req.user.id || req.user.sub;
         const success = this.telegramService.updatePreferences(userId, dto);
-
         if (!success) {
             return {
                 success: false,
                 message: 'User not registered for Telegram notifications',
             };
         }
-
         const user = this.telegramService.getUser(userId);
-
         return {
             success: true,
             message: 'Preferences updated successfully',
             preferences: user?.preferences,
         };
     }
-
     @Post('test')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -165,9 +142,7 @@ export class TelegramController {
         @Body() dto: SendTestNotificationDto
     ) {
         const message = dto.message || '🧪 *Test Notification*\n\nThis is a test message from LYNQ\\. Your notifications are working correctly\\!';
-
         const result = await this.telegramService.sendMessage(dto.chatId, message);
-
         return {
             success: result.ok,
             message: result.ok
@@ -175,23 +150,15 @@ export class TelegramController {
                 : `Failed to send: ${result.description}`,
         };
     }
-
-    
-
     @Post('webhook')
     @ApiOperation({ summary: 'Receive Telegram webhook updates' })
     @ApiResponse({ status: 200, description: 'Webhook processed' })
     @HttpCode(HttpStatus.OK)
     async handleWebhook(@Body() update: any) {
-        
-        
-
         if (update.message?.text) {
             const chatId = update.message.chat.id.toString();
             const text = update.message.text;
             const username = update.message.from?.username;
-
-            
             if (text === '/start') {
                 await this.telegramService.sendMessage(
                     chatId,
@@ -214,10 +181,8 @@ export class TelegramController {
                 );
             }
         }
-
         return { ok: true };
     }
-
     @Post('webhook/set')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -225,7 +190,6 @@ export class TelegramController {
     @ApiResponse({ status: 200, description: 'Webhook set' })
     async setWebhook(@Body() dto: WebhookUpdateDto) {
         const result = await this.telegramService.setWebhook(dto.url);
-
         return {
             success: result.ok,
             message: result.ok
@@ -233,7 +197,6 @@ export class TelegramController {
                 : `Failed: ${result.description}`,
         };
     }
-
     @Delete('webhook')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -241,13 +204,11 @@ export class TelegramController {
     @ApiResponse({ status: 200, description: 'Webhook deleted' })
     async deleteWebhook() {
         const result = await this.telegramService.deleteWebhook();
-
         return {
             success: result.ok,
             message: result.ok ? 'Webhook deleted' : `Failed: ${result.description}`,
         };
     }
-
     @Get('webhook/info')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -255,7 +216,6 @@ export class TelegramController {
     @ApiResponse({ status: 200, description: 'Webhook info' })
     async getWebhookInfo() {
         const result = await this.telegramService.getWebhookInfo();
-
         return {
             success: result.ok,
             info: result.result,

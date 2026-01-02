@@ -1,7 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -14,8 +13,7 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'src/test/',
-        '**/*.d.ts',
-        '**/*.config.*',
+        '***.config.*',
         '**/mockData',
       ],
     },
@@ -33,4 +31,3 @@ export default defineConfig({
     },
   },
 });
-

@@ -1,34 +1,27 @@
 
-
-
 export const CONTRACTS = {
   LOAN_PLATFORM: "0x1234567890123456789012345678901234567890", 
-  
 };
-
-
 export const NETWORKS = {
   MAINNET: {
     chainId: 1,
     name: "Ethereum Mainnet",
-    rpcUrl: "https://mainnet.infura.io/v3/YOUR_PROJECT_ID",
-    blockExplorer: "https://etherscan.io"
+    rpcUrl: "https:
+    blockExplorer: "https:
   },
   SEPOLIA: {
     chainId: 11155111,
     name: "Sepolia Testnet",
-    rpcUrl: "https://sepolia.infura.io/v3/YOUR_PROJECT_ID",
-    blockExplorer: "https://sepolia.etherscan.io"
+    rpcUrl: "https:
+    blockExplorer: "https:
   },
   LOCALHOST: {
     chainId: 31337,
     name: "Localhost",
-    rpcUrl: "http://localhost:8545",
-    blockExplorer: "http://localhost:8545"
+    rpcUrl: "http:
+    blockExplorer: "http:
   }
 };
-
-
 export const LOAN_CONSTANTS = {
   REPUTATION_SCALE: 1000,
   BASE_INTEREST_RATE: 500, 
@@ -38,8 +31,6 @@ export const LOAN_CONSTANTS = {
   MIN_LOAN_AMOUNT: "0.01", 
   MAX_LOAN_AMOUNT: "100", 
 };
-
-
 export const TOKENS = {
   ETH: {
     symbol: "ETH",
@@ -50,45 +41,36 @@ export const TOKENS = {
     coingeckoId: "ethereum"
   }
 };
-
-
 export const API_ENDPOINTS = {
-  COINGECKO: "https://api.coingecko.com/api/v3",
-  ETHERSCAN: "https://api.etherscan.io/api",
-  
+  COINGECKO: "https:
+  ETHERSCAN: "https:
 };
-
-
 export const SUPPORTED_WALLETS = [
   {
     id: "metamask",
     name: "MetaMask",
     icon: "🦊",
-    downloadUrl: "https://metamask.io/"
+    downloadUrl: "https:
   },
   {
     id: "coinbase",
     name: "Coinbase Wallet",
     icon: "🔷",
-    downloadUrl: "https://wallet.coinbase.com/"
+    downloadUrl: "https:
   },
   {
     id: "walletconnect",
     name: "WalletConnect",
     icon: "🔗",
-    downloadUrl: "https://walletconnect.com/"
+    downloadUrl: "https:
   }
 ];
-
-
 export const INTEREST_RATE_PARAMS = {
   BASE_RATE: 0.05, 
   REPUTATION_MULTIPLIER: 0.5, 
   MAX_RATE: 0.25, 
   MIN_RATE: 0.02, 
 };
-
-
 export const REPUTATION_PARAMS = {
   NEW_USER_SCORE: 500, 
   MAX_SCORE: 1000,
@@ -97,16 +79,12 @@ export const REPUTATION_PARAMS = {
   TIMELINESS_WEIGHT: 0.2, 
   VOLUME_WEIGHT: 0.1, 
 };
-
-
 export const UI_CONSTANTS = {
   TOAST_DURATION: 3000, 
   ANIMATION_DURATION: 300, 
   DEBOUNCE_DELAY: 500, 
   ITEMS_PER_PAGE: 10,
 };
-
-
 export const DEFAULT_LOAN_TERMS = [
   { days: 7, label: "7 days", apr: "6.5%" },
   { days: 30, label: "30 days", apr: "8.2%" },
@@ -114,8 +92,6 @@ export const DEFAULT_LOAN_TERMS = [
   { days: 180, label: "180 days", apr: "11.0%" },
   { days: 365, label: "1 year", apr: "15.0%" }
 ];
-
-
 export const COLLATERAL_OPTIONS = [
   {
     value: "eth",
@@ -136,8 +112,6 @@ export const COLLATERAL_OPTIONS = [
     minimumAmount: "100"
   }
 ];
-
-
 export const ERROR_MESSAGES = {
   WALLET_NOT_CONNECTED: "Please connect your wallet first",
   INSUFFICIENT_BALANCE: "Insufficient balance for this transaction",
@@ -146,8 +120,6 @@ export const ERROR_MESSAGES = {
   TRANSACTION_FAILED: "Transaction failed. Please try again.",
   CONTRACT_ERROR: "Smart contract error. Please contact support.",
 };
-
-
 export const SUCCESS_MESSAGES = {
   WALLET_CONNECTED: "Wallet connected successfully",
   LOAN_CREATED: "Loan created successfully",

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint src*.ts",
     "test": "vitest run",
     "test:watch": "vitest watch"
   },

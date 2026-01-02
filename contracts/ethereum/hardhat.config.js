@@ -1,20 +1,16 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
-
 const getAccounts = () => {
   const selectedNetwork = process.env.HARDHAT_NETWORK || "hardhat";
   const hasPrivateKey = typeof process.env.PRIVATE_KEY === "string" && process.env.PRIVATE_KEY.trim().length > 0;
   const hasMnemonic = typeof process.env.MNEMONIC === "string" && process.env.MNEMONIC.trim().length > 0;
   const allowMnemonic = process.env.USE_MNEMONIC === "1" || process.env.USE_MNEMONIC === "true";
-
   if (selectedNetwork !== "hardhat" && selectedNetwork !== "localhost" && !hasPrivateKey && !hasMnemonic) {
     throw new Error(
       `Missing deployer credentials. Set PRIVATE_KEY (preferred) or MNEMONIC before deploying to '${selectedNetwork}'.`
     );
   }
-
   if (hasPrivateKey) return [process.env.PRIVATE_KEY.trim()];
-
   if (hasMnemonic) {
     if (!allowMnemonic) {
       throw new Error(
@@ -23,10 +19,8 @@ const getAccounts = () => {
     }
     return { mnemonic: process.env.MNEMONIC.trim() };
   }
-
   return undefined;
 };
-
 module.exports = {
   solidity: {
     version: "0.8.20",
@@ -43,19 +37,19 @@ module.exports = {
       chainId: 1337,
     },
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: "http:
       chainId: 1337,
     },
     alfajores: {
       url:
         process.env.CELO_ALFAJORES_RPC_URL ||
         process.env.ALFAJORES_RPC_URL ||
-        "https://alfajores-forno.celo-testnet.org",
+        "https:
       accounts: getAccounts(),
       chainId: 44787,
     },
     celo: {
-      url: process.env.CELO_RPC_URL || "https://forno.celo.org",
+      url: process.env.CELO_RPC_URL || "https:
       accounts: getAccounts(),
       chainId: 42220,
     },
@@ -91,19 +85,18 @@ module.exports = {
         network: "alfajores",
         chainId: 44787,
         urls: {
-          apiURL: "https://api-alfajores.celoscan.io/api",
-          browserURL: "https://alfajores.celoscan.io",
+          apiURL: "https:
+          browserURL: "https:
         },
       },
       {
         network: "celo",
         chainId: 42220,
         urls: {
-          apiURL: "https://api.celoscan.io/api",
-          browserURL: "https://celoscan.io",
+          apiURL: "https:
+          browserURL: "https:
         },
       },
     ],
   },
 };
-

@@ -10,10 +10,8 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup-jest.ts'],
   collectCoverageFrom: [
-    'src/**/*.(t|j)s',
-    '!src/**/*.spec.ts',
-    '!src/**/*.interface.ts',
-    '!src/**/*.dto.ts',
+    'src*.spec.ts',
+    '!src*.dto.ts',
     '!src/main.ts',
   ],
   coverageDirectory: './coverage',

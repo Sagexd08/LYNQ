@@ -1,49 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { TelegramService } from "../../services/telegramService";
-
 const LOAN_CORE_ADDRESS = import.meta.env.VITE_LOAN_CORE_ADDRESS || "0x0000000000000000000000000000000000000000";
 const REPUTATION_POINTS_ADDRESS = import.meta.env.VITE_REPUTATION_POINTS_ADDRESS || "0x0000000000000000000000000000000000000000";
-
 const LOAN_CORE_ABI = [
   "function createLoan(uint256 amount, uint256 collateralAmount, address collateralToken, uint256 interestRate, uint256 duration) external returns (uint256)",
   "event LoanCreated(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 collateralAmount)"
 ];
-
 const REPUTATION_POINTS_ABI = [
   "function reputations(address user) external view returns (uint256 points, uint8 tier, uint256 loansCompleted, uint256 onTimePayments)"
 ];
-
 const isValidHexAddress = (address: string): boolean => {
   if (!address) return false;
-  
   const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
-  
   return /^[0-9a-fA-F]{40}$/.test(cleanAddress);
 };
-
 const formatAddress = (address: string): string => {
   if (!address) return '';
-  
   const cleanAddress = address.startsWith('0x') ? address : `0x${address}`;
   return cleanAddress;
 };
-
 const validateAmount = (amount: string, maxAmount: string): { isValid: boolean; error?: string } => {
   const numAmount = parseFloat(amount);
   const numMaxAmount = parseFloat(maxAmount);
-  
   if (isNaN(numAmount) || numAmount <= 0) {
     return { isValid: false, error: "Amount must be a positive number" };
   }
-  
   if (numAmount > numMaxAmount) {
     return { isValid: false, error: `Amount cannot exceed ${maxAmount} ETH` };
   }
-  
   return { isValid: true };
 };
-
 const LoanRequestForm: React.FC = () => {
   const [amount, setAmount] = useState<string>("");
   const [tokenType, setTokenType] = useState<string>("ETH");
@@ -52,22 +39,18 @@ const LoanRequestForm: React.FC = () => {
   const [purpose, setPurpose] = useState<string>("");
   const [loanType, setLoanType] = useState<string>("standard"); 
   const [flashLoanData, setFlashLoanData] = useState<string>(""); 
-  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isCreatingTrustScore, setIsCreatingTrustScore] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
-  
   const [userAddress, setUserAddress] = useState<string>("");
   const [isContractInitialized, setIsContractInitialized] = useState<boolean>(false);
   const [hasTrustScore, setHasTrustScore] = useState<boolean>(false);
   const [trustScoreData, setTrustScoreData] = useState<any>(null);
   const [maxLoanAmount, setMaxLoanAmount] = useState<string>("100");
   const [isWalletConnected, setIsWalletConnected] = useState<boolean>(false);
-
-  
   useEffect(() => {
     const checkWallet = async () => {
       try {
@@ -87,35 +70,26 @@ const LoanRequestForm: React.FC = () => {
         setIsWalletConnected(false);
       }
     };
-
     checkWallet();
   }, []);
-
-  
   const checkContractAndUserStatus = async (address: string) => {
     try {
       if (!isValidHexAddress(address)) {
         console.error("Invalid address format:", address);
         return;
       }
-
       console.log("Checking contract status for address:", address);
-      
       if (!window.ethereum) throw new Error("Wallet not connected");
       const provider = new ethers.BrowserProvider(window.ethereum);
-      
       const code = await provider.getCode(REPUTATION_POINTS_ADDRESS);
       if (code === "0x") {
         console.warn("Reputation contract not deployed");
         setHasTrustScore(false);
         return;
       }
-
       const reputationContract = new ethers.Contract(REPUTATION_POINTS_ADDRESS, REPUTATION_POINTS_ABI, provider);
       const repData = await (reputationContract as any).reputations(address);
-      
       setIsContractInitialized(true);
-      
       if (repData.points > 0) {
         setHasTrustScore(true);
         setTrustScoreData({ score: repData.points.toString() });
@@ -124,7 +98,6 @@ const LoanRequestForm: React.FC = () => {
         setHasTrustScore(false);
         setMaxLoanAmount("10");
       }
-      
     } catch (error: any) {
       console.log("Error checking contract status:", error);
       setIsContractInitialized(false);
@@ -132,14 +105,11 @@ const LoanRequestForm: React.FC = () => {
       setMaxLoanAmount("100");
     }
   };
-
-  
   const initializeContract = async () => {
     setIsInitializing(true);
     setError(null);
     setTxHash(null);
     setValidationErrors({});
-
     try {
       if (!window.ethereum) throw new Error("Wallet not connected");
       const accounts = await (window.ethereum as any).request({ method: 'eth_accounts' });
@@ -153,28 +123,22 @@ const LoanRequestForm: React.FC = () => {
       setIsInitializing(false);
     }
   };
-
-  
   const createTrustScore = async () => {
     setIsCreatingTrustScore(true);
     setError(null);
     setTxHash(null);
     setValidationErrors({});
-
     try {
       console.log("Requesting trust score calculation...");
-      
       if (!window.ethereum) throw new Error("Wallet not connected");
       const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
       if (accounts && accounts.length > 0 && accounts[0]) {
         const address = accounts[0];
         await checkContractAndUserStatus(address);
       }
-      
       if (!hasTrustScore) {
         setError("Trust score calculation pending or failed. Please try again later.");
       }
-
     } catch (err: any) {
       console.error("Trust score creation error:", err);
       setError(err.message || "Trust score creation failed.");
@@ -182,20 +146,13 @@ const LoanRequestForm: React.FC = () => {
       setIsCreatingTrustScore(false);
     }
   };
-
-  
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
-
-    
     const amountValidation = validateAmount(amount, maxLoanAmount);
     if (!amountValidation.isValid) {
       errors.amount = amountValidation.error!;
     }
-
-    
     if (loanType === "standard") {
-      
       if (collateralAddress.trim()) {
         const formattedAddress = formatAddress(collateralAddress.trim());
         if (!isValidHexAddress(formattedAddress)) {
@@ -206,64 +163,48 @@ const LoanRequestForm: React.FC = () => {
         }
       }
     } else if (loanType === "flash") {
-      
       if (!flashLoanData.trim()) {
         errors.flashLoanData = "Flash loan execution data is required for flash loans.";
       }
     }
-
-    
     if (purpose.length > 100) {
       errors.purpose = "Purpose description is too long (max 100 characters).";
     }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
-  
   const handleLoanRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
     setError(null);
     setTxHash(null);
     setValidationErrors({});
-
     if (!validateForm()) {
       return;
     }
-
     setIsLoading(true);
-
     try {
       if (!window.ethereum) throw new Error("Wallet not connected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(LOAN_CORE_ADDRESS, LOAN_CORE_ABI, signer);
-
       const amountWei = ethers.parseEther(amount);
       const durationSeconds = 30 * 24 * 60 * 60;
       const interestBps = 1000;
-      
       let collateralAmountWei = 0n;
       let collateralTokenAddr = "0x0000000000000000000000000000000000000000";
-
       if (collateralAddress && collateralAmount) {
         collateralTokenAddr = collateralAddress;
         collateralAmountWei = ethers.parseEther(collateralAmount);
-
         const erc20Abi = [
           "function approve(address spender, uint256 amount) external returns (bool)",
           "function allowance(address owner, address spender) external view returns (uint256)"
         ];
         const collateralContract = new ethers.Contract(collateralTokenAddr, erc20Abi, signer);
-        
         console.log("Approving collateral...");
         const approveTx = await (collateralContract as any).approve(LOAN_CORE_ADDRESS, collateralAmountWei);
         await approveTx.wait();
         console.log("Collateral approved");
       }
-
       const tx = await (contract as any).createLoan(
         amountWei,
         collateralAmountWei,
@@ -271,10 +212,8 @@ const LoanRequestForm: React.FC = () => {
         interestBps,
         durationSeconds
       );
-
       setTxHash(tx.hash);
       await tx.wait();
-
       void TelegramService.notifyLoanGranted({
         loanId: "Pending",
         borrower: userAddress,
@@ -282,15 +221,12 @@ const LoanRequestForm: React.FC = () => {
         aprBps: String(interestBps),
         dueDate: new Date(Date.now() + durationSeconds * 1000).toLocaleString()
       });
-      
       setAmount("");
       setPurpose("");
       setCollateralAddress("");
-      
     } catch (err: any) {
       console.error("Loan request error:", err);
       let errorMessage = "Loan request failed.";
-      
       if (err.message) {
         if (err.message.includes("insufficient")) {
           errorMessage = "Insufficient balance to request loan.";
@@ -304,28 +240,19 @@ const LoanRequestForm: React.FC = () => {
           errorMessage = err.message;
         }
       }
-      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
-  
   const handleFlashLoanRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    
     setError(null);
     setTxHash(null);
     setValidationErrors({});
-
-    
     if (!validateForm()) {
       return;
     }
-
-    
     if (!flashLoanData.trim()) {
       setValidationErrors(prev => ({ 
         ...prev, 
@@ -333,40 +260,26 @@ const LoanRequestForm: React.FC = () => {
       }));
       return;
     }
-
     setIsLoading(true);
-
     try {
       if (!window.ethereum) throw new Error("Wallet not connected");
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.getSigner(); 
-      
-      
       const amountInWei = ethers.parseEther(amount);
-      
-      
       console.log("Flash loan request:", {
         amount: amountInWei.toString(),
         tokenType,
         executionData: flashLoanData,
         purpose: purpose || "Flash loan operation"
       });
-      
-      
       const mockTxHash = "0xFL" + Math.random().toString(16).substr(2, 6); 
-
       setTxHash(mockTxHash);
-      
-      
       setAmount("");
       setPurpose("");
       setFlashLoanData("");
-      
     } catch (err: any) {
       console.error("Flash loan request error:", err);
       let errorMessage = "Flash loan request failed.";
-      
       if (err.message) {
         if (err.message.includes("insufficient")) {
           errorMessage = "Flash loan failed: insufficient liquidity in pool.";
@@ -378,42 +291,31 @@ const LoanRequestForm: React.FC = () => {
           errorMessage = err.message;
         }
       }
-      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
-  
   const handleCollateralAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCollateralAddress(value);
-    
-    
     if (validationErrors.collateralAddress) {
       setValidationErrors(prev => ({ ...prev, collateralAddress: "" }));
     }
   };
-
-  
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAmount(value);
-    
-    
     if (validationErrors.amount) {
       setValidationErrors(prev => ({ ...prev, amount: "" }));
     }
   };
-
   return (
     <div className="space-y-6 max-w-lg mx-auto p-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">🏦 Elegant DeFi Loan Platform</h2>
         <p className="text-white/70 text-sm">Decentralized lending with trust-based scoring</p>
       </div>
-      
       {}
       <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-white/10">
         <h3 className="text-white font-semibold mb-3">📊 Account Status</h3>
@@ -444,7 +346,6 @@ const LoanRequestForm: React.FC = () => {
           )}
         </div>
       </div>
-
       {}
       {!isContractInitialized && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
@@ -462,7 +363,6 @@ const LoanRequestForm: React.FC = () => {
           </button>
         </div>
       )}
-
       {}
       {isContractInitialized && !hasTrustScore && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
@@ -480,12 +380,10 @@ const LoanRequestForm: React.FC = () => {
           </button>
         </div>
       )}
-
       {}
       {isContractInitialized && hasTrustScore && (
         <div className="bg-white/5 rounded-xl p-6 border border-white/10">
           <h3 className="text-white font-semibold mb-4">💰 Request a Loan</h3>
-          
           {}
           <div className="mb-6">
             <label className="block text-white/80 text-sm font-medium mb-3">
@@ -528,7 +426,6 @@ const LoanRequestForm: React.FC = () => {
                 ? "Standard loans require collateral and have flexible repayment terms."
                 : "Flash loans must be borrowed and repaid within the same transaction. No collateral required."}
             </div>
-            
             {}
             {loanType === "flash" && (
               <div className="mt-4 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
@@ -546,7 +443,6 @@ const LoanRequestForm: React.FC = () => {
               </div>
             )}
           </div>
-          
           <form onSubmit={loanType === "flash" ? handleFlashLoanRequest : handleLoanRequest} className="space-y-4">
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">
@@ -584,7 +480,6 @@ const LoanRequestForm: React.FC = () => {
                 </div>
               )}
             </div>
-
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">
                 Token Type *
@@ -600,7 +495,6 @@ const LoanRequestForm: React.FC = () => {
                 <option value="USDT" className="text-black bg-white">USDT</option>
               </select>
             </div>
-
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">
                 Purpose / Description
@@ -624,7 +518,6 @@ const LoanRequestForm: React.FC = () => {
                 {purpose.length}/100 characters
               </p>
             </div>
-
             {}
             {loanType === "flash" && (
               <div>
@@ -657,7 +550,6 @@ const LoanRequestForm: React.FC = () => {
                 </div>
               </div>
             )}
-
             {}
             {loanType === "standard" && (
               <>
@@ -707,7 +599,6 @@ const LoanRequestForm: React.FC = () => {
                 )}
               </>
             )}
-
             <button
               type="submit"
               disabled={
@@ -740,7 +631,6 @@ const LoanRequestForm: React.FC = () => {
           </form>
         </div>
       )}
-
       {}
       {txHash && (
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
@@ -756,7 +646,7 @@ const LoanRequestForm: React.FC = () => {
                 Flash loan completed in single transaction. View on Explorer:{" "}
                 <a
                   className="underline hover:text-green-200 font-mono"
-                  href={`https://etherscan.io/tx/${txHash}`}
+                  href={`https:
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -768,7 +658,7 @@ const LoanRequestForm: React.FC = () => {
                 View on Explorer:{" "}
                 <a
                   className="underline hover:text-green-200 font-mono"
-                  href={`https://etherscan.io/tx/${txHash}`}
+                  href={`https:
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -786,7 +676,6 @@ const LoanRequestForm: React.FC = () => {
           )}
         </div>
       )}
-      
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <div className="flex items-center space-x-2 mb-2">
@@ -799,5 +688,4 @@ const LoanRequestForm: React.FC = () => {
     </div>
   );
 };
-
 export default LoanRequestForm;

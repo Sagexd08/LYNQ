@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { useFlashLoanMultiWalletStore } from '../../store/useFlashLoanMultiWalletStore';
-
 interface BatchHistoryProps {
   userAddress: string;
   refreshInterval?: number;
 }
-
-
 export const BatchHistory: React.FC<BatchHistoryProps> = ({
   userAddress,
   refreshInterval = 30000,
@@ -17,10 +14,7 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
     isLoadingHistory,
     fetchUserBatches,
   } = useFlashLoanMultiWalletStore();
-
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
-
-  
   useEffect(() => {
     fetchUserBatches(userAddress);
     const interval = setInterval(() => {
@@ -28,14 +22,10 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
     }, refreshInterval);
     return () => clearInterval(interval);
   }, [userAddress, refreshInterval, fetchUserBatches]);
-
-  
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
     return date.toLocaleString();
   };
-
-  
   const formatAmount = (amount: string): string => {
     try {
       return ethers.formatEther(amount);
@@ -43,12 +33,9 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
       return amount;
     }
   };
-
-  
   const getStatusColor = (success: boolean): string => {
     return success ? 'status-success' : 'status-failed';
   };
-
   return (
     <div className="batch-history">
       <div className="history-header">
@@ -61,15 +48,12 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
           {isLoadingHistory ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
-
       {isLoadingHistory && userBatches.length === 0 && (
         <div className="loading">Loading batches...</div>
       )}
-
       {!isLoadingHistory && userBatches.length === 0 && (
         <div className="empty-state">No batches found</div>
       )}
-
       {userBatches.length > 0 && (
         <div className="batch-list">
           {userBatches.map((batch) => (
@@ -83,18 +67,15 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
                     {formatTimestamp(batch.timestamp)}
                   </div>
                 </div>
-
                 <div className="batch-amount">
                   <strong>{formatAmount(batch.totalAmount)}</strong>
                   <span className="asset-symbol">
                     ({batch.asset.slice(0, 6)}...)
                   </span>
                 </div>
-
                 <div className={`batch-status ${getStatusColor(batch.success)}`}>
                   {batch.success ? 'Success' : 'Failed'}
                 </div>
-
                 <button
                   onClick={() =>
                     setExpandedBatch(
@@ -106,7 +87,6 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
                   {expandedBatch === batch.batchId ? '▲' : '▼'}
                 </button>
               </div>
-
               {}
               {expandedBatch === batch.batchId && (
                 <div className="batch-details">
@@ -144,7 +124,7 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
                       <div className="detail-item">
                         <span className="label">Tx Hash:</span>
                         <a
-                          href={`https://etherscan.io/tx/${batch.txHash}`}
+                          href={`https:
                           target="_blank"
                           rel="noopener noreferrer"
                           className="value tx-link"
@@ -154,7 +134,6 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
                       </div>
                     )}
                   </div>
-
                   <div className="detail-section">
                     <h4>Recipients ({batch.recipients.length})</h4>
                     <div className="recipients-table">
@@ -183,5 +162,4 @@ export const BatchHistory: React.FC<BatchHistoryProps> = ({
     </div>
   );
 };
-
 export default BatchHistory;

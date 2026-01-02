@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Check, Wallet, Globe, Activity } from 'lucide-react';
-
 interface PersonalDetailsProps {
   address?: string;
   ethBalance: number;
@@ -10,23 +9,20 @@ interface PersonalDetailsProps {
   isLoadingBalance?: boolean;
   balanceError?: string | null;
 }
-
 const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, walletType, isLoadingBalance }) => {
   const [usdRate, setUsdRate] = useState(2500);
   const [trustScore] = useState(75);
   const [trustTier, setTrustTier] = useState("🥈 Gold");
   const [copied, setCopied] = useState(false);
-
   const fetchPrice = async () => {
     try {
-      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
+      const res = await fetch("https:
       const data = await res.json();
       setUsdRate(data.ethereum.usd || 2500);
     } catch (err) {
       console.error("Failed to fetch ETH price:", err);
     }
   };
-
   useEffect(() => {
     fetchPrice();
     if (trustScore >= 86) setTrustTier("🥇 Elite");
@@ -34,7 +30,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
     else if (trustScore >= 31) setTrustTier("🥉 Silver");
     else setTrustTier("🔸 Beginner");
   }, [address, trustScore]);
-
   const handleCopy = () => {
     if (address) {
       navigator.clipboard.writeText(address);
@@ -42,9 +37,7 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
   const network = address?.startsWith('0x') ? 'Ethereum Mainnet' : 'Unknown';
-
   return (
     <motion.div
       className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg shadow-black/20 group hover:border-electric-blue/30 transition-all duration-300"
@@ -63,7 +56,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
           {address ? '● Connected' : '○ Disconnected'}
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {}
         <div className="space-y-2">
@@ -80,7 +72,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
             </span>
           </div>
         </div>
-
         {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold flex justify-between">
@@ -99,7 +90,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
             </div>
           </div>
         </div>
-
         {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Network</label>
@@ -113,7 +103,6 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
             </div>
           </div>
         </div>
-
         {}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Reputation</label>
@@ -131,5 +120,4 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({ address, ethBalance, 
     </motion.div>
   );
 };
-
 export default PersonalDetails;
