@@ -61,7 +61,6 @@ export class AuthService {
         const payload = { sub: user.id, email: user.email };
         const access_token = this.jwtService.sign(payload);
 
-        
         const { password: _pwd, ...result } = user;
         return { access_token, user: result };
     }
@@ -69,8 +68,7 @@ export class AuthService {
     async login(loginDto: LoginDto): Promise<{ access_token: string; user: any }> {
         const { email, password } = loginDto;
 
-        
-        
+
         const { data: userWithPassword, error } = await this.supabase
             .from('users')
             .select('*')
@@ -99,7 +97,7 @@ export class AuthService {
                 throw new UnauthorizedException('Invalid signature');
             }
 
-            
+            // Use safe lookup suited for SQLite/Postgres hybrid
             let user = await this.userService.findByWalletAddress(walletAddress, chain);
 
             if (!user) {

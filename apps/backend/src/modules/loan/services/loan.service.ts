@@ -82,7 +82,7 @@ export class LoanService {
       throw new Error(`Failed to create loan: ${error?.message}`);
     }
 
-    
+    // Send Telegram notification
     await this.telegramService.notifyLoanCreated(userId, savedLoan);
 
     return savedLoan as Loan;
@@ -99,8 +99,8 @@ export class LoanService {
       throw new NotFoundException('Loan not found');
     }
 
-    
-    
+    // Transform user data structure if necessary, depending on how `user:users(*)` returns it.
+    // Supabase returns nested object for relations.
     return data as Loan;
   }
 
@@ -128,8 +128,6 @@ export class LoanService {
 
     return { data: data as Loan[], count: count || 0 };
   }
-
-  
   async findAllByUser(userId: string): Promise<Loan[]> {
     const { data, error } = await this.supabase
       .from('loans')
@@ -185,7 +183,7 @@ export class LoanService {
       throw new Error('Failed to update loan repayment');
     }
 
-    
+    // Send Telegram notification for full repayment
     if (savedLoan.status === LoanStatus.REPAID) {
       await this.telegramService.notifyLoanRepaid(loan.userId, {
         ...savedLoan,
@@ -214,7 +212,7 @@ export class LoanService {
 
     if (error || !savedLoan) throw new Error('Liquidation update failed');
 
-    
+    // Send Telegram notification for liquidation
     await this.telegramService.notifyLoanLiquidated(loan.userId, savedLoan);
 
     return savedLoan as Loan;
