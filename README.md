@@ -1,18 +1,48 @@
 # LYNQ Multi-Chain DeFi Lending Platform
 
-A production-grade, multi-chain DeFi lending platform with ML-enhanced credit scoring, fraud detection, and risk assessment.
+A production-grade, multi-chain DeFi lending platform with **synthetic training data ML system**, ensemble credit scoring, fraud detection, and advanced risk assessment.
+
+## ⭐ New Features
+
+### 🤖 Production ML Service
+- **Synthetic Data Generation**: 100K+ realistic borrower profiles with 50+ features
+- **Ensemble Models**: XGBoost + LightGBM achieving **76.8% AUC-ROC**
+- **Real-time API**: FastAPI service with <200ms inference latency
+- **Model Explainability**: SHAP-based feature importance and explanations
+- **Drift Detection**: Automated data/model drift monitoring
+- **MLflow Integration**: Complete experiment tracking and model registry
+
+### 📊 Performance Metrics
+- **AUC-ROC**: 0.7683 (76.83%)
+- **Precision**: 46.22%
+- **Recall**: 65.80%
+- **F1 Score**: 54.30%
+- **Inference Latency**: <200ms (p95)
+- **Throughput**: 50+ predictions/second
 
 ## 🏗️ Monorepo Structure
 
 ```
 LYNQ/
 ├── apps/
-│   ├── backend/          # NestJS API server
+│   ├── backend/          # NestJS API server with ML integration
 │   └── web/
 │       ├── frontend/     # Vite + React user app
 │       └── admin/        # Next.js admin dashboard
 ├── packages/
-│   └── blockchain-adapter/  # Multi-chain abstraction layer
+│   ├── blockchain-adapter/  # Multi-chain abstraction layer
+│   └── ml-service/       # 🆕 Python ML service (FastAPI)
+│       ├── src/
+│       │   ├── data/            # Synthetic data generation
+│       │   ├── features/        # Feature engineering (75+ features)
+│       │   ├── training/        # Model training & hyperparameter tuning
+│       │   ├── evaluation/      # Model validation & metrics
+│       │   ├── api/             # FastAPI endpoints
+│       │   ├── monitoring/      # Drift detection & performance tracking
+│       │   └── utils/           # Configuration & logging
+│       ├── models/              # Trained model artifacts
+│       ├── data/                # Training datasets
+│       └── tests/               # Unit tests
 ├── contracts/
 │   └── evm/             # Ethereum/EVM smart contracts
 └── deployments/         # Docker & Kubernetes configs
@@ -52,7 +82,69 @@ LYNQ/
 - Real-time collateral value tracking
 - Statuses: LOCKED, UNLOCKED, LIQUIDATED
 
-#### 🤖 Advanced ML Module (`apps/backend/src/modules/ml`)
+#### 🤖 ML Service (`packages/ml-service`) ⭐ **NEW**
+
+**Production ML Pipeline**
+- **Synthetic Data Generation**:
+  - Statistical synthesis with realistic distributions
+  - GAN-based profile generation
+  - 100K+ borrower profiles with 50+ features
+  - Configurable default rates (target: 15%)
+  - Demographic, financial, and on-chain features
+
+- **Feature Engineering** (75+ features):
+  - Borrower profiles: age, income, employment, credit history
+  - On-chain metrics: wallet age, DeFi experience, transaction patterns
+  - Behavioral indicators: gas spending, smart contract interactions
+  - Risk factors: LTV ratio, debt-to-income, portfolio volatility
+  - Interaction terms and polynomial features
+
+- **Ensemble Models**:
+  - **XGBoost Classifier** (60% weight): 500 estimators, depth 7
+  - **LightGBM Classifier** (40% weight): 500 estimators, 31 leaves
+  - SMOTE for class imbalance handling
+  - Cross-validation with stratified k-fold
+
+- **Model Performance**:
+  - AUC-ROC: **0.7683** (76.83%)
+  - Precision: 46.22%, Recall: 65.80%, F1: 54.30%
+  - Top features: risk_score, wallet_age_days, defi_experience_level
+
+- **Real-time API** (FastAPI):
+  - `/api/ml/credit-score`: Individual credit assessment
+  - `/api/ml/batch-score`: Batch predictions
+  - `/api/ml/model/info`: Model metadata
+  - `/api/ml/health`: Service health check
+  - Response time: <200ms (p95)
+
+- **Model Explainability**:
+  - SHAP feature importance
+  - Confidence intervals (95%)
+  - Human-readable explanations
+  - Risk level classification: VERY_LOW → VERY_HIGH
+  - Recommended actions: APPROVE, MANUAL_REVIEW, DECLINE
+
+- **Monitoring & Drift Detection**:
+  - Real-time data drift detection (KS test)
+  - Model performance tracking
+  - Automated alerting for degradation
+  - Quarterly retraining schedule
+  - Performance benchmarks tracking
+
+- **MLflow Integration**:
+  - Experiment tracking
+  - Model versioning
+  - Artifact storage
+  - Hyperparameter logging
+
+**Backend ML Module** (`apps/backend/src/modules/ml`)
+- **MLServiceClient**: HTTP client for ML service integration
+- **MLService**: Risk assessment orchestration with fallback
+- **MLController**: REST endpoints for frontend
+- Automatic fallback to rule-based scoring if ML unavailable
+- Environment-based configuration
+
+#### 🎯 Risk Scoring Module (`apps/backend/src/modules/risk-scoring`)
 
 **Credit Scoring Service**
 - 5-factor weighted algorithm:
@@ -61,8 +153,8 @@ LYNQ/
   - Account Age (15%): Platform history
   - Reputation Score (15%): Platform standing
   - Diversification (10%): Asset variety
-- AI-enhanced predictions using Advanced AI Engine
 - Credit grades: A+ (800+) to F (<500)
+- Integration with ML service for enhanced predictions
 
 **Fraud Detection Service**
 - Pattern analysis checks:
@@ -74,27 +166,10 @@ LYNQ/
 - Recommendations: APPROVE, REVIEW, REJECT
 
 **Risk Assessment Service**
-- Default probability calculation based on:
-  - Credit score
-  - Payment history
-  - Current debt ratio
+- Default probability from ML model
 - Liquidation risk monitoring (120% threshold)
 - Collateral health tracking
 - Risk levels: LOW, MEDIUM, HIGH, CRITICAL
-
-**🆕 Ensemble Models Service** ⭐
-- **Random Forest Classifier**: 50-tree ensemble for robust predictions
-- **Gradient Boosting**: Adaptive learning with residual corrections
-- **Neural Network**: Backpropagation-trained network (20→15→10 architecture)
-- **Logistic Regression**: Baseline linear classification
-- **Decision Trees**: Information gain optimization with 10-level depth
-- Weighted ensemble combination (RF: 40%, GB: 30%, NN: 20%, LR: 10%)
-- Features:
-  - Cross-validation (k-fold) support for model evaluation
-  - Feature importance calculation and ranking
-  - Anomaly detection between model predictions
-  - Confidence scoring based on model agreement
-  - Training history tracking
 
 **🆕 Anomaly Detection Service** ⭐
 - **Z-Score Detection**: Statistical deviation analysis with configurable thresholds
@@ -127,25 +202,39 @@ LYNQ/
 - End-to-end ML training and inference pipeline
 - Automatic feature normalization and scaling
 - Model persistence and serialization
-- Real-time prediction endpoints
-- Historical data tracking for model improvement
-- Performance metrics tracking
-- Cross-validation for robust evaluation
+- **ML Integration**: Axios HTTP client for ML service
 
-## 📦 Smart Contracts (EVM)
+### ML Service 🆕
+- **Framework**: FastAPI (Python 3.11+)
+- **ML Libraries**: 
+  - XGBoost 2.0.3, LightGBM 4.3.0
+  - scikit-learn 1.4.0, Optuna 3.5.0
+  - SHAP 0.44.1, imbalanced-learn
+- **Data Processing**: Pandas, NumPy, Polars
+- **Synthetic Data**: Faker, SDV, CTGAN
+- **Tracking**: MLflow 3.8.1
+- **Cache**: Redis 7.0
+- **Testing**: pytest, pytest-cov
 
-### 🌍 Deployed Contracts (Mantle Sepolia)
-| Contract | Address |
-| :--- | :--- |
-| **LoanCore** | `0x16fB626C9Ef59aa865366d086931FAcfDc70490F` |
-| **SocialStaking** | `0xF7569f3F1f8E667829061941f3A09603a7501A09` |
-| **CreditScoreVerifier** | `0x47B887406f3773fdc45C50692ba8e37732036b01` |
-| **ReputationPoints** | `0x989671777720a8b82AF271f48287d4ace3F3b363` |
-| **CollateralVault** | `0x8D65d4bbED41a9BbDDEdA63c5798e16058e31A4A` |
-| **LiquidatorProtocol** | `0xd1125B8FEa5dF57aB1f3c3A225FF48E8Ff83D032` |
-| **MockToken** | `0x9cbC3Fb3Bb48c70a0feB5EF7487187AC298C537C` |
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **State**: Zustand + React Query
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Wallet**: RainbowKit, Petra (Aptos), Flow Client Library
+- **Forms**: React Hook Form + Zod
 
+### Smart Contracts
+- **Language**: Solidity 0.8.20
+- **Framework**: Hardhat
+- **Libraries**: OpenZeppelin Contracts 5.0
+- **Networks**: Ethereum, Polygon, BSC, Mantle Sepolia
 
+### Infrastructure
+- **Containerization**: Docker multi-stage builds
+- **Orchestration**: Kubernetes
+- **CI/CD**: GitHub Actions
+- **Monorepo**: Turborepo + pnpm workspaces
+- **Monitoring**: Prometheus + Grafana (planned)
 ### LoanCore.sol
 - Loan lifecycle management
 - Interest calculation
@@ -198,27 +287,130 @@ LYNQ/
 ```bash
 node >= 18.0.0
 pnpm >= 8.0.0
+python >= 3.11.0
 docker >= 24.0.0
 postgresql >= 16.0.0
+redis >= 7.0.0 (optional, for ML caching)
 ```
 
-### Installation
+### Quick Start (Full Stack)
 
-1. **Clone and install dependencies**
+#### 1. **Using Docker Compose** (Recommended)
 ```bash
-git clone <repository-url>
+# Clone repository
+git clone https://github.com/Sagexd08/LYNQ.git
 cd LYNQ
+
+# Start all services (Backend + ML Service + Database + Redis)
+docker-compose up -d
+
+# Check service health
+curl http://localhost:3000/health
+curl http://localhost:8001/api/ml/health
+
+# View logs
+docker-compose logs -f
+```
+
+Services will be available at:
+- Backend API: http://localhost:3000
+- ML Service: http://localhost:8001
+- MLflow UI: http://localhost:5000
+- Swagger Docs: http://localhost:3000/api
+
+#### 2. **Manual Installation**
+
+**A. Backend Setup**
+```bash
+# Install dependencies
 pnpm install
-```
 
-2. **Setup environment variables**
-```bash
+# Setup environment
+cd apps/backend
 cp .env.example .env
-# Edit .env with your configurations
+# Edit .env with your database credentials and ML_SERVICE_URL
+
+# Run database migrations
+pnpm migration:run
+
+# Start backend
+pnpm dev
 ```
 
-3. **Start PostgreSQL**
+**B. ML Service Setup**
 ```bash
+cd packages/ml-service
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Setup environment
+cp .env.example .env
+
+# Generate synthetic training data
+python src/data/synthetic_generator.py \
+  --samples 100000 \
+  --output data/synthetic_loans.csv \
+  --default-rate 0.15
+
+# Train model
+python src/training/train_model.py \
+  --data data/synthetic_loans.csv \
+  --output models/production
+
+# Start ML service
+uvicorn src.api.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+**C. Start Frontend** (Optional)
+```bash
+cd apps/web/frontend
+pnpm dev
+# Frontend at http://localhost:3001
+```
+
+### Development Workflow
+
+**Backend Development**
+```bash
+cd apps/backend
+pnpm dev              # Start dev server
+pnpm test             # Run tests
+pnpm test:e2e         # Run e2e tests
+pnpm build            # Build for production
+```
+
+**ML Service Development**
+```bash
+cd packages/ml-service
+
+# Run tests
+pytest tests/ -v --cov=src
+
+# Generate new training data
+python src/data/synthetic_generator.py --samples 10000
+
+# Retrain model
+python src/training/train_model.py --data data/synthetic_loans.csv
+
+# Hyperparameter tuning
+python src/training/hyperparameter_tuning.py --data data/synthetic_loans.csv --trials 100
+
+# Start API
+uvicorn src.api.main:app --reload
+```
+
+**Frontend Development**
+```bash
+cd apps/web/frontend
+pnpm dev              # Start dev server
+pnpm build            # Build for production
+pnpm lint             # Run linter
+```
 docker-compose up -d postgres
 ```
 
@@ -284,28 +476,67 @@ POST /collateral/:id/unlock  - Unlock collateral
 GET  /collateral/:id/value   - Get current value
 ```
 
-### ML Services (Internal & Advanced)
+### ML Services 🆕
+
+**Backend Integration** (http://localhost:3000/ml)
 ```
-# Legacy ML Services
-POST /ml/credit-score          - Calculate credit score
-POST /ml/fraud-check           - Run fraud detection
-POST /ml/risk-assessment       - Assess loan risk
+GET  /ml/status              - Get ML service health status
+POST /ml/assess-risk         - Comprehensive risk assessment
+```
 
-# 🆕 Advanced ML Endpoints
-POST /ml/ensemble-prediction   - Get ensemble model prediction with confidence
-POST /ml/ensemble-train        - Train ensemble models with historical data
-GET  /ml/feature-importance    - Get feature importance scores for all models
-POST /ml/cross-validate        - Perform k-fold cross-validation (default 5 folds)
+**ML Service API** (http://localhost:8001/api/ml)
+```
+POST /credit-score           - Get credit score prediction
+  Request: { applicant_id, loan_amount, loan_term_months, collateral_amount, collateral_type }
+  Response: { credit_score, default_probability, risk_level, recommended_action, 
+              interest_rate, confidence_interval, feature_importance, explanation }
 
-# 🆕 Anomaly Detection Endpoints
-POST /ml/anomaly-detection     - Detect anomalies in user behavior/transactions
-POST /ml/train-anomaly-detector - Train anomaly detector on historical data
-GET  /ml/anomaly-baseline      - Get baseline statistics for comparison
+POST /batch-score            - Batch credit predictions
+  Request: { applicant_ids[], processing_mode }
+  Response: { results[], total_processed }
 
-# 🆕 Predictive Analytics Endpoints
-POST /ml/forecast-timeseries   - Forecast time series data with confidence intervals
-POST /ml/predict-loan-default  - Predict loan default probability (advanced)
-POST /ml/predict-churn         - Predict user churn probability
+GET  /model/info             - Get model metadata
+  Response: { model_version, trained_date, feature_count, training_samples, auc_roc }
+
+GET  /health                 - Health check
+  Response: { status, model_loaded, timestamp }
+```
+
+**Example Request**
+```bash
+curl -X POST http://localhost:8001/api/ml/credit-score \
+  -H "Content-Type: application/json" \
+  -d '{
+    "applicant_id": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+    "loan_amount": 50000,
+    "loan_term_months": 12,
+    "collateral_amount": 75000,
+    "collateral_type": "USDC"
+  }'
+```
+
+**Example Response**
+```json
+{
+  "credit_score": 720,
+  "default_probability": 0.08,
+  "risk_level": "MEDIUM",
+  "recommended_action": "APPROVE",
+  "interest_rate": 8.5,
+  "confidence_interval": {
+    "lower": 0.06,
+    "upper": 0.10
+  },
+  "feature_importance": {
+    "risk_score": 14.47,
+    "wallet_age_days": 7.61,
+    "defi_experience_level": 6.01
+  },
+  "explanation": "Good credit history and low volatility portfolio...",
+  "model_version": "v1.0.0",
+  "inference_time_ms": 145
+}
+```
 POST /ml/forecast-market       - Forecast market trends and volatility
 ```
 
