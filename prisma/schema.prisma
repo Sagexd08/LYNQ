@@ -30,12 +30,14 @@ model User {
 }
 
 model Loan {
-  id        String     @id @default(uuid())
-  userId    String     @map("user_id")
-  amount    Int
-  issuedAt  DateTime   @default(now()) @map("issued_at")
-  dueAt     DateTime   @map("due_at")
-  status    LoanStatus @default(active)
+  id                   String     @id @default(uuid())
+  userId               String     @map("user_id")
+  amount               Int
+  issuedAt             DateTime   @default(now()) @map("issued_at")
+  dueAt                DateTime   @map("due_at")
+  status               LoanStatus @default(active)
+  lateDays             Int        @default(0) @map("late_days")
+  partialExtensionUsed Boolean    @default(false) @map("partial_extension_used")
 
   user       User        @relation(fields: [userId], references: [id])
   repayments Repayment[]
@@ -55,9 +57,12 @@ model Repayment {
 }
 
 model Reputation {
-  userId    String   @id @map("user_id")
-  score     Int      @default(50)
-  updatedAt DateTime @default(now()) @map("updated_at")
+  userId                    String   @id @map("user_id")
+  score                     Int      @default(50)
+  consecutiveLateCount      Int      @default(0) @map("consecutive_late_count")
+  cleanCycleCount           Int      @default(0) @map("clean_cycle_count")
+  maxScoreBeforeLastPenalty Int?     @map("max_score_before_last_penalty")
+  updatedAt                 DateTime @default(now()) @map("updated_at")
 
   user      User     @relation(fields: [userId], references: [id])
 

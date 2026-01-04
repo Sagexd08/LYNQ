@@ -1,13 +1,21 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReputationService } from '../reputation/reputation.service';
 import { CreateRepaymentDto } from './dto/create-repayment.dto';
+import { classifyRepayment, RepaymentClassification } from './classification';
+
+const PARTIAL_EXTENSION_DAYS = 3;
 
 @Injectable()
 export class RepaymentsService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly reputationService: ReputationService,
+    ) { }
 
     async create(createRepaymentDto: CreateRepaymentDto) {
         const { loanId, amount } = createRepaymentDto;
+        const paidAt = new Date();
 
         const loan = await this.prisma.loan.findUnique({
             where: { id: loanId },
@@ -27,7 +35,8 @@ export class RepaymentsService {
             throw new BadRequestException('Loan is already repaid');
         }
 
-        // Create repayment record
+        const outcome = classifyRepayment(loan, amount, paidAt);
+
         const repayment = await this.prisma.repayment.create({
             data: {
                 loanId,
@@ -35,31 +44,52 @@ export class RepaymentsService {
             },
         });
 
-        // Check if fully repaid
-        const totalRepaid = loan.repayments.reduce((sum: number, r: { amount: number }) => sum + r.amount, 0) + amount;
+        if (outcome.classification === RepaymentClassification.PARTIAL) {
+            if (loan.partialExtensionUsed) {
+                await this.prisma.loan.update({
+                    where: { id: loanId },
+                    data: {
+                        lateDays: Math.max(1, outcome.lateDays),
+                    },
+                });
 
-        if (totalRepaid >= loan.amount) {
-            // Mark loan as repaid
-            await this.prisma.loan.update({
-                where: { id: loanId },
-                data: { status: 'repaid' },
-            });
+                if (loan.user?.reputation) {
+                    await this.reputationService.applyRepaymentOutcome(
+                        loan.userId,
+                        RepaymentClassification.LATE,
+                        1
+                    );
+                }
+            } else {
+                const newDueAt = new Date(loan.dueAt);
+                newDueAt.setDate(newDueAt.getDate() + PARTIAL_EXTENSION_DAYS);
 
-            // Update reputation
-            if (loan.user && loan.user.reputation) {
-                const isOverdue = new Date() > loan.dueAt;
-                const scoreChange = isOverdue ? -20 : 10;
-                let newScore = loan.user.reputation.score + scoreChange;
-
-                // Clamp score
-                if (newScore > 100) newScore = 100;
-                if (newScore < 0) newScore = 0;
-
-                await this.prisma.reputation.update({
-                    where: { userId: loan.userId },
-                    data: { score: newScore },
+                await this.prisma.loan.update({
+                    where: { id: loanId },
+                    data: {
+                        partialExtensionUsed: true,
+                        dueAt: newDueAt,
+                    },
                 });
             }
+
+            return repayment;
+        }
+
+        await this.prisma.loan.update({
+            where: { id: loanId },
+            data: {
+                status: 'repaid',
+                lateDays: outcome.lateDays,
+            },
+        });
+
+        if (loan.user?.reputation) {
+            await this.reputationService.applyRepaymentOutcome(
+                loan.userId,
+                outcome.classification,
+                outcome.lateDays
+            );
         }
 
         return repayment;

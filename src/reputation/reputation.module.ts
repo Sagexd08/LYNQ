@@ -6,6 +6,8 @@ import { ReputationService } from './reputation.service';
 @Module({
   imports: [PrismaModule],
   controllers: [ReputationController],
-  providers: [ReputationService]
+  providers: [ReputationService],
+  exports: [ReputationService],
 })
 export class ReputationModule { }
+
