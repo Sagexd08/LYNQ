@@ -9,4 +9,10 @@ export class ReputationController {
     getScore(@Param('userId') userId: string) {
         return this.reputationService.getScore(userId);
     }
+
+    @Get(':userId/history')
+    getHistory(@Param('userId') userId: string) {
+        return this.reputationService.getHistory(userId);
+    }
 }
+

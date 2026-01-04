@@ -7,6 +7,7 @@ describe('ReputationController', () => {
 
   const mockReputationService = {
     getScore: jest.fn(),
+    getHistory: jest.fn(),
   };
 
   beforeEach(async () => {

@@ -64,7 +64,37 @@ model Reputation {
   maxScoreBeforeLastPenalty Int?     @map("max_score_before_last_penalty")
   updatedAt                 DateTime @default(now()) @map("updated_at")
 
-  user      User     @relation(fields: [userId], references: [id])
+  user   User              @relation(fields: [userId], references: [id])
+  events ReputationEvent[]
 
   @@map("reputation")
 }
+
+enum ReputationEventType {
+  EARLY_REPAYMENT
+  ON_TIME_REPAYMENT
+  PARTIAL_REPAYMENT
+  LATE_REPAYMENT
+  CONSECUTIVE_LATE_BLOCK
+  RECOVERY
+  UNBLOCK
+  ADMIN_ADJUSTMENT
+}
+
+model ReputationEvent {
+  id            String              @id @default(uuid())
+  userId        String              @map("user_id")
+  type          ReputationEventType
+  delta         Int
+  previousScore Int                 @map("previous_score")
+  newScore      Int                 @map("new_score")
+  loanId        String?             @map("loan_id")
+  reason        String?
+  createdAt     DateTime            @default(now()) @map("created_at")
+
+  reputation Reputation @relation(fields: [userId], references: [userId])
+
+  @@index([userId, createdAt])
+  @@map("reputation_events")
+}
+

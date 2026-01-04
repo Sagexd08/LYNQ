@@ -37,61 +37,65 @@ export class RepaymentsService {
 
         const outcome = classifyRepayment(loan, amount, paidAt);
 
-        const repayment = await this.prisma.repayment.create({
-            data: {
-                loanId,
-                amount,
-            },
-        });
+        return this.prisma.$transaction(async (tx) => {
+            const repayment = await tx.repayment.create({
+                data: {
+                    loanId,
+                    amount,
+                },
+            });
 
-        if (outcome.classification === RepaymentClassification.PARTIAL) {
-            if (loan.partialExtensionUsed) {
-                await this.prisma.loan.update({
-                    where: { id: loanId },
-                    data: {
-                        lateDays: Math.max(1, outcome.lateDays),
-                    },
-                });
+            if (outcome.classification === RepaymentClassification.PARTIAL) {
+                if (loan.partialExtensionUsed) {
+                    await tx.loan.update({
+                        where: { id: loanId },
+                        data: {
+                            lateDays: Math.max(1, outcome.lateDays),
+                        },
+                    });
 
-                if (loan.user?.reputation) {
-                    await this.reputationService.applyRepaymentOutcome(
-                        loan.userId,
-                        RepaymentClassification.LATE,
-                        1
-                    );
+                    if (loan.user?.reputation) {
+                        await this.reputationService.applyRepaymentOutcome(
+                            loan.userId,
+                            RepaymentClassification.LATE,
+                            1,
+                            loanId
+                        );
+                    }
+                } else {
+                    const newDueAt = new Date(loan.dueAt);
+                    newDueAt.setDate(newDueAt.getDate() + PARTIAL_EXTENSION_DAYS);
+
+                    await tx.loan.update({
+                        where: { id: loanId },
+                        data: {
+                            partialExtensionUsed: true,
+                            dueAt: newDueAt,
+                        },
+                    });
                 }
-            } else {
-                const newDueAt = new Date(loan.dueAt);
-                newDueAt.setDate(newDueAt.getDate() + PARTIAL_EXTENSION_DAYS);
 
-                await this.prisma.loan.update({
-                    where: { id: loanId },
-                    data: {
-                        partialExtensionUsed: true,
-                        dueAt: newDueAt,
-                    },
-                });
+                return repayment;
+            }
+
+            await tx.loan.update({
+                where: { id: loanId },
+                data: {
+                    status: 'repaid',
+                    lateDays: outcome.lateDays,
+                },
+            });
+
+            if (loan.user?.reputation) {
+                await this.reputationService.applyRepaymentOutcome(
+                    loan.userId,
+                    outcome.classification,
+                    outcome.lateDays,
+                    loanId
+                );
             }
 
             return repayment;
-        }
-
-        await this.prisma.loan.update({
-            where: { id: loanId },
-            data: {
-                status: 'repaid',
-                lateDays: outcome.lateDays,
-            },
         });
-
-        if (loan.user?.reputation) {
-            await this.reputationService.applyRepaymentOutcome(
-                loan.userId,
-                outcome.classification,
-                outcome.lateDays
-            );
-        }
-
-        return repayment;
     }
 }

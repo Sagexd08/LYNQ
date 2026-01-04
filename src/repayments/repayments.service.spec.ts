@@ -7,6 +7,7 @@ import { RepaymentClassification } from './classification';
 
 describe('RepaymentsService', () => {
   let service: RepaymentsService;
+  let mockTx: any;
   let prisma: any;
   let reputationService: any;
 
@@ -17,7 +18,7 @@ describe('RepaymentsService', () => {
     userId: 'user-1',
     amount: 1000,
     issuedAt: new Date('2026-01-01'),
-    dueAt: new Date('2026-02-01T12:30:00Z'), // 30 minutes from NOW
+    dueAt: new Date('2026-02-01T12:30:00Z'),
     status: 'active',
     lateDays: 0,
     partialExtensionUsed: false,
@@ -40,14 +41,20 @@ describe('RepaymentsService', () => {
     jest.useFakeTimers();
     jest.setSystemTime(NOW);
 
+    mockTx = {
+      loan: {
+        update: jest.fn().mockResolvedValue({}),
+      },
+      repayment: {
+        create: jest.fn().mockResolvedValue({ id: 'repay-1' }),
+      },
+    };
+
     prisma = {
       loan: {
         findUnique: jest.fn(),
-        update: jest.fn(),
       },
-      repayment: {
-        create: jest.fn(),
-      },
+      $transaction: jest.fn((callback: (tx: any) => Promise<any>) => callback(mockTx)),
     };
 
     reputationService = {
@@ -81,10 +88,10 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 300 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanWithRepayments);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 400 });
-      expect(prisma.loan.update).toHaveBeenCalledWith(
+
+      expect(mockTx.loan.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             partialExtensionUsed: true,
@@ -100,27 +107,27 @@ describe('RepaymentsService', () => {
         dueAt: new Date('2026-02-03T12:00:00Z'),
       };
       prisma.loan.findUnique.mockResolvedValue(earlyLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.EARLY,
-        0
+        0,
+        'loan-1'
       );
     });
 
     it('should classify ON_TIME when payment >= full amount and paid on/before dueAt', async () => {
       prisma.loan.findUnique.mockResolvedValue(mockLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.ON_TIME,
-        0
+        0,
+        'loan-1'
       );
     });
 
@@ -130,14 +137,14 @@ describe('RepaymentsService', () => {
         dueAt: new Date('2026-01-30T12:00:00Z'),
       };
       prisma.loan.findUnique.mockResolvedValue(lateLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.LATE,
-        expect.any(Number)
+        expect.any(Number),
+        'loan-1'
       );
     });
   });
@@ -149,11 +156,10 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 700 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanWithRepayments);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 200 });
 
-      const updateCall = prisma.loan.update.mock.calls[0][0];
+      const updateCall = mockTx.loan.update.mock.calls[0][0];
       expect(updateCall.data.partialExtensionUsed).toBe(true);
       expect(updateCall.data.dueAt.getDate()).toBe(mockLoan.dueAt.getDate() + 3);
     });
@@ -165,24 +171,23 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 700 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanWithExtension);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 200 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.LATE,
-        1
+        1,
+        'loan-1'
       );
     });
 
     it('ON_TIME: should set status=repaid and lateDays=0', async () => {
       prisma.loan.findUnique.mockResolvedValue(mockLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
-      expect(prisma.loan.update).toHaveBeenCalledWith(
+      expect(mockTx.loan.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             status: 'repaid',
@@ -195,14 +200,13 @@ describe('RepaymentsService', () => {
     it('LATE: should set status=repaid and calculate lateDays', async () => {
       const lateLoan = {
         ...mockLoan,
-        dueAt: new Date('2026-01-30T12:00:00Z'), // 2 days ago
+        dueAt: new Date('2026-01-30T12:00:00Z'),
       };
       prisma.loan.findUnique.mockResolvedValue(lateLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
-      const updateCall = prisma.loan.update.mock.calls[0][0];
+      const updateCall = mockTx.loan.update.mock.calls[0][0];
       expect(updateCall.data.status).toBe('repaid');
       expect(updateCall.data.lateDays).toBeGreaterThan(0);
     });
@@ -215,14 +219,14 @@ describe('RepaymentsService', () => {
         dueAt: new Date('2026-02-03T12:00:00Z'),
       };
       prisma.loan.findUnique.mockResolvedValue(earlyLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.EARLY,
-        0
+        0,
+        'loan-1'
       );
     });
 
@@ -232,7 +236,6 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 600 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanWithRepayments);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 300 });
 
@@ -242,17 +245,17 @@ describe('RepaymentsService', () => {
     it('1-day LATE: should call reputation service with LATE classification', async () => {
       const lateLoan = {
         ...mockLoan,
-        dueAt: new Date('2026-01-31T12:00:00Z'), // 1 day ago
+        dueAt: new Date('2026-01-31T12:00:00Z'),
       };
       prisma.loan.findUnique.mockResolvedValue(lateLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 1000 });
 
       expect(reputationService.applyRepaymentOutcome).toHaveBeenCalledWith(
         'user-1',
         RepaymentClassification.LATE,
-        expect.any(Number)
+        expect.any(Number),
+        'loan-1'
       );
     });
   });
@@ -261,7 +264,6 @@ describe('RepaymentsService', () => {
     it('should handle blocked user response from reputation service', async () => {
       reputationService.applyRepaymentOutcome.mockResolvedValue({ blocked: true });
       prisma.loan.findUnique.mockResolvedValue(mockLoan);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       const result = await service.create({ loanId: 'loan-1', amount: 1000 });
 
@@ -294,11 +296,10 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 700 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanFirstExtension);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-1' });
 
       await service.create({ loanId: 'loan-1', amount: 200 });
 
-      expect(prisma.loan.update).toHaveBeenCalledWith(
+      expect(mockTx.loan.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             partialExtensionUsed: true,
@@ -313,11 +314,10 @@ describe('RepaymentsService', () => {
         repayments: [{ amount: 300 }, { amount: 400 }, { amount: 200 }],
       };
       prisma.loan.findUnique.mockResolvedValue(loanMultipleRepayments);
-      prisma.repayment.create.mockResolvedValue({ id: 'repay-4' });
 
       await service.create({ loanId: 'loan-1', amount: 100 });
 
-      expect(prisma.loan.update).toHaveBeenCalledWith(
+      expect(mockTx.loan.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             status: 'repaid',
