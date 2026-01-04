@@ -29,7 +29,6 @@ export class LoansService {
 
         const reputation = user.reputation;
         if (!reputation) {
-            // Should not happen if user creation always creates reputation
             throw new InternalServerErrorException('User reputation data is missing');
         }
 

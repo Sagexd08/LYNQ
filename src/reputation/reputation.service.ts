@@ -54,13 +54,9 @@ export class ReputationService {
                 break;
 
             case RepaymentClassification.LATE:
-                if (lateDays === 1) {
-                    scoreChange = -5;
-                } else {
-                    scoreChange = -5;
-                }
+                scoreChange = -5;
 
-                if (newConsecutiveLateCount >= 1) {
+                if (newConsecutiveLateCount === 1) {
                     scoreChange = -20;
                     newMaxScoreBeforeLastPenalty = reputation.score;
                     shouldBlock = true;
@@ -77,7 +73,8 @@ export class ReputationService {
             classification === RepaymentClassification.ON_TIME;
 
         if (isCleanCycle && newCleanCycleCount >= 2 && newMaxScoreBeforeLastPenalty !== null) {
-            const recoveryAmount = Math.floor(Math.abs(scoreChange) * 0.5);
+            const penaltyAmount = Math.abs(newMaxScoreBeforeLastPenalty - reputation.score);
+            const recoveryAmount = Math.floor(penaltyAmount * 0.5);
             const recoveredScore = newScore + recoveryAmount;
             newScore = Math.min(recoveredScore, newMaxScoreBeforeLastPenalty);
         }
