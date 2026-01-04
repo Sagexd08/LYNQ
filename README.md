@@ -1,98 +1,190 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FLYN
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+FLYN is a credit-first financial platform designed to help people earn access through trust.  
+It starts with simple micro-credit and reputation-based limits, then evolves into a global financial system where responsible behavior unlocks greater control and ownership over money.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Problem
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Millions of people use modern payment apps but still lack access to fair credit.
 
-## Project setup
+- No credit history or rejected by banks
+- Predatory lending and opaque fees
+- Credit systems that don't reward good behavior early
+- Financial tools that assume trust instead of helping users earn it
+
+---
+
+## Vision
+
+FLYN aims to become a global trust and credit layer for individuals.
+
+Instead of relying only on paperwork or legacy credit scores, FLYN builds trust through real financial behavior — borrowing responsibly, repaying on time, and growing access gradually.
+
+---
+
+## MVP Scope (v0)
+
+The first version of FLYN focuses on one thing only:
+
+- Phone-based user identity (mocked)
+- Micro-credit issuance (₹500 – ₹5,000)
+- Fixed repayment windows
+- Rule-based reputation scoring
+- Progressive credit limits
+- Admin-controlled risk management
+
+No UI. No blockchain. No machine learning.
+
+---
+
+## Core Principles
+
+- **Trust is earned, not assumed**
+- **Simple systems beat complex ideas**
+- **Behavior matters more than background**
+- **Build small, validate fast, scale responsibly**
+
+---
+
+## Tech Stack (Initial)
+
+- Backend: Node.js + TypeScript
+- Framework: NestJS
+- Database: PostgreSQL
+- ORM: Prisma
+- API: REST
+- Auth: Mock phone verification
+
+---
+
+## Roadmap (High-Level)
+
+- v0: Credit engine & reputation logic
+- v1: Closed pilot with real users
+- v2: Stronger risk models & automation
+- v3: Optional on-chain reputation & ownership
+
+---
+
+## Project Setup
 
 ```bash
-$ npm install
+npm install
+docker-compose up -d
+npx prisma migrate dev
+npx prisma generate
 ```
 
-## Compile and run the project
+## Run the Project
 
 ```bash
 # development
-$ npm run start
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# production
+npm run start:prod
 ```
 
-## Run tests
+## Run Tests
 
 ```bash
-# unit tests
-$ npm run test
+# all tests
+npm test
 
-# e2e tests
-$ npm run test:e2e
+# specific test suite
+npm test -- src/reputation/reputation.service.spec.ts
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
 ```
 
-## Deployment
+## API Endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### User Management
+- `POST /users` - Register new user
+- `GET /users/:id` - Get user profile
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Loans
+- `POST /loans` - Create loan (reputation-gated)
+- `GET /loans/:id` - Get loan details
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### Repayments
+- `POST /repayments` - Make payment (triggers reputation update)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Reputation
+- `GET /reputation/:userId` - Get current reputation score
+- `GET /reputation/:userId/history` - Get audit trail of all reputation changes
 
-## Resources
+### Admin
+- `GET /admin/users` - List all users
+- `PATCH /admin/users/:id/status` - Block/unblock user
+- `PATCH /admin/reputation/:userId` - Manual reputation adjustment
+- `POST /admin/loans/:id/overdue` - Simulate overdue loan (testing)
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Reputation System
 
-## Support
+### How It Works
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**Starting Score:** 50 points (0-100 range)
 
-## Stay in touch
+**Payment Classifications:**
+- **EARLY** (≥24h before due): +12 points
+- **ON_TIME** (on/before due): +10 points
+- **PARTIAL** (< full amount): No change, +3 day extension (1x only)
+- **LATE** (after due):
+  - 1st late: -5 points
+  - 2nd consecutive late: -20 points + BLOCKED
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Recovery System:**
+- After 2 clean on-time cycles: Recover 50% of last penalty (capped)
+- After 3 clean on-time cycles: +10 bonus (capped at pre-penalty score)
+
+**Loan Eligibility:**
+- Reputation score ≥ 30
+- Not blocked
+- No existing active loan
+- Max loan amount = score × 20
+
+---
+
+## Database Schema
+
+### Tables
+1. **users** - User accounts with status tracking
+2. **loans** - Loan issuance and tracking
+3. **repayments** - Payment history
+4. **reputation** - User reputation scores with tracking fields
+5. **reputation_events** - Complete audit trail of all reputation changes
+
+### Key Features
+- Transactional mutations (ACID compliance)
+- Immutable audit log for every reputation change
+- Indexed queries for fast lookups
+
+---
+
+## Status
+
+FLYN is in early development and active research.  
+The project is intentionally minimal while core assumptions are tested.
+
+**Current Version:** 0.0.1  
+**Test Suite:** 49 tests (100% passing)  
+**Git Repository:** https://github.com/Sagexd08/FLYN.git
+
+---
+
+## Disclaimer
+
+This project is an early-stage experiment and not a licensed lending product.  
+All credit flows are simulated until regulatory and compliance requirements are met.
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT
