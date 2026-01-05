@@ -157,6 +157,7 @@ export class OracleService {
       aptos: {
         '0x1::aptos_coin::AptosCoin': 'e8b5e1e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8',
       },
+
     };
 
     const feedId = pythFeedIds[chain]?.[tokenAddress.toLowerCase()];

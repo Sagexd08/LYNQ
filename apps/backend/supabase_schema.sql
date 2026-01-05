@@ -1,4 +1,3 @@
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create Enums
@@ -62,7 +61,31 @@ CREATE TABLE "vouches" (
 -- Add Foreign Key for Loans -> Users
 ALTER TABLE "loans" ADD CONSTRAINT "FK_loans_users" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
+-- Create Telegram Subscriptions Table
+CREATE TABLE "telegram_subscriptions" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "chatId" CHARACTER VARYING NOT NULL,
+    "walletAddress" CHARACTER VARYING NOT NULL,
+    "username" CHARACTER VARYING,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "preferences" JSONB NOT NULL DEFAULT '{"loanAlerts":true,"healthFactorAlerts":true,"creditScoreAlerts":true,"transactionAlerts":true,"dailySummary":false,"priceAlerts":false,"marketingMessages":false}',
+    "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+    "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+    CONSTRAINT "PK_telegram_subscriptions" PRIMARY KEY ("id"),
+    CONSTRAINT "UQ_telegram_userId" UNIQUE ("userId"),
+    CONSTRAINT "UQ_telegram_chatId" UNIQUE ("chatId")
+);
+
+-- Add Foreign Key for Telegram Subscriptions -> Users
+ALTER TABLE "telegram_subscriptions" ADD CONSTRAINT "FK_telegram_users" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- Create index for wallet address lookup
+CREATE INDEX "IDX_telegram_walletAddress" ON "telegram_subscriptions" ("walletAddress");
+
 -- Enable Row Level Security (Optional, for Supabase specific testing)
 ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "loans" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "vouches" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "telegram_subscriptions" ENABLE ROW LEVEL SECURITY;
+

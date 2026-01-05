@@ -38,7 +38,7 @@ describe('OracleService', () => {
       expect(result).toBeDefined();
       expect(result.tokenAddress).toBe('0x0000000000000000000000000000000000000000');
       expect(result.chain).toBe('ethereum');
-      expect(result.price).toBeGreaterThan(0);
+      expect(parseFloat(result.price)).toBeGreaterThan(0);
       expect(result.source).toBeDefined();
       expect(result.timestamp).toBeInstanceOf(Date);
     });
@@ -47,7 +47,7 @@ describe('OracleService', () => {
         '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         'ethereum'
       );
-      expect(result.price).toBeGreaterThan(0);
+      expect(parseFloat(result.price)).toBeGreaterThan(0);
       expect(result.source).toBe('fallback'); 
     });
     it('should return price feed for USDC', async () => {
@@ -55,14 +55,14 @@ describe('OracleService', () => {
         '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         'ethereum'
       );
-      expect(result.price).toBe(1); 
+      expect(result.price).toBe('1'); 
     });
     it('should handle unknown tokens with default price', async () => {
       const result = await service.getPrice(
         '0x1111111111111111111111111111111111111111',
         'ethereum'
       );
-      expect(result.price).toBe(1000); 
+      expect(result.price).toBe('1000'); 
       expect(result.source).toBe('fallback');
     });
   });
@@ -97,9 +97,9 @@ describe('OracleService', () => {
       );
       expect(result.tokenAddress).toBe('0x0000000000000000000000000000000000000000');
       expect(result.amount).toBe('1.5');
-      expect(result.valueUSD).toBeGreaterThan(0);
-      expect(result.pricePerToken).toBeGreaterThan(0);
-      expect(result.valueUSD).toBe(1.5 * (result.pricePerToken as unknown as number));
+      expect(parseFloat(result.valueUSD)).toBeGreaterThan(0);
+      expect(parseFloat(result.pricePerToken)).toBeGreaterThan(0);
+      expect(parseFloat(result.valueUSD)).toBeCloseTo(1.5 * parseFloat(result.pricePerToken), 2);
     });
     it('should handle large amounts', async () => {
       const result = await service.getTokenValuation(
@@ -107,7 +107,7 @@ describe('OracleService', () => {
         '1000000',
         'ethereum'
       );
-      expect(result.valueUSD).toBe(1000000); 
+      expect(result.valueUSD).toBe('1000000.00000000'); 
     });
     it('should handle decimal amounts', async () => {
       const result = await service.getTokenValuation(
@@ -115,7 +115,7 @@ describe('OracleService', () => {
         '0.5',
         'ethereum'
       );
-      expect(result.valueUSD).toBe(0.5);
+      expect(result.valueUSD).toBe('0.50000000');
     });
   });
   describe('Multi-chain Support', () => {

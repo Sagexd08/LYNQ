@@ -1,5 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SupabaseService } from '../../supabase/supabase.service';
 import {
     NotificationType,
     NotificationPayload,
@@ -8,30 +9,53 @@ import {
     DEFAULT_NOTIFICATION_PREFERENCES,
 } from '../types/notification.types';
 import { getMessageTemplate, TemplateData } from '../templates/message.templates';
+
 interface TelegramApiResponse {
     ok: boolean;
     result?: any;
     description?: string;
     error_code?: number;
 }
+
 interface SendMessageOptions {
     parse_mode?: 'MarkdownV2' | 'HTML' | 'Markdown';
     disable_web_page_preview?: boolean;
     disable_notification?: boolean;
     reply_markup?: any;
 }
+
+interface TelegramSubscriptionRow {
+    id: string;
+    userId: string;
+    chatId: string;
+    walletAddress: string;
+    username?: string;
+    isActive: boolean;
+    preferences: NotificationPreferences;
+    createdAt: string;
+    updatedAt: string;
+}
+
 @Injectable()
 export class TelegramService implements OnModuleInit {
     private readonly logger = new Logger(TelegramService.name);
     private readonly baseUrl: string;
     private readonly botToken: string;
     private isEnabled: boolean = false;
-    private readonly users: Map<string, TelegramUser> = new Map();
-    private readonly walletToChatId: Map<string, string> = new Map();
-    constructor(private readonly configService: ConfigService) {
+
+    constructor(
+        private readonly configService: ConfigService,
+        @Inject(forwardRef(() => SupabaseService))
+        private readonly supabaseService: SupabaseService,
+    ) {
         this.botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN', '');
         this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
     }
+
+    private get supabase() {
+        return this.supabaseService.getClient();
+    }
+
     async onModuleInit() {
         if (!this.botToken) {
             this.logger.warn('⚠️ TELEGRAM_BOT_TOKEN not configured - Telegram notifications disabled');
@@ -47,12 +71,15 @@ export class TelegramService implements OnModuleInit {
             this.logger.error('❌ Failed to connect to Telegram Bot API', error);
         }
     }
+
     isNotificationsEnabled(): boolean {
         return this.isEnabled;
     }
+
     async getMe(): Promise<TelegramApiResponse> {
         return this.apiRequest('getMe');
     }
+
     async sendMessage(
         chatId: string,
         text: string,
@@ -62,6 +89,7 @@ export class TelegramService implements OnModuleInit {
             this.logger.debug('Telegram notifications disabled, skipping message');
             return { ok: false, description: 'Telegram notifications disabled' };
         }
+
         const payload = {
             chat_id: chatId,
             text,
@@ -70,47 +98,56 @@ export class TelegramService implements OnModuleInit {
             disable_notification: options.disable_notification ?? false,
             ...options,
         };
+
         return this.apiRequest('sendMessage', payload);
     }
+
     async sendNotification(payload: NotificationPayload): Promise<boolean> {
         try {
-            const chatId = payload.chatId || this.getChatIdByUserId(payload.userId);
+            const chatId = payload.chatId || await this.getChatIdByUserId(payload.userId);
             if (!chatId) {
                 this.logger.warn(`No chat ID found for user: ${payload.userId}`);
                 return false;
             }
+
             if (payload.userId) {
-                const user = this.users.get(payload.userId);
+                const user = await this.getUser(payload.userId);
                 if (user && !this.shouldSendNotification(payload.type, user.preferences)) {
                     this.logger.debug(`Notification ${payload.type} disabled for user ${payload.userId}`);
                     return false;
                 }
             }
+
             const message = getMessageTemplate(payload.type, payload.data as TemplateData);
             const result = await this.sendMessage(chatId, message);
+
             if (result.ok) {
                 this.logger.log(`✉️ Notification sent: ${payload.type} to ${chatId}`);
             } else {
                 this.logger.error(`Failed to send notification: ${result.description}`);
             }
+
             return result.ok;
         } catch (error) {
             this.logger.error(`Error sending notification: ${error.message}`, error.stack);
             return false;
         }
     }
+
     async notifyByWallet(
         walletAddress: string,
         type: NotificationType,
         data: Record<string, any>
     ): Promise<boolean> {
-        const chatId = this.walletToChatId.get(walletAddress.toLowerCase());
+        const chatId = await this.getChatIdByWallet(walletAddress);
         if (!chatId) {
             this.logger.debug(`No Telegram chat linked to wallet: ${walletAddress}`);
             return false;
         }
+
         return this.sendNotification({ type, chatId, data });
     }
+
     async notifyLoanCreated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_CREATED,
@@ -124,6 +161,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyLoanApproved(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_APPROVED,
@@ -136,6 +174,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyLoanActivated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_ACTIVATED,
@@ -150,6 +189,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyLoanRepaid(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_REPAID,
@@ -161,6 +201,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyLoanLiquidated(userId: string, loanData: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.LOAN_LIQUIDATED,
@@ -173,10 +214,12 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyHealthFactorWarning(userId: string, data: any): Promise<boolean> {
         const type = data.healthFactor < 1.2
             ? NotificationType.HEALTH_FACTOR_CRITICAL
             : NotificationType.HEALTH_FACTOR_WARNING;
+
         return this.sendNotification({
             type,
             userId,
@@ -189,12 +232,14 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyCreditScoreUpdate(userId: string, data: any): Promise<boolean> {
         const type = data.newTier !== data.oldTier
             ? (data.newScore > data.oldScore
                 ? NotificationType.TIER_UPGRADED
                 : NotificationType.TIER_DOWNGRADED)
             : NotificationType.CREDIT_SCORE_UPDATED;
+
         return this.sendNotification({
             type,
             userId,
@@ -207,6 +252,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyVouchReceived(userId: string, data: any): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.VOUCH_RECEIVED,
@@ -219,10 +265,12 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async notifyTransactionConfirmed(userId: string, data: any): Promise<boolean> {
         const type = data.type === 'deposit'
             ? NotificationType.DEPOSIT_CONFIRMED
             : NotificationType.WITHDRAWAL_CONFIRMED;
+
         return this.sendNotification({
             type,
             userId,
@@ -235,6 +283,7 @@ export class TelegramService implements OnModuleInit {
             },
         });
     }
+
     async sendWelcome(chatId: string): Promise<boolean> {
         return this.sendNotification({
             type: NotificationType.WELCOME,
@@ -242,47 +291,143 @@ export class TelegramService implements OnModuleInit {
             data: {},
         });
     }
-    registerUser(
+
+    async registerUser(
         userId: string,
         chatId: string,
         walletAddress: string,
         username?: string
-    ): TelegramUser {
-        const user: TelegramUser = {
-            id: userId,
+    ): Promise<TelegramUser> {
+        const normalizedWallet = walletAddress.toLowerCase();
+
+        const { data: existing } = await this.supabase
+            .from('telegram_subscriptions')
+            .select('*')
+            .eq('userId', userId)
+            .single();
+
+        const subscriptionData = {
+            userId,
             chatId,
-            walletAddress: walletAddress.toLowerCase(),
+            walletAddress: normalizedWallet,
             username,
             isActive: true,
-            preferences: { ...DEFAULT_NOTIFICATION_PREFERENCES },
-            createdAt: new Date(),
+            preferences: DEFAULT_NOTIFICATION_PREFERENCES,
+            updatedAt: new Date().toISOString(),
         };
-        this.users.set(userId, user);
-        this.walletToChatId.set(walletAddress.toLowerCase(), chatId);
+
+        if (existing) {
+            const { data, error } = await this.supabase
+                .from('telegram_subscriptions')
+                .update(subscriptionData)
+                .eq('userId', userId)
+                .select()
+                .single();
+
+            if (error) {
+                this.logger.error(`Failed to update Telegram subscription: ${error.message}`);
+                throw new Error('Failed to update Telegram subscription');
+            }
+
+            this.logger.log(`📱 User Telegram subscription updated: ${userId} -> ${chatId}`);
+            return this.rowToUser(data);
+        }
+
+        const { data, error } = await this.supabase
+            .from('telegram_subscriptions')
+            .insert(subscriptionData)
+            .select()
+            .single();
+
+        if (error) {
+            this.logger.error(`Failed to create Telegram subscription: ${error.message}`);
+            throw new Error('Failed to create Telegram subscription');
+        }
+
         this.logger.log(`📱 User registered for Telegram: ${userId} -> ${chatId}`);
-        return user;
+        return this.rowToUser(data);
     }
-    updatePreferences(userId: string, preferences: Partial<NotificationPreferences>): boolean {
-        const user = this.users.get(userId);
+
+    async updatePreferences(userId: string, preferences: Partial<NotificationPreferences>): Promise<boolean> {
+        const user = await this.getUser(userId);
         if (!user) return false;
-        user.preferences = { ...user.preferences, ...preferences };
-        this.users.set(userId, user);
+
+        const mergedPreferences = { ...user.preferences, ...preferences };
+
+        const { error } = await this.supabase
+            .from('telegram_subscriptions')
+            .update({
+                preferences: mergedPreferences,
+                updatedAt: new Date().toISOString(),
+            })
+            .eq('userId', userId);
+
+        if (error) {
+            this.logger.error(`Failed to update preferences: ${error.message}`);
+            return false;
+        }
+
         return true;
     }
-    unregisterUser(userId: string): boolean {
-        const user = this.users.get(userId);
-        if (!user) return false;
-        this.walletToChatId.delete(user.walletAddress);
-        this.users.delete(userId);
+
+    async unregisterUser(userId: string): Promise<boolean> {
+        const { error } = await this.supabase
+            .from('telegram_subscriptions')
+            .update({
+                isActive: false,
+                updatedAt: new Date().toISOString(),
+            })
+            .eq('userId', userId);
+
+        if (error) {
+            this.logger.error(`Failed to unregister user: ${error.message}`);
+            return false;
+        }
+
         return true;
     }
-    getUser(userId: string): TelegramUser | undefined {
-        return this.users.get(userId);
+
+    async getUser(userId: string): Promise<TelegramUser | undefined> {
+        const { data, error } = await this.supabase
+            .from('telegram_subscriptions')
+            .select('*')
+            .eq('userId', userId)
+            .eq('isActive', true)
+            .single();
+
+        if (error || !data) return undefined;
+        return this.rowToUser(data);
     }
-    private getChatIdByUserId(userId?: string): string | undefined {
+
+    private async getChatIdByUserId(userId?: string): Promise<string | undefined> {
         if (!userId) return undefined;
-        return this.users.get(userId)?.chatId;
+        const user = await this.getUser(userId);
+        return user?.chatId;
     }
+
+    private async getChatIdByWallet(walletAddress: string): Promise<string | undefined> {
+        const { data } = await this.supabase
+            .from('telegram_subscriptions')
+            .select('chatId')
+            .eq('walletAddress', walletAddress.toLowerCase())
+            .eq('isActive', true)
+            .single();
+
+        return data?.chatId;
+    }
+
+    private rowToUser(row: TelegramSubscriptionRow): TelegramUser {
+        return {
+            id: row.userId,
+            chatId: row.chatId,
+            walletAddress: row.walletAddress,
+            username: row.username,
+            isActive: row.isActive,
+            preferences: row.preferences || DEFAULT_NOTIFICATION_PREFERENCES,
+            createdAt: new Date(row.createdAt),
+        };
+    }
+
     private shouldSendNotification(type: NotificationType, prefs: NotificationPreferences): boolean {
         const prefMap: Partial<Record<NotificationType, keyof NotificationPreferences>> = {
             [NotificationType.LOAN_CREATED]: 'loanAlerts',
@@ -303,10 +448,12 @@ export class TelegramService implements OnModuleInit {
             [NotificationType.DAILY_SUMMARY]: 'dailySummary',
             [NotificationType.PRICE_ALERT]: 'priceAlerts',
         };
+
         const prefKey = prefMap[type];
-        if (!prefKey) return true; 
+        if (!prefKey) return true;
         return prefs[prefKey];
     }
+
     private async apiRequest(method: string, body?: any): Promise<TelegramApiResponse> {
         try {
             const url = `${this.baseUrl}/${method}`;
@@ -314,26 +461,33 @@ export class TelegramService implements OnModuleInit {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             };
+
             if (body) {
                 options.body = JSON.stringify(body);
             }
+
             const response = await fetch(url, options);
             const data = await response.json() as TelegramApiResponse;
+
             if (!data.ok) {
                 this.logger.error(`Telegram API error: ${data.description}`);
             }
+
             return data;
         } catch (error) {
             this.logger.error(`Telegram API request failed: ${error.message}`);
             return { ok: false, description: error.message };
         }
     }
+
     async setWebhook(url: string): Promise<TelegramApiResponse> {
         return this.apiRequest('setWebhook', { url });
     }
+
     async deleteWebhook(): Promise<TelegramApiResponse> {
         return this.apiRequest('deleteWebhook');
     }
+
     async getWebhookInfo(): Promise<TelegramApiResponse> {
         return this.apiRequest('getWebhookInfo');
     }
