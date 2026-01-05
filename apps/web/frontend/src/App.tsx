@@ -17,6 +17,7 @@ const MLInsightsPage = lazy(() => import('./pages/MLInsightsPage'));
 const ProtocolPage = lazy(() => import('./pages/ProtocolPage'));
 const RiskPage = lazy(() => import('./pages/RiskPage'));
 const GovernancePage = lazy(() => import('./pages/GovernancePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 import { PulseBar } from './components/layout/PulseBar';
 
@@ -75,10 +76,10 @@ const Layout = ({
 };
 
 function App() {
-  const [useTestnet, setUseTestnet] = useState<boolean>(true); 
+  const [useTestnet, setUseTestnet] = useState<boolean>(true);
   const [currentChainKey, setCurrentChainKey] = useState<string>('mantleSepolia');
 
-  
+
   const address = useWalletStore((state) => state.address);
   const connect = useWalletStore((state) => state.connect);
   const updateBalance = useWalletStore((state) => state.updateBalance);
@@ -86,7 +87,7 @@ function App() {
   const setLoadingBalance = useWalletStore((state) => state.setLoadingBalance);
   const setBalanceError = useWalletStore((state) => state.setBalanceError);
 
-  
+
   const fetchBalance = useCallback(async (walletAddress: string, chainKey: string = currentChainKey) => {
     if (!walletAddress) {
       updateBalance(0);
@@ -107,9 +108,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching balance:', error);
       setBalanceError('Failed to fetch balance');
-      
+
       if (walletAddress.startsWith('0x1234')) {
-        updateBalance(1.5); 
+        updateBalance(1.5);
       } else {
         updateBalance(0);
       }
@@ -118,7 +119,7 @@ function App() {
     }
   }, [currentChainKey, updateBalance, setLoadingBalance, setBalanceError]);
 
-  
+
   interface WalletData {
     address: string;
     chainId?: string;
@@ -135,7 +136,7 @@ function App() {
     if (walletData?.address) {
       console.log('Wallet connected:', walletData);
 
-      
+
       let chainKey = currentChainKey;
       if (walletData.chainId) {
         const chainInfo = getChainByChainId(walletData.chainId);
@@ -157,17 +158,17 @@ function App() {
         social: !!walletData.social,
       });
 
-      
+
       fetchBalance(walletData.address, chainKey);
     }
   }, [connect, fetchBalance, currentChainKey]);
 
-  
+
   const handleToggleNetwork = useCallback(() => {
     const newTestnetState = !useTestnet;
     setUseTestnet(newTestnetState);
 
-    
+
     const newChainKey = newTestnetState ? 'mantleSepolia' : 'mantle';
     setCurrentChainKey(newChainKey);
 
@@ -176,19 +177,19 @@ function App() {
       updateNetwork(config.chainId.toString(), config.name);
     }
 
-    
+
     if (address) {
       fetchBalance(address, newChainKey);
     }
   }, [useTestnet, address, fetchBalance, updateNetwork]);
 
-  
+
   useEffect(() => {
     const savedConnection = getSavedWalletConnection();
     if (savedConnection?.address) {
       console.log('Restoring saved wallet connection:', savedConnection);
 
-      
+
       let chainKey = 'mantleSepolia';
       if (savedConnection.chainId) {
         const chainInfo = getChainByChainId(savedConnection.chainId);
@@ -210,11 +211,11 @@ function App() {
     }
   }, [connect, fetchBalance]);
 
-  
+
   useEffect(() => {
     if (!address) return;
 
-    
+
     const interval = setInterval(() => {
       fetchBalance(address, currentChainKey);
     }, 30000);
@@ -243,7 +244,7 @@ function App() {
             <Route path="/risk" element={<RiskPage />} />
             <Route path="/governance" element={<GovernancePage />} />
             <Route path="/analytics" element={<MLInsightsPage />} />
-            {}
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<DashboardPage />} />
           </Routes>
         </Suspense>

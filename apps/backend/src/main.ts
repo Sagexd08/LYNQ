@@ -10,15 +10,16 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
     const nodeEnv = configService.get<string>('NODE_ENV', 'development');
     const port = configService.get<number>('PORT', 3000);
+    const baseUrl = configService.get<string>('BASE_URL', `http://localhost:${port}`);
+    const defaultLocalOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
     const allowedOrigins = Array.from(
         new Set(
             [
                 configService.get<string>('FRONTEND_URL'),
                 configService.get<string>('ADMIN_URL'),
+                baseUrl,
                 ...(configService.get<string>('CORS_ORIGINS')?.split(',').map((origin) => origin.trim()) || []),
-                'http:
-                'http:
-                'http:
+                ...defaultLocalOrigins,
             ].filter(Boolean),
         ),
     );
@@ -55,10 +56,10 @@ async function bootstrap() {
     }
     app.enableShutdownHooks();
     await app.listen(port);
-    logger.log(`🚀 LYNQ Backend v2.0 running on http:
+    logger.log(`🚀 LYNQ Backend v2.0 running on ${baseUrl}`);
     if (shouldServeSwagger) {
-        logger.log(`📚 API Documentation: http:
+        logger.log(`📚 API Documentation: ${baseUrl}/api/docs`);
     }
-    logger.log(`❤️  Health Check: http:
+    logger.log(`❤️  Health Check: ${baseUrl}/api/v1/health`);
 }
 bootstrap();

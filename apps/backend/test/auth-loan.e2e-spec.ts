@@ -28,7 +28,7 @@ describe('Auth and Loan Flow (e2e)', () => {
       const server = app.getHttpServer();
       const addr = server.address();
       const port = typeof addr === 'string' ? 80 : addr.port;
-      const response = await fetch(`http:
+      const response = await fetch(`http://localhost:${port}/api/v1/auth/wallet-connect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -49,7 +49,7 @@ describe('Auth and Loan Flow (e2e)', () => {
       const server = app.getHttpServer();
       const addr = server.address();
       const port = typeof addr === 'string' ? 80 : addr.port;
-      const response = await fetch(`http:
+      const response = await fetch(`http://localhost:${port}/api/v1/users/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       expect(response.status).toBe(200);
@@ -64,7 +64,7 @@ describe('Auth and Loan Flow (e2e)', () => {
       const server = app.getHttpServer();
       const addr = server.address();
       const port = typeof addr === 'string' ? 80 : addr.port;
-      const response = await fetch(`http:
+      const response = await fetch(`http://localhost:${port}/api/v1/loans`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ describe('Auth and Loan Flow (e2e)', () => {
       const server = app.getHttpServer();
       const addr = server.address();
       const port = typeof addr === 'string' ? 80 : addr.port;
-      const response = await fetch(`http:
+      const response = await fetch(`http://localhost:${port}/api/v1/loans/my-loans`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       expect(response.status).toBe(200);
@@ -102,7 +102,7 @@ describe('Auth and Loan Flow (e2e)', () => {
       const server = app.getHttpServer();
       const addr = server.address();
       const port = typeof addr === 'string' ? 80 : addr.port;
-      const response = await fetch(`http:
+      const response = await fetch(`http://localhost:${port}/api/v1/loans/${loanId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       expect(response.status).toBe(200);

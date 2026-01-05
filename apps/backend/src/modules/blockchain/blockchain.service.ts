@@ -37,30 +37,30 @@ export class BlockchainService {
     private providers: Map<string, ethers.JsonRpcProvider> = new Map();
     private wallets: Map<string, ethers.Wallet> = new Map();
     private readonly defaultRpcUrls: Record<SupportedChain, string> = {
-        mantle: 'https:
-        mantleSepolia: 'https:
-        ethereum: 'https:
-        sepolia: 'https:
-        polygon: 'https:
-        polygonAmoy: 'https:
-        arbitrum: 'https:
-        arbitrumSepolia: 'https:
-        optimism: 'https:
-        optimismSepolia: 'https:
-        base: 'https:
-        baseSepolia: 'https:
-        bsc: 'https:
-        bscTestnet: 'https:
-        avalanche: 'https:
-        avalancheFuji: 'https:
-        localhost: 'http:
+        mantle: 'https://rpc.mantle.xyz',
+        mantleSepolia: 'https://rpc.sepolia.mantle.xyz',
+        ethereum: 'https://rpc.ankr.com/eth',
+        sepolia: 'https://ethereum-sepolia-rpc.publicnode.com',
+        polygon: 'https://polygon-rpc.com',
+        polygonAmoy: 'https://rpc-amoy.polygon.technology',
+        arbitrum: 'https://arb1.arbitrum.io/rpc',
+        arbitrumSepolia: 'https://sepolia-rollup.arbitrum.io/rpc',
+        optimism: 'https://mainnet.optimism.io',
+        optimismSepolia: 'https://sepolia.optimism.io',
+        base: 'https://mainnet.base.org',
+        baseSepolia: 'https://sepolia.base.org',
+        bsc: 'https://bsc-dataseed.binance.org',
+        bscTestnet: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+        avalanche: 'https://api.avax.network/ext/bc/C/rpc',
+        avalancheFuji: 'https://api.avax-test.network/ext/bc/C/rpc',
+        localhost: 'http://localhost:8545',
     };
     private readonly chains: Record<SupportedChain, ChainConfig> = {
         mantle: {
             name: 'Mantle',
             chainId: 5000,
             rpcUrl: this.defaultRpcUrls.mantle,
-            explorerUrl: 'https:
+            explorerUrl: 'https://explorer.mantle.xyz',
             nativeCurrency: { name: 'Mantle', symbol: 'MNT', decimals: 18 },
             isTestnet: false,
         },
@@ -68,7 +68,7 @@ export class BlockchainService {
             name: 'Mantle Sepolia',
             chainId: 5003,
             rpcUrl: this.defaultRpcUrls.mantleSepolia,
-            explorerUrl: 'https:
+            explorerUrl: 'https://explorer.sepolia.mantle.xyz',
             nativeCurrency: { name: 'Mantle', symbol: 'MNT', decimals: 18 },
             isTestnet: true,
         },
@@ -76,7 +76,7 @@ export class BlockchainService {
             name: 'Ethereum',
             chainId: 1,
             rpcUrl: this.defaultRpcUrls.ethereum,
-            explorerUrl: 'https:
+            explorerUrl: 'https://etherscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: false,
         },
@@ -84,7 +84,7 @@ export class BlockchainService {
             name: 'Sepolia',
             chainId: 11155111,
             rpcUrl: this.defaultRpcUrls.sepolia,
-            explorerUrl: 'https:
+            explorerUrl: 'https://sepolia.etherscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
@@ -92,7 +92,7 @@ export class BlockchainService {
             name: 'Polygon',
             chainId: 137,
             rpcUrl: this.defaultRpcUrls.polygon,
-            explorerUrl: 'https:
+            explorerUrl: 'https://polygonscan.com',
             nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
             isTestnet: false,
         },
@@ -100,7 +100,7 @@ export class BlockchainService {
             name: 'Polygon Amoy',
             chainId: 80002,
             rpcUrl: this.defaultRpcUrls.polygonAmoy,
-            explorerUrl: 'https:
+            explorerUrl: 'https://amoy.polygonscan.com',
             nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
             isTestnet: true,
         },
@@ -108,7 +108,7 @@ export class BlockchainService {
             name: 'Arbitrum One',
             chainId: 42161,
             rpcUrl: this.defaultRpcUrls.arbitrum,
-            explorerUrl: 'https:
+            explorerUrl: 'https://arbiscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: false,
         },
@@ -116,7 +116,7 @@ export class BlockchainService {
             name: 'Arbitrum Sepolia',
             chainId: 421614,
             rpcUrl: this.defaultRpcUrls.arbitrumSepolia,
-            explorerUrl: 'https:
+            explorerUrl: 'https://sepolia.arbiscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
@@ -124,7 +124,7 @@ export class BlockchainService {
             name: 'Optimism',
             chainId: 10,
             rpcUrl: this.defaultRpcUrls.optimism,
-            explorerUrl: 'https:
+            explorerUrl: 'https://optimistic.etherscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: false,
         },
@@ -132,7 +132,7 @@ export class BlockchainService {
             name: 'Optimism Sepolia',
             chainId: 11155420,
             rpcUrl: this.defaultRpcUrls.optimismSepolia,
-            explorerUrl: 'https:
+            explorerUrl: 'https://sepolia-optimism.etherscan.io',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
@@ -140,7 +140,7 @@ export class BlockchainService {
             name: 'Base',
             chainId: 8453,
             rpcUrl: this.defaultRpcUrls.base,
-            explorerUrl: 'https:
+            explorerUrl: 'https://basescan.org',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: false,
         },
@@ -148,7 +148,7 @@ export class BlockchainService {
             name: 'Base Sepolia',
             chainId: 84532,
             rpcUrl: this.defaultRpcUrls.baseSepolia,
-            explorerUrl: 'https:
+            explorerUrl: 'https://sepolia.basescan.org',
             nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
             isTestnet: true,
         },
@@ -156,7 +156,7 @@ export class BlockchainService {
             name: 'BNB Smart Chain',
             chainId: 56,
             rpcUrl: this.defaultRpcUrls.bsc,
-            explorerUrl: 'https:
+            explorerUrl: 'https://bscscan.com',
             nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
             isTestnet: false,
         },
@@ -164,7 +164,7 @@ export class BlockchainService {
             name: 'BSC Testnet',
             chainId: 97,
             rpcUrl: this.defaultRpcUrls.bscTestnet,
-            explorerUrl: 'https:
+            explorerUrl: 'https://testnet.bscscan.com',
             nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 },
             isTestnet: true,
         },
@@ -172,7 +172,7 @@ export class BlockchainService {
             name: 'Avalanche C-Chain',
             chainId: 43114,
             rpcUrl: this.defaultRpcUrls.avalanche,
-            explorerUrl: 'https:
+            explorerUrl: 'https://snowtrace.io',
             nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
             isTestnet: false,
         },
@@ -180,7 +180,7 @@ export class BlockchainService {
             name: 'Avalanche Fuji',
             chainId: 43113,
             rpcUrl: this.defaultRpcUrls.avalancheFuji,
-            explorerUrl: 'https:
+            explorerUrl: 'https://testnet.snowtrace.io',
             nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
             isTestnet: true,
         },

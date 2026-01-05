@@ -83,7 +83,7 @@ Your loan is now *ACTIVE*\\!
 ├ Collateral: \`${escapeMarkdown(data.collateralAmount || 'N/A')}\`
 ├ Health Factor: ${getHealthFactorEmoji(data.healthFactor || 0)} ${escapeMarkdown(String(data.healthFactor?.toFixed(2) || 'N/A'))}
 ├ Due Date: ${data.dueDate ? escapeMarkdown(formatDate(data.dueDate)) : 'N/A'}
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 💰 _Funds have been transferred to your wallet\\!_
 `,
 
@@ -93,7 +93,7 @@ Congratulations\\! You've successfully repaid your loan\\.
 📊 *Repayment Summary:*
 ├ Total Repaid: \`${escapeMarkdown(formatAmount(data.amount))}\` USDC
 ├ Loan ID: \`${escapeMarkdown(data.loanId.slice(0, 8))}...\`
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 ⭐ *\\+100 Reputation Points Earned\\!*
 _Keep up the great payment behavior to unlock better rates\\!_
 `,
@@ -105,7 +105,7 @@ Unfortunately, your loan position has been liquidated\\.
 ├ Loan Amount: \`${escapeMarkdown(formatAmount(data.amount))}\` USDC
 ├ Collateral Lost: \`${escapeMarkdown(data.collateralAmount || 'N/A')}\`
 ├ Loan ID: \`${escapeMarkdown(data.loanId.slice(0, 8))}...\`
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 📉 *\\-200 Reputation Points*
 _To avoid future liquidations, consider maintaining a higher health factor\\._
 `,
@@ -118,7 +118,7 @@ Your loan payment is due in *3 days*\\.
 ├ Due Date: ${data.dueDate ? escapeMarkdown(formatDate(data.dueDate)) : 'N/A'}
 └ Loan ID: \`${escapeMarkdown(data.loanId.slice(0, 8))}...\`
 💡 _Repay on time to earn reputation points and avoid penalties\\!_
-[Repay Now](https:
+[Repay Now](https://app.example/repay)
 `,
 
     [NotificationType.LOAN_OVERDUE]: (data: LoanNotificationData): string => `
@@ -130,7 +130,7 @@ Your loan payment is *OVERDUE*\\!
 ├ Days Overdue: URGENT
 └ Loan ID: \`${escapeMarkdown(data.loanId.slice(0, 8))}...\`
 ⚠️ *Risk of Liquidation\\!*
-[Repay Immediately](https:
+[Repay Immediately](https://app.example/repay)
 `,
 
     [NotificationType.HEALTH_FACTOR_WARNING]: (data: HealthFactorNotificationData): string => `
@@ -142,7 +142,7 @@ Your loan health factor is below the safe threshold\\.
 ├ Collateral: \`${escapeMarkdown(data.collateralValue)}\`
 └ Debt: \`${escapeMarkdown(data.debtValue)}\`
 💡 _Consider adding collateral or repaying part of the loan\\._
-[Manage Position](https:
+[Manage Position](https://app.example/positions)
 `,
 
     [NotificationType.HEALTH_FACTOR_CRITICAL]: (data: HealthFactorNotificationData): string => `
@@ -154,7 +154,7 @@ Your position is at *HIGH RISK* of liquidation\\!
 ├ Collateral: \`${escapeMarkdown(data.collateralValue)}\`
 └ Debt: \`${escapeMarkdown(data.debtValue)}\`
 ⚠️ *IMMEDIATE ACTION REQUIRED*
-[Add Collateral Now](https:
+[Add Collateral Now](https://app.example/collateral)
 `,
 
     [NotificationType.LIQUIDATION_RISK]: (data: HealthFactorNotificationData): string => `
@@ -165,7 +165,7 @@ Your position will be *LIQUIDATED* if health factor drops below 1\\.0\\!
 ├ Collateral Value: \`${escapeMarkdown(data.collateralValue)}\`
 └ Outstanding Debt: \`${escapeMarkdown(data.debtValue)}\`
 🆘 *ACT NOW to save your collateral\\!*
-[Emergency Repay](https:
+[Emergency Repay](https://app.example/repay)
 `,
 
     [NotificationType.CREDIT_SCORE_UPDATED]: (data: CreditScoreNotificationData): string => {
@@ -180,7 +180,7 @@ Your LYNQ Credit Score has been updated\\.
 ├ Current: \`${data.newScore}\`
 └ Change: ${sign}${change}
 ${data.reason ? `📝 _Reason: ${escapeMarkdown(data.reason)}_` : ''}
-[View Full Report](https:
+[View Full Report](https://app.example/report)
 `;
     },
 
@@ -201,7 +201,7 @@ Your tier has been adjusted\\.
 ${getTierEmoji(data.oldTier)} ${escapeMarkdown(data.oldTier)} → ${getTierEmoji(data.newTier)} ${escapeMarkdown(data.newTier)}
 📝 _Reason: ${escapeMarkdown(data.reason || 'Score threshold not met')}_
 💡 _Improve your score by making timely payments and maintaining healthy positions\\._
-[View Analytics](https:
+[View Analytics](https://app.example/analytics)
 `,
 
     [NotificationType.VOUCH_RECEIVED]: (data: VouchNotificationData): string => `
@@ -212,7 +212,7 @@ Someone has vouched for you on LYNQ\\!
 ├ Amount: \`${escapeMarkdown(formatAmount(data.amount))}\` MNT
 └ ${data.message ? `Message: "${escapeMarkdown(data.message)}"` : 'No message'}
 ⭐ _This vouch can help you get better loan terms\\!_
-[View Vouches](https:
+[View Vouches](https://app.example/vouches)
 `,
 
     [NotificationType.VOUCH_UTILIZED]: (data: VouchNotificationData): string => `
@@ -231,7 +231,7 @@ Your deposit has been successfully processed\\.
 📊 *Transaction Details:*
 ├ Amount: \`${escapeMarkdown(formatAmount(data.amount))}\` ${escapeMarkdown(data.asset)}
 ├ Chain: ${escapeMarkdown(data.chain)}
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 ✅ _Funds are now available in your account\\._
 `,
 
@@ -241,7 +241,7 @@ Your withdrawal has been successfully processed\\.
 📊 *Transaction Details:*
 ├ Amount: \`${escapeMarkdown(formatAmount(data.amount))}\` ${escapeMarkdown(data.asset)}
 ├ Chain: ${escapeMarkdown(data.chain)}
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 ✅ _Funds have been sent to your wallet\\._
 `,
 
@@ -253,7 +253,7 @@ Your improved credit score qualifies you for better loan terms\\.
 ├ Current Rate: ${escapeMarkdown(data.interestRate || 'N/A')}%
 └ Outstanding: \`${escapeMarkdown(formatAmount(data.amount))}\` USDC
 🎯 _Check your dashboard for refinancing options\\!_
-[Refinance Now](https:
+[Refinance Now](https://app.example/refinance)
 `,
 
     [NotificationType.REFINANCE_COMPLETED]: (data: LoanNotificationData): string => `
@@ -262,7 +262,7 @@ Your loan has been successfully refinanced\\.
 📊 *Updated Terms:*
 ├ New Rate: ${escapeMarkdown(data.interestRate || 'N/A')}%
 ├ Amount: \`${escapeMarkdown(formatAmount(data.amount))}\` USDC
-└ Tx: [View on Explorer](https:
+└ Tx: [View on Explorer](https://explorer.example/tx/${escapeMarkdown(data.txHash || '')})
 💰 _You're now saving on interest payments\\!_
 `,
 
@@ -276,7 +276,7 @@ Your Telegram notifications are now enabled\\.
 ├ Vouch notifications
 └ Transaction confirmations
 ⚙️ _Customize your preferences in the app settings\\._
-[Open Dashboard](https:
+[Open Dashboard](https://app.example/dashboard)
 `,
 
     [NotificationType.DAILY_SUMMARY]: (data: Record<string, any>): string => `
@@ -288,7 +288,7 @@ Here's your LYNQ activity for today\\.
 ├ Health Factor: ${getHealthFactorEmoji(data.avgHealthFactor || 2)} \`${escapeMarkdown(String(data.avgHealthFactor?.toFixed(2) || 'N/A'))}\`
 └ Credit Score: \`${data.creditScore || 'N/A'}\`
 ${data.alerts?.length ? `⚠️ *Alerts:* ${data.alerts.length}` : '✅ No alerts today'}
-[View Details](https:
+[View Details](https://app.example/details)
 `,
 
     [NotificationType.PRICE_ALERT]: (data: Record<string, any>): string => `

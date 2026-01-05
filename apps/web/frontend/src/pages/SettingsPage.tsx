@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Settings, Bell, Shield, User, Wallet, Moon, Sun, Info } from 'lucide-react';
 import { TelegramConnect } from '../components/telegram/TelegramConnect';
 
@@ -43,8 +43,8 @@ export const SettingsPage = ({ walletAddress, userId }: SettingsPageProps) => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 <Icon className="w-4 h-4" />

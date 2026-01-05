@@ -23,7 +23,7 @@ describe('Health Check (e2e)', () => {
     const server = app.getHttpServer();
     const addr = server.address();
     const port = typeof addr === 'string' ? 80 : addr.port;
-    const res = await fetch(`http:
+    const res = await fetch(`http://localhost:${port}/api/v1/health`);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveProperty('status', 'ok');

@@ -31,7 +31,7 @@ export class IndexerService implements OnModuleInit, OnModuleDestroy {
     private async start() {
         try {
             const wsUrl = this.configService.get<string>('WS_RPC_URL');
-            const httpUrl = this.configService.get<string>('RPC_URL') || 'https:
+            const httpUrl = this.configService.get<string>('RPC_URL') || 'http://localhost:8545';
             const address = this.configService.get<string>('LOAN_CORE_ADDRESS') || this.LOAN_CORE_ADDRESS;
             if (wsUrl) {
                 this.provider = new ethers.WebSocketProvider(wsUrl);
