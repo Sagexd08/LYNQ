@@ -1,5 +1,5 @@
 packages:
-  - 'apps/*'
-  - 'apps/web/*'
-  - 'packages/*'
-  - 'contracts/*'
+  - "apps/*"
+  - "apps/web/*"
+  - "packages/*"
+  - "contracts/*"
