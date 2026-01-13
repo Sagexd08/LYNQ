@@ -4,7 +4,6 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with account:", deployer.address);
 
-    // Deploy LoanCore
     console.log("\nDeploying LoanCore...");
     const LoanCore = await ethers.getContractFactory("LoanCore");
     const loanCore = await LoanCore.deploy();
@@ -12,7 +11,6 @@ async function main() {
     const loanCoreAddress = await loanCore.getAddress();
     console.log("LoanCore deployed to:", loanCoreAddress);
 
-    // Deploy CollateralVault
     console.log("\nDeploying CollateralVault...");
     const CollateralVault = await ethers.getContractFactory("CollateralVault");
     const collateralVault = await CollateralVault.deploy();
@@ -20,13 +18,11 @@ async function main() {
     const vaultAddress = await collateralVault.getAddress();
     console.log("CollateralVault deployed to:", vaultAddress);
 
-    // Link contracts
     console.log("\nLinking contracts...");
     await loanCore.setCollateralVault(vaultAddress);
     await collateralVault.setLoanCore(loanCoreAddress);
     console.log("Contracts linked successfully");
 
-    // Summary
     console.log("\n========== Deployment Summary ==========");
     console.log("Network:", (await ethers.provider.getNetwork()).name);
     console.log("Deployer:", deployer.address);
@@ -34,7 +30,6 @@ async function main() {
     console.log("CollateralVault:", vaultAddress);
     console.log("=========================================\n");
 
-    // Return addresses for verification
     return {
         loanCore: loanCoreAddress,
         collateralVault: vaultAddress,

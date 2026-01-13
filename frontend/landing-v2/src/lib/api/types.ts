@@ -1,4 +1,4 @@
-// Authentication Types
+
 export interface WalletChallengeRequest {
   walletAddress: string;
 }
@@ -11,7 +11,7 @@ export interface WalletChallengeResponse {
 export interface WalletVerifyRequest {
   walletAddress: string;
   signature: string;
-  nonce: string; // Required - nonce from challenge response
+  nonce: string; 
 }
 
 export interface WalletVerifyResponse {
@@ -39,7 +39,6 @@ export interface Profile {
   updatedAt: string;
 }
 
-// Loan Types
 export interface CreateLoanRequest {
   amount: number;
   termMonths: number;
@@ -117,7 +116,6 @@ export interface RepayLoanResponse {
   createdAt: string;
 }
 
-// Risk Types
 export interface RiskEvaluationRequest {
   walletAddress: string;
   walletAgeDays?: number;
@@ -153,7 +151,6 @@ export interface RiskEvaluationResponse {
   }>;
 }
 
-// Health Types
 export interface HealthResponse {
   status: string;
   database: {

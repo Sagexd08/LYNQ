@@ -10,29 +10,25 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const { profile, setProfile, clearAuth } = useAuthStore();
 
-  // Get current profile
   const { data: currentProfile, isLoading } = useQuery({
     queryKey: ['auth', 'profile'],
     queryFn: () => authApi.getProfile(),
     enabled: authApi.isAuthenticated(),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, 
   });
 
-  // Update store when profile changes
   useEffect(() => {
     if (currentProfile) {
       setProfile(currentProfile);
     }
   }, [currentProfile, setProfile]);
 
-  // Wallet challenge mutation
   const challengeMutation = useMutation({
     mutationFn: (request: WalletChallengeRequest) =>
       authApi.getChallenge(request),
   });
 
-  // Verify signature mutation
   const verifyMutation = useMutation({
     mutationFn: (request: WalletVerifyRequest) =>
       authApi.verifySignature(request),
@@ -46,18 +42,14 @@ export function useAuth() {
     },
   });
 
-  /**
-   * Connect wallet and authenticate
-   */
   const connectWallet = useCallback(async () => {
     try {
-      // Check if MetaMask is installed
+      
       if (!window.ethereum) {
         toast.error('Please install MetaMask to continue');
         return;
       }
 
-      // Request account access
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
@@ -70,19 +62,15 @@ export function useAuth() {
 
       const walletAddress = accounts[0] as string;
 
-      // Get challenge
       const challenge = await challengeMutation.mutateAsync({
         walletAddress,
       });
 
-      // Store nonce temporarily
       const nonce = challenge.nonce;
 
-      // Sign message
       const signer = await provider.getSigner();
       const signature = await signer.signMessage(challenge.message);
 
-      // Verify signature
       await verifyMutation.mutateAsync({
         walletAddress,
         signature,
@@ -97,9 +85,6 @@ export function useAuth() {
     }
   }, [challengeMutation, verifyMutation]);
 
-  /**
-   * Disconnect wallet
-   */
   const disconnect = useCallback(() => {
     authApi.logout();
     clearAuth();

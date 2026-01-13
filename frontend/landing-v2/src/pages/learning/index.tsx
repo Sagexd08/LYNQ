@@ -24,9 +24,6 @@ import { Button } from '@/components/shared/Buttons';
 import { LESSONS } from '@/data/lessons';
 import { useLearningStore, useSandboxStore } from '@/store/useStore';
 
-// ============================================================================
-// COMPONENT: LearningHero
-// ============================================================================
 function LearningHero() {
   const { progress } = useLearningStore();
   const completionRate = (progress.completedLessons.length / LESSONS.length) * 100;
@@ -56,7 +53,7 @@ function LearningHero() {
             before risking real capital.
           </p>
 
-          {/* Progress Card */}
+          {}
           <div className="max-w-2xl mx-auto p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
             <div className="flex items-center justify-between mb-4">
               <div className="text-left">
@@ -96,9 +93,6 @@ function LearningHero() {
   );
 }
 
-// ============================================================================
-// COMPONENT: Quiz
-// ============================================================================
 function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
   const isCorrect = selectedAnswer === quiz.correctIndex;
 
@@ -207,9 +201,6 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
   );
 }
 
-// ============================================================================
-// COMPONENT: LessonSlides
-// ============================================================================
 function LessonSlides() {
   const { progress, completeLesson, setCurrentLesson } = useLearningStore();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -250,7 +241,7 @@ function LessonSlides() {
   return (
     <section className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Lesson Navigation */}
+        {}
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={handlePrevious}
@@ -298,7 +289,7 @@ function LessonSlides() {
           </button>
         </div>
 
-        {/* Lesson Content */}
+        {}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -371,9 +362,6 @@ function LessonSlides() {
   );
 }
 
-// ============================================================================
-// COMPONENT: Sandbox
-// ============================================================================
 function Sandbox() {
   const sandbox = useSandboxStore();
   const [selectedAsset, setSelectedAsset] = useState('USDC');
@@ -410,7 +398,7 @@ function Sandbox() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Balances */}
+          {}
           <div className="space-y-6">
             <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
               <h3 className="text-xl font-bold text-white mb-4">Your Balances</h3>
@@ -445,7 +433,7 @@ function Sandbox() {
             </div>
           </div>
 
-          {/* Actions */}
+          {}
           <div className="p-8 bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-400/30 rounded-2xl">
             <h3 className="text-2xl font-bold text-white mb-6">Take Action</h3>
 
@@ -511,7 +499,7 @@ function Sandbox() {
           </div>
         </div>
 
-        {/* Recent Transactions */}
+        {}
         {sandbox.transactions.length > 0 && (
           <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl">
             <h3 className="text-xl font-bold text-white mb-4">Recent Transactions</h3>
@@ -546,9 +534,6 @@ function Sandbox() {
   );
 }
 
-// ============================================================================
-// COMPONENT: ProgressTracker
-// ============================================================================
 function ProgressTracker() {
   const { progress } = useLearningStore();
   const completionRate = (progress.completedLessons.length / LESSONS.length) * 100;
@@ -630,7 +615,7 @@ function ProgressTracker() {
           )}
         </div>
 
-        {/* Achievement Badges */}
+        {}
         <div className="mt-8 p-8 bg-white/5 border border-white/10 rounded-2xl">
           <h3 className="text-2xl font-bold text-white mb-6">Achievements</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -680,9 +665,6 @@ function ProgressTracker() {
   );
 }
 
-// ============================================================================
-// MAIN LEARNING PAGE
-// ============================================================================
 export default function LearningPage() {
   return (
     <div className="bg-black text-white min-h-screen">

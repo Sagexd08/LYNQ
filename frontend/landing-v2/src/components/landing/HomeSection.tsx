@@ -15,7 +15,7 @@ export function HomeSection() {
 			</div>
 
 			<div className="max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-				{/* Left Content */}
+				{}
 				<motion.div
 					initial={{ opacity: 0, x: -20 }}
 					animate={{ opacity: 1, x: 0 }}
@@ -50,7 +50,7 @@ export function HomeSection() {
 					</div>
 				</motion.div>
 
-				{/* Right Spline */}
+				{}
 				<motion.div
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
@@ -58,7 +58,7 @@ export function HomeSection() {
 					className="relative h-[500px] lg:h-full lg:min-h-[600px]"
 				>
 					<Suspense fallback={<div className="w-full h-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center"><span className="text-gray-400">Loading 3D scene...</span></div>}>
-						<Spline scene="https://prod.spline.design/fVI7osVNsN6xgxlO/scene.splinecode" />
+						<Spline scene="https:
 					</Suspense>
 				</motion.div>
 			</div>

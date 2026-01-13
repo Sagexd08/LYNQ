@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http:
 
 class ApiClient {
   private client: AxiosInstance;
@@ -33,7 +33,6 @@ class ApiClient {
       }
     );
 
-    // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
@@ -43,7 +42,7 @@ class ApiClient {
 
           switch (status) {
             case 401:
-              // Unauthorized - clear token and redirect
+              
               localStorage.removeItem('lynq_access_token');
               localStorage.removeItem('lynq_profile');
               if (window.location.pathname !== '/') {

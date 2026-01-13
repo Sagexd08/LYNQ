@@ -28,7 +28,7 @@ export function ProductIntroSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Learning Mode */}
+          {}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -62,7 +62,7 @@ export function ProductIntroSection() {
             </a>
           </motion.div>
 
-          {/* Lending Mode */}
+          {}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}

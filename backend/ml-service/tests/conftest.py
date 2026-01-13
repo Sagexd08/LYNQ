@@ -43,7 +43,7 @@ def mock_model():
 def mock_scaler():
     """Mock scaler for testing."""
     scaler = Mock()
-    scaler.transform.return_value = [[0.5] * 12]  # 12 features
+    scaler.transform.return_value = [[0.5] * 12]
     return scaler
 
 

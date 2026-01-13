@@ -53,9 +53,27 @@ aws s3 cp ./ml-service/models/feature_config.json s3://lynq-models/models/credit
 # 1. Navigate to lynq-models bucket
 # 2. Create folder: models/
 # 3. Upload files:
-#    - credit_model_v1.pkl
-#    - credit_model_v1_scaler.pkl
-#    - credit_model_v1_config.json
+#    - credit_model_v1.pkl          (XGBoost classifier model, ~2-5 MB)
+#    - credit_model_v1_scaler.pkl   (StandardScaler for feature normalization, ~1-2 KB)
+#    - credit_model_v1_config.json  (Feature configuration and model metadata, ~1 KB)
+#
+# Model File Details:
+# - credit_model_v1.pkl: Trained XGBoost classifier for credit risk prediction
+#   - Model Type: XGBoost Classifier
+#   - Features: 12 (wallet_age_days, total_transactions, total_volume_usd, etc.)
+#   - Performance: Accuracy 99.99%, F1 Score 99.95%, ROC-AUC 1.0000
+#   - Training Samples: 100,000 synthetic DeFi lending records
+#   - Default Rate: ~8% (imbalanced dataset)
+#
+# - credit_model_v1_scaler.pkl: StandardScaler for feature normalization
+#   - Ensures all features are on the same scale (mean=0, std=1)
+#   - Required for consistent model predictions
+#
+# - credit_model_v1_config.json: Model metadata and feature configuration
+#   - Feature names and order
+#   - Model version (v1.0.0)
+#   - Training metrics and performance statistics
+#   - Creation timestamp
 ```
 
 ### 1.3 Configure Bucket Policy (Optional)

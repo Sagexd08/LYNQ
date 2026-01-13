@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  ml-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lynq-ml-service
+    ports:
+      - "8000:8000"
+    environment:
+      # Model Configuration
+      - MODEL_SOURCE=${MODEL_SOURCE:-s3}
+      - S3_BUCKET=${S3_BUCKET:-lynq-models}
+      - S3_KEY=${S3_KEY:-models/credit_model_v1.pkl}
+      
+      # AWS Configuration
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      
+      # API Security
+      - API_KEY=${API_KEY:-dev-api-key}
+      
+      # Feature Flags
+      - ENABLE_SHAP=${ENABLE_SHAP:-true}
+      - PRELOAD_MODEL=${PRELOAD_MODEL:-false}
+      
+      # Server Configuration
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=${DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount models directory if using local models
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - lynq-network
+
+networks:
+  lynq-network:
+    driver: bridge

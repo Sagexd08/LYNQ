@@ -20,8 +20,8 @@ export const QUEUE_NAMES = {
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 connection: {
-                    host: new URL(configService.get<string>('REDIS_URL', 'redis://localhost:6379')).hostname,
-                    port: parseInt(new URL(configService.get<string>('REDIS_URL', 'redis://localhost:6379')).port || '6379'),
+                    host: new URL(configService.get<string>('REDIS_URL', 'redis:
+                    port: parseInt(new URL(configService.get<string>('REDIS_URL', 'redis:
                 },
                 defaultJobOptions: {
                     removeOnComplete: 1000,

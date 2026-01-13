@@ -4,7 +4,7 @@ import uuid
 from typing import Optional
 from contextvars import ContextVar
 
-# Request ID context variable
+
 request_id_var: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
 
 

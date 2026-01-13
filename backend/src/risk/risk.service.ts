@@ -35,7 +35,7 @@ export class RiskService {
     ) { }
 
     async evaluateLoanRisk(dto: RiskEvaluationDto): Promise<RiskEvaluationResult> {
-        // Find user by wallet address in JSONB array using raw SQL
+        
         const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
             SELECT id FROM users 
             WHERE "walletAddresses" @> ${JSON.stringify([dto.walletAddress.toLowerCase()])}::jsonb

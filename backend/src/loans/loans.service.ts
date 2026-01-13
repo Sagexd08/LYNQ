@@ -34,7 +34,6 @@ export class LoansService {
             throw new NotFoundException('User not found');
         }
 
-        // Check if user is blocked (stored in metadata)
         const metadata = (user.metadata as any) || {};
         if (metadata.isBlocked) {
             throw new BadRequestException('User is blocked from creating loans');
@@ -44,7 +43,6 @@ export class LoansService {
             throw new BadRequestException('User already has an active loan');
         }
 
-        // Get wallet address from JSONB array
         const walletAddresses = (user.walletAddresses as string[]) || [];
         const walletAddress = walletAddresses[0] || '';
 
@@ -74,7 +72,6 @@ export class LoansService {
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
 
-        // Calculate duration days from term months
         const durationDays = dto.termMonths * 30;
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
@@ -144,7 +141,6 @@ export class LoansService {
             include: { collaterals: true },
         });
 
-        // Update user metadata with loan stats
         const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
         const userMetadata = (user?.metadata as any) || {};
         userMetadata.totalLoans = (userMetadata.totalLoans || 0) + 1;
@@ -200,7 +196,7 @@ export class LoansService {
         });
 
         if (isFullyRepaid) {
-            // Update user metadata
+            
             const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
             const userMetadata = (user?.metadata as any) || {};
             userMetadata.successfulLoans = (userMetadata.successfulLoans || 0) + 1;
@@ -254,7 +250,6 @@ export class LoansService {
             },
         });
 
-        // Update user metadata
         const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
         const userMetadata = (user?.metadata as any) || {};
         userMetadata.defaultedLoans = (userMetadata.defaultedLoans || 0) + 1;

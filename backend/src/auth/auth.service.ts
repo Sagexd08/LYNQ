@@ -31,8 +31,6 @@ export class AuthService {
         const normalizedAddress = walletAddress.toLowerCase();
         const nonce = randomUUID();
 
-        // Find or create user by wallet address
-        // Query using raw SQL for JSONB array search
         const existingUser = await this.prisma.$queryRaw<Array<{ id: string }>>`
             SELECT id FROM users 
             WHERE "walletAddresses" @> ${JSON.stringify([normalizedAddress])}::jsonb
@@ -40,7 +38,7 @@ export class AuthService {
         `.then(rows => rows[0] ? this.prisma.user.findUnique({ where: { id: rows[0].id } }) : null);
 
         if (existingUser) {
-            // Update metadata with nonce
+            
             const metadata = (existingUser.metadata as any) || {};
             metadata.nonce = nonce;
             await this.prisma.user.update({
@@ -48,10 +46,10 @@ export class AuthService {
                 data: { metadata },
             });
         } else {
-            // Create new user with wallet address
+            
             await this.prisma.user.create({
                 data: {
-                    email: `${normalizedAddress}@wallet.local`, // Temporary email
+                    email: `${normalizedAddress}@wallet.local`, 
                     walletAddresses: [normalizedAddress],
                     reputationTier: 'BRONZE',
                     reputationPoints: 50,
@@ -72,7 +70,6 @@ export class AuthService {
     ): Promise<AuthResponse> {
         const normalizedAddress = walletAddress.toLowerCase();
 
-        // Find user by wallet address in JSONB array using raw SQL
         const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
             SELECT id FROM users 
             WHERE "walletAddresses" @> ${JSON.stringify([normalizedAddress])}::jsonb
@@ -91,7 +88,6 @@ export class AuthService {
             throw new NotFoundException('User not found. Request a challenge first.');
         }
 
-        // Check nonce from metadata
         const metadata = (user.metadata as any) || {};
         if (metadata.nonce !== nonce) {
             throw new UnauthorizedException('Invalid or expired nonce');
@@ -104,7 +100,6 @@ export class AuthService {
             throw new UnauthorizedException('Invalid signature');
         }
 
-        // Clear nonce from metadata
         delete metadata.nonce;
         await this.prisma.user.update({
             where: { id: user.id },
@@ -157,7 +152,6 @@ export class AuthService {
             throw new UnauthorizedException('Invalid user');
         }
 
-        // Check if user is blocked (stored in metadata)
         const metadata = (user.metadata as any) || {};
         if (metadata.isBlocked) {
             throw new UnauthorizedException('User is blocked');

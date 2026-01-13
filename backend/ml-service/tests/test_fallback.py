@@ -39,7 +39,7 @@ def test_fallback_low_risk(sample_request):
     """Test fallback scoring for low-risk scenario."""
     service = FallbackService()
     
-    # Low risk: established wallet, high collateral, good history
+
     sample_request.wallet_age_days = 730
     sample_request.collateral_value_usd = 3000
     sample_request.reputation_score = 90

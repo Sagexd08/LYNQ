@@ -34,7 +34,7 @@ export function useRiskAssessment(loanId: string | null) {
     queryKey: ['risk', loanId],
     queryFn: () => riskApi.getRiskAssessment(loanId!),
     enabled: !!loanId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, 
   });
 
   return {

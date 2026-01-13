@@ -1,4 +1,4 @@
-// Extend Window interface for MetaMask
+
 interface Window {
   ethereum?: {
     isMetaMask?: boolean;

@@ -1,4 +1,5 @@
 import logging
+import math
 import time
 from typing import Optional
 from app.schemas.credit import (
@@ -194,13 +195,13 @@ class InferenceService:
     
     def _format_prediction(self, prediction, probability, request: CreditScoreRequest) -> CreditScoreResponse:
         """Format ML model prediction into CreditScoreResponse."""
-        # prediction is binary (0 or 1), probability is array [prob_no_default, prob_default]
+
         default_probability = float(probability[1]) if len(probability) > 1 else float(probability[0])
         
-        # Calculate credit score from default probability (inverse relationship)
-        credit_score = int((1 - default_probability) * 900 + 100)  # Scale to 100-1000
+
+        credit_score = int((1 - default_probability) * 900 + 100)
         
-        # Determine risk level from default probability
+
         if default_probability < 0.10:
             risk_level = RiskLevel.VERY_LOW
         elif default_probability < 0.25:
@@ -212,11 +213,11 @@ class InferenceService:
         else:
             risk_level = RiskLevel.VERY_HIGH
         
-        # Calculate fraud and anomaly scores
+
         fraud_score = self._calculate_fraud_score(request)
         anomaly_score = self._calculate_anomaly_score(request)
         
-        # Determine recommended action
+
         if fraud_score > 0.7 or default_probability > 0.75:
             recommended_action = RecommendedAction.REJECT
         elif fraud_score > 0.5 or anomaly_score > 0.5 or risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]:
@@ -226,7 +227,7 @@ class InferenceService:
         else:
             recommended_action = RecommendedAction.APPROVE
         
-        # Calculate interest rate
+
         base_rate = 5.0
         risk_premium = {
             RiskLevel.VERY_LOW: 0,
@@ -237,7 +238,7 @@ class InferenceService:
         }
         interest_rate = base_rate + risk_premium[risk_level]
         
-        # Calculate max loan amount
+
         max_loan = request.collateral_value_usd * 0.8
         if risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]:
             max_loan *= 0.5

@@ -8,7 +8,7 @@ from app.schemas.credit import CreditScoreRequest, RiskLevel, RecommendedAction
 def test_rule_based_prediction(sample_request):
     """Test rule-based prediction when model is not available."""
     service = InferenceService()
-    service.model = None  # No model available
+    service.model = None
     
     result = service.predict(sample_request)
     
@@ -21,7 +21,7 @@ def test_rule_based_prediction(sample_request):
     assert result.default_probability <= 1
     assert result.fraud_score >= 0
     assert result.fraud_score <= 1
-    assert result.is_fallback == False  # Rule-based, not fallback
+    assert result.is_fallback == False
 
 
 def test_ml_prediction_with_mock_model(sample_request, mock_model, mock_scaler):
@@ -44,13 +44,13 @@ def test_fraud_score_calculation(sample_request):
     """Test fraud score calculation."""
     service = InferenceService()
     
-    # New wallet
+
     sample_request.wallet_age_days = 5
     sample_request.total_transactions = 2
     fraud_score = service._calculate_fraud_score(sample_request)
     assert fraud_score > 0.5
     
-    # Established wallet
+
     sample_request.wallet_age_days = 365
     sample_request.total_transactions = 100
     fraud_score = service._calculate_fraud_score(sample_request)
@@ -82,4 +82,4 @@ def test_feature_extraction(sample_request):
     assert len(features) == 12
     assert all(isinstance(f, (int, float)) for f in features)
     assert features[0] == sample_request.wallet_age_days
-    assert features[11] > 0  # collateral_ratio
+    assert features[11] > 0

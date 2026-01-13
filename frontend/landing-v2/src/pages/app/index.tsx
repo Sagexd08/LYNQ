@@ -40,7 +40,7 @@ function AppContent() {
         collateralValueUsd: collateralValue ? parseFloat(collateralValue) : undefined,
       });
     } catch (error) {
-      // Error handled by mutation
+      
     }
   };
 
@@ -56,12 +56,11 @@ function AppContent() {
         termMonths: parseInt(termMonths),
         collateralValueUsd: collateralValue ? parseFloat(collateralValue) : undefined,
       });
-      
-      // Reset form
+
       setLoanAmount('');
       setCollateralValue('');
     } catch (error) {
-      // Error handled by mutation
+      
     }
   };
 
@@ -69,7 +68,7 @@ function AppContent() {
     <div className="bg-black text-white min-h-screen">
       <Header />
       <main className="pt-28 pb-16 px-6 max-w-6xl mx-auto">
-        {/* Profile Section */}
+        {}
         <div className="mb-8 p-6 bg-gray-900 rounded-lg border border-gray-800">
           <div className="flex justify-between items-start">
             <div>
@@ -101,7 +100,7 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Create Loan Section */}
+        {}
         <div className="mb-8 p-6 bg-gray-900 rounded-lg border border-gray-800">
           <h2 className="text-2xl font-bold mb-4">Request a Loan</h2>
           <div className="space-y-4">
@@ -187,7 +186,7 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Loans List */}
+        {}
         <div className="p-6 bg-gray-900 rounded-lg border border-gray-800">
           <h2 className="text-2xl font-bold mb-4">Your Loans</h2>
           {loansLoading ? (

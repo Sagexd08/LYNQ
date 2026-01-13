@@ -5,9 +5,7 @@ import {
 } from './types';
 
 export const riskApi = {
-  /**
-   * Evaluate loan risk
-   */
+  
   async evaluateRisk(
     request: RiskEvaluationRequest
   ): Promise<RiskEvaluationResponse> {
@@ -18,9 +16,6 @@ export const riskApi = {
     return response.data;
   },
 
-  /**
-   * Get risk assessment for a loan
-   */
   async getRiskAssessment(loanId: string): Promise<RiskEvaluationResponse> {
     const response = await api.get<RiskEvaluationResponse>(
       `/risk/${loanId}`

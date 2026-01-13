@@ -265,7 +265,7 @@ Need help? Contact support at lynq.support
         }
 
         try {
-            // Find user by wallet address using raw SQL
+            
             const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
                 SELECT id FROM users 
                 WHERE "walletAddresses" @> ${JSON.stringify([walletAddress.toLowerCase()])}::jsonb

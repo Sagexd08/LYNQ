@@ -43,7 +43,7 @@ export class AdminService {
             where: { id: loanId },
             data: {
                 dueAt: yesterday,
-                status: 'overdue' // Explicitly set status for clarity though dueAt implies it
+                status: 'overdue' 
             },
         });
     }

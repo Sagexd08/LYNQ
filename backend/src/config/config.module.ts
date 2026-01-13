@@ -14,14 +14,14 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRATION: z.string().default('24h'),
 
-  ML_SERVICE_URL: z.string().url().default('http://localhost:8000'),
+  ML_SERVICE_URL: z.string().url().default('http:
   ML_API_KEY: z.string().min(8),
 
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_ADMIN_CHAT_ID: z.string().optional(),
   TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
 
-  REDIS_URL: z.string().default('redis://localhost:6379'),
+  REDIS_URL: z.string().default('redis:
 
   BLOCKCHAIN_RPC_URL: z.string().url().optional(),
   BLOCKCHAIN_RPC_URL_POLYGON: z.string().url().optional(),

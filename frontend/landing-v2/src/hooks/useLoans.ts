@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 export function useLoans() {
   const queryClient = useQueryClient();
 
-  // Get all loans
   const {
     data: loans,
     isLoading,
@@ -14,10 +13,9 @@ export function useLoans() {
   } = useQuery({
     queryKey: ['loans'],
     queryFn: () => loansApi.getLoans(),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 30 * 1000, 
   });
 
-  // Create loan mutation
   const createLoanMutation = useMutation({
     mutationFn: (request: CreateLoanRequest) => loansApi.createLoan(request),
     onSuccess: (data) => {
@@ -30,7 +28,6 @@ export function useLoans() {
     },
   });
 
-  // Repay loan mutation
   const repayLoanMutation = useMutation({
     mutationFn: ({
       loanId,

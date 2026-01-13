@@ -10,7 +10,7 @@ from app.core.security import verify_api_key
 from app.core.logging import setup_logging, request_id_var, get_logger
 from app.models.loader import ModelLoader
 
-# Setup structured logging
+
 setup_logging(settings.LOG_LEVEL)
 logger = get_logger(__name__)
 

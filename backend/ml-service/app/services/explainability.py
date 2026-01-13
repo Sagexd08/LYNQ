@@ -8,7 +8,7 @@ from app.models.loader import model_loader
 
 logger = logging.getLogger(__name__)
 
-# Try to import SHAP
+
 try:
     import shap
     SHAP_AVAILABLE = True
@@ -57,7 +57,7 @@ class ExplainabilityService:
         if model is None:
             raise ValueError("Model not loaded, cannot use SHAP")
         
-        # Extract features (duplicate logic from inference service to avoid circular import)
+
         collateral_ratio = request.collateral_value_usd / request.loan_amount if request.loan_amount > 0 else 0
         features = np.array([[
             request.wallet_age_days,
@@ -74,33 +74,33 @@ class ExplainabilityService:
             collateral_ratio,
         ]])
         
-        # Scale if scaler available
+
         if scaler:
             features = scaler.transform(features)
         
-        # Initialize SHAP explainer if needed
+
         if self._shap_explainer is None:
-            # Use TreeExplainer for tree-based models
+
             if hasattr(model, 'tree_') or hasattr(model, 'estimators_'):
                 self._shap_explainer = shap.TreeExplainer(model)
             else:
-                # Use KernelExplainer as fallback
+
                 self._shap_explainer = shap.KernelExplainer(
                     model.predict_proba,
-                    features[:1]  # Use single sample as background
+                    features[:1]
                 )
         
-        # Calculate SHAP values
+
         shap_values = self._shap_explainer.shap_values(features)
         
-        # Handle multi-class output
+
         if isinstance(shap_values, list):
-            shap_values = shap_values[1]  # Use positive class
+            shap_values = shap_values[1]
         
-        # Get feature names
+
         feature_names = model_loader.get_feature_names()
         
-        # Create factor explanations
+
         factors = []
         feature_values = {
             'wallet_age_days': request.wallet_age_days,
@@ -126,11 +126,11 @@ class ExplainabilityService:
                 contribution=float(abs(shap_value))
             ))
         
-        # Sort by contribution and take top 3
+
         factors.sort(key=lambda x: x.contribution, reverse=True)
         top_factors = factors[:3]
         
-        # Calculate confidence from SHAP values variance
+
         confidence = 1.0 - min(np.std(shap_values[0]) / (np.abs(shap_values[0]).mean() + 1e-6), 1.0)
         confidence = max(0.5, min(0.99, confidence))
         
