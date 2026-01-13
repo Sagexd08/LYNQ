@@ -19,6 +19,14 @@ export class CreateLoanDto {
     @Min(0)
     collateralValueUsd?: number;
 
+    @ApiPropertyOptional({ description: 'Blockchain network', example: 'ethereum' })
+    @IsOptional()
+    chain?: string;
+
+    @ApiPropertyOptional({ description: 'Collateral token address' })
+    @IsOptional()
+    collateralTokenAddress?: string;
+
     @ApiPropertyOptional({ description: 'Wallet age in days (for risk assessment)' })
     @IsNumber()
     @IsOptional()

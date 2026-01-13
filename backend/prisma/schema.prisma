@@ -1,15 +1,238 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// ==============================================
-// ENUMS
-// ==============================================
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   String                @id(map: "PK_users") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
+  email                String                @unique(map: "UQ_users_email") @map("email") @db.VarChar
+  password             String?               @map("password") @db.VarChar
+  walletAddresses      Json?                 @map("walletAddresses")
+  reputationTier       ReputationTier        @default(BRONZE) @map("reputationTier")
+  reputationPoints     Int                   @default(0) @map("reputationPoints")
+  kycVerified          Boolean               @default(false) @map("kycVerified")
+  metadata             Json?                 @map("metadata")
+  createdAt            DateTime              @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt            DateTime              @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  achievements         Achievement[]
+  collateral           Collateral[]
+  creditScores         CreditScore[]
+  fraudChecks          FraudCheck[]
+  learningProgress     LearningProgress[]
+  loans                Loan[]
+  mlTrainingData       MlTrainingData[]
+  quizAttempts         QuizAttempt[]
+  reputationActions    ReputationAction[]
+  telegramSubscription TelegramSubscription?
+
+  @@index([reputationTier], map: "IDX_users_reputationTier")
+  @@map("users")
+}
+
+model Loan {
+  id                     String               @id(map: "PK_loans") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
+  userId                 String               @map("userId") @db.Uuid
+  amount                 Decimal              @map("amount") @db.Decimal(18, 8)
+  outstandingAmount      Decimal              @default(0) @map("outstandingAmount") @db.Decimal(18, 8)
+  chain                  String               @map("chain") @db.VarChar
+  collateralTokenAddress String               @map("collateralTokenAddress") @db.VarChar
+  collateralAmount       Decimal              @map("collateralAmount") @db.Decimal(18, 8)
+  interestRate           Decimal              @map("interestRate") @db.Decimal(5, 2)
+  durationDays           Int                  @map("durationDays")
+  status                 LoanStatus           @default(PENDING) @map("status")
+  contractAddress        String?              @map("contractAddress") @db.VarChar
+  transactionHash        String?              @map("transactionHash") @db.VarChar
+  startDate              DateTime?            @map("startDate") @db.Timestamp(6)
+  dueDate                DateTime?            @map("dueDate") @db.Timestamp(6)
+  repaidDate             DateTime?            @map("repaidDate") @db.Timestamp(6)
+  metadata               Json?                @map("metadata")
+  createdAt              DateTime             @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt              DateTime             @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  riskAssessments        LoanRiskAssessment[]
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_loans_users")
+  mlTrainingData         MlTrainingData[]
+
+  @@index([createdAt], map: "IDX_loans_createdAt")
+  @@index([status], map: "IDX_loans_status")
+  @@index([userId], map: "IDX_loans_userId")
+  @@map("loans")
+}
+
+model Vouch {
+  id              String      @id(map: "PK_vouches") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
+  loanId          String      @map("loanId") @db.VarChar
+  stakerAddress   String      @map("stakerAddress") @db.VarChar
+  borrowerAddress String      @map("borrowerAddress") @db.VarChar
+  amount          Decimal     @map("amount") @db.Decimal(36, 18)
+  status          VouchStatus @default(ACTIVE) @map("status")
+  transactionHash String      @map("transactionHash") @db.VarChar
+  createdAt       DateTime    @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt       DateTime    @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+
+  @@map("vouches")
+}
+
+model Collateral {
+  id              String           @id(map: "PK_collateral") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
+  userId          String           @map("userId") @db.Uuid
+  tokenAddress    String           @map("tokenAddress") @db.VarChar
+  amount          Decimal          @map("amount") @db.Decimal(18, 8)
+  status          CollateralStatus @default(LOCKED) @map("status")
+  chain           String?          @default("ethereum") @map("chain") @db.VarChar
+  lastValuation   Decimal?         @map("lastValuation") @db.Decimal(18, 8)
+  lastValuationAt DateTime?        @map("lastValuationAt") @db.Timestamp(6)
+  createdAt       DateTime         @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_collateral_users")
+
+  @@index([status], map: "IDX_collateral_status")
+  @@index([userId], map: "IDX_collateral_userId")
+  @@map("collateral")
+}
+
+model LoanRiskAssessment {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  loanId             String    @map("loanId") @db.Uuid
+  riskLevel          String    @map("riskLevel") @db.VarChar
+  defaultProbability Decimal?  @map("defaultProbability") @db.Decimal(5, 2)
+  liquidationRisk    Decimal?  @map("liquidationRisk") @db.Decimal(5, 2)
+  collateralHealth   Decimal?  @map("collateralHealth") @db.Decimal(5, 2)
+  recommendation     String    @map("recommendation") @db.VarChar
+  assessedAt         DateTime  @map("assessedAt") @db.Timestamp(6)
+  createdAt          DateTime? @default(now()) @map("createdAt") @db.Timestamp(6)
+  loan               Loan      @relation(fields: [loanId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_loan_risk_assessments_loans")
+
+  @@index([loanId], map: "IDX_loan_risk_assessments_loanId")
+  @@map("loan_risk_assessments")
+}
+
+model CreditScore {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId       String    @map("userId") @db.Uuid
+  score        Int       @map("score")
+  grade        String    @map("grade") @db.VarChar
+  breakdown    Json      @map("breakdown")
+  method       String    @map("method") @db.VarChar
+  calculatedAt DateTime  @map("calculatedAt") @db.Timestamp(6)
+  createdAt    DateTime? @default(now()) @map("createdAt") @db.Timestamp(6)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_credit_scores_users")
+
+  @@index([userId], map: "IDX_credit_scores_userId")
+  @@map("credit_scores")
+}
+
+model FraudCheck {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId         String    @map("userId") @db.Uuid
+  riskScore      Int       @map("riskScore")
+  recommendation String    @map("recommendation") @db.VarChar
+  flags          Json      @map("flags")
+  checkedAt      DateTime  @map("checkedAt") @db.Timestamp(6)
+  createdAt      DateTime? @default(now()) @map("createdAt") @db.Timestamp(6)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_fraud_checks_users")
+
+  @@index([userId], map: "IDX_fraud_checks_userId")
+  @@map("fraud_checks")
+}
+
+model MlTrainingData {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  loanId      String?   @map("loanId") @db.Uuid
+  userId      String?   @map("userId") @db.Uuid
+  features    Json      @map("features")
+  collectedAt DateTime  @map("collected_at") @db.Timestamp(6)
+  createdAt   DateTime? @default(now()) @map("createdAt") @db.Timestamp(6)
+  loan        Loan?     @relation(fields: [loanId], references: [id], onUpdate: NoAction, map: "FK_ml_training_data_loans")
+  user        User?     @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "FK_ml_training_data_users")
+
+  @@map("ml_training_data")
+}
+
+model TelegramSubscription {
+  id            String   @id(map: "PK_telegram_subscriptions") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
+  userId        String   @unique(map: "UQ_telegram_userId") @map("userId") @db.Uuid
+  chatId        String   @unique(map: "UQ_telegram_chatId") @map("chatId") @db.VarChar
+  walletAddress String   @map("walletAddress") @db.VarChar
+  username      String?  @map("username") @db.VarChar
+  isActive      Boolean  @default(true) @map("isActive")
+  preferences   Json     @default("{\"loanAlerts\": true, \"priceAlerts\": false, \"dailySummary\": false, \"creditScoreAlerts\": true, \"marketingMessages\": false, \"transactionAlerts\": true, \"healthFactorAlerts\": true}") @map("preferences")
+  createdAt     DateTime @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_telegram_users")
+
+  @@index([walletAddress], map: "IDX_telegram_walletAddress")
+  @@map("telegram_subscriptions")
+}
+
+model LearningModule {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  title            String             @map("title")
+  description      String?            @map("description")
+  content          String?            @map("content")
+  videoUrl         String?            @map("video_url")
+  difficulty       String?            @default("BEGINNER") @map("difficulty")
+  pointsReward     Int?               @default(100) @map("points_reward")
+  createdAt        DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  learningProgress LearningProgress[]
+  quizAttempts     QuizAttempt[]
+
+  @@map("learning_modules")
+}
+
+model LearningProgress {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId      String?         @map("user_id") @db.Uuid
+  moduleId    String?         @map("module_id") @db.Uuid
+  status      String?         @default("STARTED") @map("status")
+  score       Int?            @default(0) @map("score")
+  completedAt DateTime?       @map("completed_at") @db.Timestamptz(6)
+  createdAt   DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  module      LearningModule? @relation(fields: [moduleId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_learning_progress_modules")
+  user        User?           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_learning_progress_users")
+
+  @@unique([userId, moduleId])
+  @@index([userId], map: "IDX_learning_progress_user_id")
+  @@map("learning_progress")
+}
+
+model QuizAttempt {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId    String?         @map("user_id") @db.Uuid
+  moduleId  String?         @map("module_id") @db.Uuid
+  answers   Json?           @map("answers")
+  score     Int?            @map("score")
+  passed    Boolean?        @default(false) @map("passed")
+  createdAt DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  module    LearningModule? @relation(fields: [moduleId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_quiz_attempts_modules")
+  user      User?           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_quiz_attempts_users")
+
+  @@index([userId], map: "IDX_quiz_attempts_user_id")
+  @@map("quiz_attempts")
+}
+
+model ReputationAction {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  actionType String    @map("action_type")
+  points     Int       @map("points")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_reputation_actions_users")
+
+  @@map("reputation_actions")
+}
+
+model Achievement {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid
+  userId          String?   @map("user_id") @db.Uuid
+  achievementType String    @map("achievement_type")
+  unlockedAt      DateTime? @default(now()) @map("unlocked_at") @db.Timestamptz(6)
+  user            User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_achievements_users")
+
+  @@map("achievements")
+}
 
 enum LoanStatus {
   PENDING
@@ -21,169 +244,19 @@ enum LoanStatus {
 
 enum CollateralStatus {
   LOCKED
-  RELEASED
-  SEIZED
+  UNLOCKED
+  LIQUIDATED
 }
 
-enum RiskLevel {
-  VERY_LOW
-  LOW
-  MEDIUM
-  HIGH
-  VERY_HIGH
-}
-
-enum UserTier {
+enum ReputationTier {
   BRONZE
   SILVER
   GOLD
   PLATINUM
 }
 
-// ==============================================
-// MODELS
-// ==============================================
-
-model Profile {
-  id              String   @id @default(uuid())
-  walletAddress   String   @unique @map("wallet_address")
-  nonce           String?  @map("nonce") // For wallet signature verification
-  reputationScore Int      @default(50) @map("reputation_score")
-  tier            UserTier @default(BRONZE)
-  totalLoans      Int      @default(0) @map("total_loans")
-  successfulLoans Int      @default(0) @map("successful_loans")
-  defaultedLoans  Int      @default(0) @map("defaulted_loans")
-  totalBorrowed   Float    @default(0) @map("total_borrowed")
-  totalRepaid     Float    @default(0) @map("total_repaid")
-  isBlocked       Boolean  @default(false) @map("is_blocked")
-  metadata        Json?    @map("metadata")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  loans              Loan[]
-  telegramSubscription TelegramSubscription?
-
-  @@map("profiles")
-}
-
-model Loan {
-  id                  String     @id @default(uuid())
-  userId              String     @map("user_id")
-  amount              Float
-  interestRate        Float      @map("interest_rate")
-  termMonths          Int        @map("term_months")
-  status              LoanStatus @default(PENDING)
-  riskLevel           RiskLevel? @map("risk_level")
-  defaultProbability  Float?     @map("default_probability")
-  recommendedAction   String?    @map("recommended_action")
-  amountRepaid        Float      @default(0) @map("amount_repaid")
-  dueDate             DateTime?  @map("due_date")
-  repaidAt            DateTime?  @map("repaid_at")
-  defaultedAt         DateTime?  @map("defaulted_at")
-  liquidatedAt        DateTime?  @map("liquidated_at")
-  onChainTxHash       String?    @map("on_chain_tx_hash")
-  onChainLoanId       String?    @map("on_chain_loan_id")
-  metadata            Json?      @map("metadata")
-  createdAt           DateTime   @default(now()) @map("created_at")
-  updatedAt           DateTime   @updatedAt @map("updated_at")
-
-  profile        Profile         @relation(fields: [userId], references: [id])
-  collaterals    Collateral[]
-  riskAssessment RiskAssessment?
-  repayments     Repayment[]
-
-  @@map("loans")
-}
-
-model Collateral {
-  id            String           @id @default(uuid())
-  loanId        String           @map("loan_id")
-  tokenAddress  String           @map("token_address")
-  tokenSymbol   String           @map("token_symbol")
-  amount        Float
-  valueUsd      Float            @map("value_usd")
-  chainId       Int              @map("chain_id")
-  status        CollateralStatus @default(LOCKED)
-  onChainTxHash String?          @map("on_chain_tx_hash")
-  lockedAt      DateTime         @default(now()) @map("locked_at")
-  releasedAt    DateTime?        @map("released_at")
-  seizedAt      DateTime?        @map("seized_at")
-  metadata      Json?            @map("metadata")
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
-
-  loan Loan @relation(fields: [loanId], references: [id])
-
-  @@map("collaterals")
-}
-
-model RiskAssessment {
-  id                String    @id @default(uuid())
-  loanId            String    @unique @map("loan_id")
-  creditScore       Int       @map("credit_score")
-  fraudScore        Float     @map("fraud_score")
-  anomalyScore      Float     @map("anomaly_score")
-  riskLevel         RiskLevel @map("risk_level")
-  defaultProbability Float    @map("default_probability")
-  recommendedAction String    @map("recommended_action")
-  confidenceScore   Float?    @map("confidence_score")
-  topFactors        Json?     @map("top_factors") // SHAP explanations
-  mlModelVersion    String?   @map("ml_model_version")
-  processingTimeMs  Int?      @map("processing_time_ms")
-  isFallback        Boolean   @default(false) @map("is_fallback")
-  metadata          Json?     @map("metadata")
-  createdAt         DateTime  @default(now()) @map("created_at")
-
-  loan Loan @relation(fields: [loanId], references: [id])
-
-  @@map("risk_assessments")
-}
-
-model Repayment {
-  id            String   @id @default(uuid())
-  loanId        String   @map("loan_id")
-  amount        Float
-  onChainTxHash String?  @map("on_chain_tx_hash")
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  loan Loan @relation(fields: [loanId], references: [id])
-
-  @@map("repayments")
-}
-
-model TelegramSubscription {
-  id              String   @id @default(uuid())
-  profileId       String   @unique @map("profile_id")
-  telegramUserId  String   @unique @map("telegram_user_id")
-  telegramChatId  String   @map("telegram_chat_id")
-  username        String?  @map("username")
-  isActive        Boolean  @default(true) @map("is_active")
-  notifyLoans     Boolean  @default(true) @map("notify_loans")
-  notifyRepayments Boolean @default(true) @map("notify_repayments")
-  notifyRisk      Boolean  @default(true) @map("notify_risk")
-  notifyAlerts    Boolean  @default(true) @map("notify_alerts")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  profile Profile @relation(fields: [profileId], references: [id])
-
-  @@map("telegram_subscriptions")
-}
-
-model BlockchainEvent {
-  id              String   @id @default(uuid())
-  chainId         Int      @map("chain_id")
-  contractAddress String   @map("contract_address")
-  eventName       String   @map("event_name")
-  transactionHash String   @map("transaction_hash")
-  blockNumber     BigInt   @map("block_number")
-  logIndex        Int      @map("log_index")
-  data            Json     @map("data")
-  processed       Boolean  @default(false)
-  processedAt     DateTime? @map("processed_at")
-  error           String?  @map("error")
-  createdAt       DateTime @default(now()) @map("created_at")
-
-  @@unique([transactionHash, logIndex])
-  @@map("blockchain_events")
+enum VouchStatus {
+  ACTIVE
+  WITHDRAWN
+  SLASHED
 }

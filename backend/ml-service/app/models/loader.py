@@ -4,17 +4,9 @@ import logging
 from typing import Optional, List
 import joblib
 from app.core.config import settings
+from app.core.aws import get_s3_loader, get_cloudwatch_metrics
 
 logger = logging.getLogger(__name__)
-
-# Try to import boto3 for S3 support
-try:
-    import boto3
-    from botocore.exceptions import ClientError
-    BOTO3_AVAILABLE = True
-except ImportError:
-    BOTO3_AVAILABLE = False
-    logger.warning("boto3 not available, S3 model loading disabled")
 
 
 class ModelLoader:
@@ -50,22 +42,13 @@ class ModelLoader:
             self._is_loaded = True
     
     def _load_from_s3(self):
-        if not BOTO3_AVAILABLE:
-            logger.warning("boto3 not available, falling back to mock model")
-            self._use_mock_model()
-            return
-        
+        """Load model from S3 using AWS SDK"""
         try:
             logger.info(f"Loading model from S3: {settings.S3_BUCKET}/{settings.S3_KEY}")
             
-            s3_client = boto3.client(
-                's3',
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
+            s3_loader = get_s3_loader()
             
-            # Download model
+            # Create models directory
             model_dir = os.path.join(os.path.dirname(__file__), "..", "..", "models")
             os.makedirs(model_dir, exist_ok=True)
             
@@ -73,22 +56,18 @@ class ModelLoader:
             scaler_path = os.path.join(model_dir, "scaler.pkl")
             config_path = os.path.join(model_dir, "feature_config.json")
             
-            # Download files from S3
-            s3_client.download_file(settings.S3_BUCKET, settings.S3_KEY, model_path)
+            # Download model file
+            if not s3_loader.download_model(settings.S3_BUCKET, settings.S3_KEY, model_path):
+                logger.error("Failed to download model from S3")
+                self._use_mock_model()
+                return
             
             # Try to download scaler and config (optional)
             scaler_key = settings.S3_KEY.replace(".pkl", "_scaler.pkl")
             config_key = settings.S3_KEY.replace(".pkl", "_config.json")
             
-            try:
-                s3_client.download_file(settings.S3_BUCKET, scaler_key, scaler_path)
-            except ClientError:
-                logger.warning(f"Scaler not found at {scaler_key}, continuing without scaler")
-            
-            try:
-                s3_client.download_file(settings.S3_BUCKET, config_key, config_path)
-            except ClientError:
-                logger.warning(f"Config not found at {config_key}, using defaults")
+            s3_loader.download_model(settings.S3_BUCKET, scaler_key, scaler_path)
+            s3_loader.download_model(settings.S3_BUCKET, config_key, config_path)
             
             # Load model
             self._model = joblib.load(model_path)
@@ -109,9 +88,21 @@ class ModelLoader:
                 self._feature_config = {"features": self._get_default_features(), "version": "v1.0.0"}
                 self._model_version = "v1.0.0"
             
+            # Log to CloudWatch
+            metrics = get_cloudwatch_metrics()
+            metrics.put_metric("S3ModelLoad", 1, "Count", {"Status": "Success"})
+            
         except Exception as e:
             logger.error(f"Failed to load model from S3: {e}")
             logger.info("Falling back to mock model")
+            
+            # Log failure to CloudWatch
+            try:
+                metrics = get_cloudwatch_metrics()
+                metrics.put_metric("S3ModelLoad", 0, "Count", {"Status": "Failed"})
+            except Exception as metric_error:
+                logger.error(f"Failed to log metric: {metric_error}")
+            
             self._use_mock_model()
     
     def _load_from_local(self):

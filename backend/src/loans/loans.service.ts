@@ -21,7 +21,7 @@ export class LoansService {
     ) { }
 
     async createLoan(userId: string, dto: CreateLoanDto) {
-        const profile = await this.prisma.profile.findUnique({
+        const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: {
                 loans: {
@@ -30,20 +30,26 @@ export class LoansService {
             },
         });
 
-        if (!profile) {
-            throw new NotFoundException('Profile not found');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
 
-        if (profile.isBlocked) {
+        // Check if user is blocked (stored in metadata)
+        const metadata = (user.metadata as any) || {};
+        if (metadata.isBlocked) {
             throw new BadRequestException('User is blocked from creating loans');
         }
 
-        if (profile.loans.length > 0) {
+        if (user.loans.length > 0) {
             throw new BadRequestException('User already has an active loan');
         }
 
+        // Get wallet address from JSONB array
+        const walletAddresses = (user.walletAddresses as string[]) || [];
+        const walletAddress = walletAddresses[0] || '';
+
         const riskEvaluation = await this.riskService.evaluateLoanRisk({
-            walletAddress: profile.walletAddress,
+            walletAddress: walletAddress,
             walletAgeDays: dto.walletAgeDays || 30,
             totalTransactions: dto.totalTransactions || 10,
             totalVolumeUsd: dto.totalVolumeUsd || 1000,
@@ -68,16 +74,22 @@ export class LoansService {
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
 
+        // Calculate duration days from term months
+        const durationDays = dto.termMonths * 30;
+        const dueDate = new Date();
+        dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
+
         const loan = await this.prisma.loan.create({
             data: {
                 userId,
                 amount: dto.amount,
+                outstandingAmount: dto.amount,
+                chain: dto.chain || 'ethereum',
+                collateralTokenAddress: dto.collateralTokenAddress || '0x0',
+                collateralAmount: dto.collateralValueUsd || 0,
                 interestRate: riskEvaluation.interestRate,
-                termMonths: dto.termMonths,
+                durationDays,
                 status: 'PENDING',
-                riskLevel: riskEvaluation.riskLevel,
-                defaultProbability: riskEvaluation.defaultProbability,
-                recommendedAction: riskEvaluation.recommendedAction,
                 dueDate,
             },
         });
@@ -132,12 +144,15 @@ export class LoansService {
             include: { collaterals: true },
         });
 
-        await this.prisma.profile.update({
+        // Update user metadata with loan stats
+        const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
+        const userMetadata = (user?.metadata as any) || {};
+        userMetadata.totalLoans = (userMetadata.totalLoans || 0) + 1;
+        userMetadata.totalBorrowed = (userMetadata.totalBorrowed || 0) + Number(loan.amount);
+        
+        await this.prisma.user.update({
             where: { id: loan.userId },
-            data: {
-                totalLoans: { increment: 1 },
-                totalBorrowed: { increment: loan.amount },
-            },
+            data: { metadata: userMetadata },
         });
 
         this.logger.log(`Loan activated: ${loanId}`);
@@ -148,7 +163,7 @@ export class LoansService {
     async repayLoan(loanId: string, dto: RepayLoanDto) {
         const loan = await this.prisma.loan.findUnique({
             where: { id: loanId },
-            include: { profile: true },
+            include: { user: true },
         });
 
         if (!loan) {
@@ -159,8 +174,9 @@ export class LoansService {
             throw new BadRequestException('Only active loans can be repaid');
         }
 
-        const totalOwed = loan.amount * (1 + loan.interestRate / 100);
-        const remaining = totalOwed - loan.amountRepaid;
+        const totalOwed = Number(loan.amount) * (1 + Number(loan.interestRate) / 100);
+        const amountRepaid = Number(loan.outstandingAmount) - Number(loan.amount);
+        const remaining = totalOwed - amountRepaid;
         const paymentAmount = Math.min(dto.amount, remaining);
 
         await this.prisma.repayment.create({
@@ -171,25 +187,30 @@ export class LoansService {
             },
         });
 
-        const newAmountRepaid = loan.amountRepaid + paymentAmount;
-        const isFullyRepaid = newAmountRepaid >= totalOwed;
+        const newOutstanding = Number(loan.outstandingAmount) - paymentAmount;
+        const isFullyRepaid = newOutstanding <= 0;
 
         const updatedLoan = await this.prisma.loan.update({
             where: { id: loanId },
             data: {
-                amountRepaid: newAmountRepaid,
+                outstandingAmount: Math.max(0, newOutstanding),
                 status: isFullyRepaid ? 'REPAID' : 'ACTIVE',
-                repaidAt: isFullyRepaid ? new Date() : null,
+                repaidDate: isFullyRepaid ? new Date() : null,
             },
         });
 
         if (isFullyRepaid) {
-            await this.prisma.profile.update({
+            // Update user metadata
+            const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
+            const userMetadata = (user?.metadata as any) || {};
+            userMetadata.successfulLoans = (userMetadata.successfulLoans || 0) + 1;
+            userMetadata.totalRepaid = (userMetadata.totalRepaid || 0) + paymentAmount;
+            
+            await this.prisma.user.update({
                 where: { id: loan.userId },
                 data: {
-                    successfulLoans: { increment: 1 },
-                    totalRepaid: { increment: newAmountRepaid },
-                    reputationScore: { increment: 5 },
+                    metadata: userMetadata,
+                    reputationPoints: { increment: 5 },
                 },
             });
 
@@ -233,11 +254,16 @@ export class LoansService {
             },
         });
 
-        await this.prisma.profile.update({
+        // Update user metadata
+        const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
+        const userMetadata = (user?.metadata as any) || {};
+        userMetadata.defaultedLoans = (userMetadata.defaultedLoans || 0) + 1;
+        
+        await this.prisma.user.update({
             where: { id: loan.userId },
             data: {
-                defaultedLoans: { increment: 1 },
-                reputationScore: { decrement: 20 },
+                metadata: userMetadata,
+                reputationPoints: { decrement: 20 },
             },
         });
 
@@ -252,10 +278,9 @@ export class LoansService {
         const loan = await this.prisma.loan.findUnique({
             where: { id },
             include: {
-                profile: true,
-                collaterals: true,
-                riskAssessment: true,
-                repayments: true,
+                user: true,
+                riskAssessments: true,
+                mlTrainingData: true,
             },
         });
 
@@ -270,8 +295,7 @@ export class LoansService {
         return this.prisma.loan.findMany({
             where: { userId },
             include: {
-                collaterals: true,
-                riskAssessment: true,
+                riskAssessments: true,
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -286,14 +310,14 @@ export class LoansService {
             this.prisma.loan.findMany({
                 where,
                 include: {
-                    profile: {
+                    user: {
                         select: {
-                            walletAddress: true,
-                            tier: true,
-                            reputationScore: true,
+                            walletAddresses: true,
+                            reputationTier: true,
+                            reputationPoints: true,
                         },
                     },
-                    riskAssessment: true,
+                    riskAssessments: true,
                 },
                 orderBy: { createdAt: 'desc' },
                 take: limit,

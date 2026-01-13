@@ -1,5 +1,5 @@
 import logging
-import math
+import time
 from typing import Optional
 from app.schemas.credit import (
     CreditScoreRequest,
@@ -8,6 +8,7 @@ from app.schemas.credit import (
     RecommendedAction,
 )
 from app.models.loader import model_loader
+from app.core.aws import get_cloudwatch_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +22,12 @@ class InferenceService:
         self.model = model_loader.get_model()
         self.scaler = model_loader.get_scaler()
         
+        start_time = time.time()
+        
         if self.model is None:
-            return self._rule_based_prediction(request)
+            result = self._rule_based_prediction(request)
+            self._log_inference_metrics("rule_based", start_time, result is not None)
+            return result
         
         try:
             features = self._extract_features(request)
@@ -33,11 +38,23 @@ class InferenceService:
             prediction = self.model.predict([features])[0]
             probability = self.model.predict_proba([features])[0]
             
-            return self._format_prediction(prediction, probability, request)
+            result = self._format_prediction(prediction, probability, request)
+            self._log_inference_metrics("ml_model", start_time, result is not None)
+            return result
             
         except Exception as e:
             logger.error(f"ML prediction failed: {e}")
+            self._log_inference_metrics("ml_model", start_time, False)
             return None
+    
+    def _log_inference_metrics(self, model_type: str, start_time: float, success: bool):
+        """Log inference metrics to CloudWatch"""
+        try:
+            latency_ms = (time.time() - start_time) * 1000
+            metrics = get_cloudwatch_metrics()
+            metrics.log_inference_metric(model_type, latency_ms, success)
+        except Exception as e:
+            logger.warning(f"Failed to log inference metrics: {e}")
     
     def _rule_based_prediction(self, request: CreditScoreRequest) -> CreditScoreResponse:
         collateral_ratio = request.collateral_value_usd / request.loan_amount if request.loan_amount > 0 else 0

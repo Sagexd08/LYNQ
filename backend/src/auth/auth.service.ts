@@ -31,16 +31,34 @@ export class AuthService {
         const normalizedAddress = walletAddress.toLowerCase();
         const nonce = randomUUID();
 
-        await this.prisma.profile.upsert({
-            where: { walletAddress: normalizedAddress },
-            update: { nonce },
-            create: {
-                walletAddress: normalizedAddress,
-                nonce,
-                reputationScore: 50,
-                tier: 'BRONZE',
-            },
-        });
+        // Find or create user by wallet address
+        // Query using raw SQL for JSONB array search
+        const existingUser = await this.prisma.$queryRaw<Array<{ id: string }>>`
+            SELECT id FROM users 
+            WHERE "walletAddresses" @> ${JSON.stringify([normalizedAddress])}::jsonb
+            LIMIT 1
+        `.then(rows => rows[0] ? this.prisma.user.findUnique({ where: { id: rows[0].id } }) : null);
+
+        if (existingUser) {
+            // Update metadata with nonce
+            const metadata = (existingUser.metadata as any) || {};
+            metadata.nonce = nonce;
+            await this.prisma.user.update({
+                where: { id: existingUser.id },
+                data: { metadata },
+            });
+        } else {
+            // Create new user with wallet address
+            await this.prisma.user.create({
+                data: {
+                    email: `${normalizedAddress}@wallet.local`, // Temporary email
+                    walletAddresses: [normalizedAddress],
+                    reputationTier: 'BRONZE',
+                    reputationPoints: 50,
+                    metadata: { nonce },
+                },
+            });
+        }
 
         const message = this.buildSignMessage(normalizedAddress, nonce);
 
@@ -54,15 +72,28 @@ export class AuthService {
     ): Promise<AuthResponse> {
         const normalizedAddress = walletAddress.toLowerCase();
 
-        const profile = await this.prisma.profile.findUnique({
-            where: { walletAddress: normalizedAddress },
+        // Find user by wallet address in JSONB array using raw SQL
+        const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
+            SELECT id FROM users 
+            WHERE "walletAddresses" @> ${JSON.stringify([normalizedAddress])}::jsonb
+            LIMIT 1
+        `;
+        
+        if (userRows.length === 0) {
+            throw new NotFoundException('User not found. Request a challenge first.');
+        }
+        
+        const user = await this.prisma.user.findUnique({
+            where: { id: userRows[0].id },
         });
 
-        if (!profile) {
-            throw new NotFoundException('Profile not found. Request a challenge first.');
+        if (!user) {
+            throw new NotFoundException('User not found. Request a challenge first.');
         }
 
-        if (profile.nonce !== nonce) {
+        // Check nonce from metadata
+        const metadata = (user.metadata as any) || {};
+        if (metadata.nonce !== nonce) {
             throw new UnauthorizedException('Invalid or expired nonce');
         }
 
@@ -73,15 +104,17 @@ export class AuthService {
             throw new UnauthorizedException('Invalid signature');
         }
 
-        await this.prisma.profile.update({
-            where: { id: profile.id },
-            data: { nonce: null },
+        // Clear nonce from metadata
+        delete metadata.nonce;
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { metadata },
         });
 
         const payload: JwtPayload = {
-            sub: profile.id,
+            sub: user.id,
             walletAddress: normalizedAddress,
-            tier: profile.tier,
+            tier: user.reputationTier,
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -89,16 +122,16 @@ export class AuthService {
         return {
             accessToken,
             profile: {
-                id: profile.id,
-                walletAddress: profile.walletAddress,
-                tier: profile.tier,
-                reputationScore: profile.reputationScore,
+                id: user.id,
+                walletAddress: normalizedAddress,
+                tier: user.reputationTier,
+                reputationScore: user.reputationPoints,
             },
         };
     }
 
     async getProfile(userId: string) {
-        const profile = await this.prisma.profile.findUnique({
+        const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: {
                 loans: {
@@ -108,23 +141,29 @@ export class AuthService {
             },
         });
 
-        if (!profile) {
-            throw new NotFoundException('Profile not found');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
 
-        return profile;
+        return user;
     }
 
     async validateJwtPayload(payload: JwtPayload) {
-        const profile = await this.prisma.profile.findUnique({
+        const user = await this.prisma.user.findUnique({
             where: { id: payload.sub },
         });
 
-        if (!profile || profile.isBlocked) {
-            throw new UnauthorizedException('Invalid or blocked user');
+        if (!user) {
+            throw new UnauthorizedException('Invalid user');
         }
 
-        return profile;
+        // Check if user is blocked (stored in metadata)
+        const metadata = (user.metadata as any) || {};
+        if (metadata.isBlocked) {
+            throw new UnauthorizedException('User is blocked');
+        }
+
+        return user;
     }
 
     private buildSignMessage(walletAddress: string, nonce: string): string {

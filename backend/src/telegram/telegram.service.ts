@@ -108,8 +108,8 @@ Get started by linking your wallet!
         const chatId = msg.chat.id.toString();
 
         const subscription = await this.prisma.telegramSubscription.findFirst({
-            where: { telegramChatId: chatId },
-            include: { profile: true },
+            where: { chatId: chatId },
+            include: { user: true },
         });
 
         if (!subscription) {
@@ -117,17 +117,18 @@ Get started by linking your wallet!
             return;
         }
 
-        const profile = subscription.profile;
+        const user = subscription.user;
+        const metadata = (user.metadata as any) || {};
         const statusMessage = `
 📊 *Account Status*
 
-💰 Tier: ${profile.tier}
-⭐ Reputation: ${profile.reputationScore}/100
-📈 Total Loans: ${profile.totalLoans}
-✅ Successful: ${profile.successfulLoans}
-❌ Defaulted: ${profile.defaultedLoans}
-💵 Total Borrowed: $${profile.totalBorrowed.toFixed(2)}
-💳 Total Repaid: $${profile.totalRepaid.toFixed(2)}
+💰 Tier: ${user.reputationTier}
+⭐ Reputation: ${user.reputationPoints}/100
+📈 Total Loans: ${metadata.totalLoans || 0}
+✅ Successful: ${metadata.successfulLoans || 0}
+❌ Defaulted: ${metadata.defaultedLoans || 0}
+💵 Total Borrowed: $${(metadata.totalBorrowed || 0).toFixed(2)}
+💳 Total Repaid: $${(metadata.totalRepaid || 0).toFixed(2)}
     `;
 
         await this.sendMessage(chatId, statusMessage, { parse_mode: 'Markdown' });
@@ -137,9 +138,9 @@ Get started by linking your wallet!
         const chatId = msg.chat.id.toString();
 
         const subscription = await this.prisma.telegramSubscription.findFirst({
-            where: { telegramChatId: chatId },
+            where: { chatId: chatId },
             include: {
-                profile: {
+                user: {
                     include: {
                         loans: {
                             where: { status: 'ACTIVE' },
@@ -156,7 +157,7 @@ Get started by linking your wallet!
             return;
         }
 
-        const loans = subscription.profile.loans;
+        const loans = subscription.user.loans;
 
         if (loans.length === 0) {
             await this.sendMessage(chatId, '📭 No active loans found.');
@@ -184,8 +185,8 @@ Risk: ${loan.riskLevel || 'N/A'}
         const chatId = msg.chat.id.toString();
 
         const subscription = await this.prisma.telegramSubscription.findFirst({
-            where: { telegramChatId: chatId },
-            include: { profile: true },
+            where: { chatId: chatId },
+            include: { user: true },
         });
 
         if (!subscription) {
@@ -193,22 +194,26 @@ Risk: ${loan.riskLevel || 'N/A'}
             return;
         }
 
-        const profile = subscription.profile;
+        const user = subscription.user;
+        const metadata = (user.metadata as any) || {};
+        const totalLoans = metadata.totalLoans || 0;
+        const successfulLoans = metadata.successfulLoans || 0;
+        const defaultedLoans = metadata.defaultedLoans || 0;
 
         let riskEmoji = '🟢';
-        if (profile.reputationScore < 40) riskEmoji = '🔴';
-        else if (profile.reputationScore < 60) riskEmoji = '🟡';
+        if (user.reputationPoints < 40) riskEmoji = '🔴';
+        else if (user.reputationPoints < 60) riskEmoji = '🟡';
 
         const riskMessage = `
 ${riskEmoji} *Risk Profile*
 
-📊 Reputation Score: ${profile.reputationScore}/100
-🏆 Tier: ${profile.tier}
+📊 Reputation Score: ${user.reputationPoints}/100
+🏆 Tier: ${user.reputationTier}
 
 *Performance*
-✅ Successful Loans: ${profile.successfulLoans}
-❌ Defaulted Loans: ${profile.defaultedLoans}
-${profile.totalLoans > 0 ? `📈 Success Rate: ${((profile.successfulLoans / profile.totalLoans) * 100).toFixed(1)}%` : ''}
+✅ Successful Loans: ${successfulLoans}
+❌ Defaulted Loans: ${defaultedLoans}
+${totalLoans > 0 ? `📈 Success Rate: ${((successfulLoans / totalLoans) * 100).toFixed(1)}%` : ''}
 
 *Tips to improve:*
 • Repay loans on time
@@ -260,24 +265,38 @@ Need help? Contact support at lynq.support
         }
 
         try {
-            const profile = await this.prisma.profile.findUnique({
-                where: { walletAddress: walletAddress.toLowerCase() },
+            // Find user by wallet address using raw SQL
+            const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
+                SELECT id FROM users 
+                WHERE "walletAddresses" @> ${JSON.stringify([walletAddress.toLowerCase()])}::jsonb
+                LIMIT 1
+            `;
+            
+            if (userRows.length === 0) {
+                await this.sendMessage(chatId, '❌ Wallet not registered. Please register on the LYNQ platform first.');
+                return;
+            }
+            
+            const user = await this.prisma.user.findUnique({
+                where: { id: userRows[0].id },
             });
 
-            if (!profile) {
+            if (!user) {
                 await this.sendMessage(chatId, '❌ Wallet not registered. Please register on the LYNQ platform first.');
                 return;
             }
 
             await this.prisma.telegramSubscription.upsert({
-                where: { telegramUserId: userId },
+                where: { userId: user.id },
                 update: {
-                    telegramChatId: chatId,
+                    chatId: chatId,
                     username: username,
                     isActive: true,
                 },
                 create: {
-                    profileId: profile.id,
+                    userId: user.id,
+                    chatId: chatId,
+                    walletAddress: walletAddress.toLowerCase(),
                     telegramUserId: userId!,
                     telegramChatId: chatId,
                     username: username,

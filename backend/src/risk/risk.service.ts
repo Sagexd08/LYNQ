@@ -35,8 +35,19 @@ export class RiskService {
     ) { }
 
     async evaluateLoanRisk(dto: RiskEvaluationDto): Promise<RiskEvaluationResult> {
-        const profile = await this.prisma.profile.findUnique({
-            where: { walletAddress: dto.walletAddress.toLowerCase() },
+        // Find user by wallet address in JSONB array using raw SQL
+        const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
+            SELECT id FROM users 
+            WHERE "walletAddresses" @> ${JSON.stringify([dto.walletAddress.toLowerCase()])}::jsonb
+            LIMIT 1
+        `;
+        
+        if (userRows.length === 0) {
+            throw new NotFoundException('User not found');
+        }
+        
+        const user = await this.prisma.user.findUnique({
+            where: { id: userRows[0].id },
             include: {
                 loans: {
                     select: {
@@ -47,17 +58,21 @@ export class RiskService {
             },
         });
 
-        if (!profile) {
-            throw new NotFoundException('Profile not found');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
+
+        const metadata = (user.metadata as any) || {};
+        const totalLoans = metadata.totalLoans || 0;
+        const defaultedLoans = metadata.defaultedLoans || 0;
 
         const fraudCheck = this.performFraudChecks({
             walletAgeDays: dto.walletAgeDays,
             totalTransactions: dto.totalTransactions,
             totalVolumeUsd: dto.totalVolumeUsd,
             loanAmount: dto.loanAmount,
-            previousLoans: profile.totalLoans,
-            defaults: profile.defaultedLoans,
+            previousLoans: totalLoans,
+            defaults: defaultedLoans,
         });
 
         const mlAssessment = await this.mlService.assessCreditRisk({
@@ -69,10 +84,10 @@ export class RiskService {
             loanAmount: dto.loanAmount,
             collateralValueUsd: dto.collateralValueUsd,
             termMonths: dto.termMonths,
-            previousLoans: profile.totalLoans,
-            successfulRepayments: profile.successfulLoans,
-            defaults: profile.defaultedLoans,
-            reputationScore: profile.reputationScore,
+            previousLoans: totalLoans,
+            successfulRepayments: metadata.successfulLoans || 0,
+            defaults: defaultedLoans,
+            reputationScore: user.reputationPoints,
         });
 
         const finalRiskLevel = this.determineFinalRiskLevel(mlAssessment, fraudCheck);
@@ -96,25 +111,19 @@ export class RiskService {
     }
 
     async saveRiskAssessment(loanId: string, evaluation: RiskEvaluationResult): Promise<void> {
-        await this.prisma.riskAssessment.create({
+        await this.prisma.loanRiskAssessment.create({
             data: {
                 loanId,
-                creditScore: evaluation.creditScore,
-                fraudScore: evaluation.fraudScore,
-                anomalyScore: evaluation.anomalyScore,
                 riskLevel: evaluation.riskLevel,
                 defaultProbability: evaluation.defaultProbability,
-                recommendedAction: evaluation.recommendedAction,
-                confidenceScore: evaluation.topFactors?.[0]?.contribution || 0.5,
-                topFactors: evaluation.topFactors,
-                mlModelVersion: evaluation.mlModelVersion,
-                isFallback: evaluation.isFallback,
+                recommendation: evaluation.recommendedAction,
+                assessedAt: new Date(),
             },
         });
     }
 
     async getRiskAssessment(loanId: string) {
-        const assessment = await this.prisma.riskAssessment.findUnique({
+        const assessment = await this.prisma.loanRiskAssessment.findFirst({
             where: { loanId },
             include: { loan: true },
         });
