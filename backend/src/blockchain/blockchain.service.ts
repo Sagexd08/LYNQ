@@ -1,0 +1,242 @@
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ethers, Contract, Wallet, JsonRpcProvider } from 'ethers';
+import { PrismaService } from '../prisma/prisma.service';
+
+const LOAN_CORE_ABI = [
+    "function createLoan(uint256 amount, uint256 interestRate, uint256 termDays) external returns (bytes32)",
+    "function activateLoan(bytes32 loanId) external",
+    "function repay(bytes32 loanId) external payable",
+    "function markDefaulted(bytes32 loanId) external",
+    "function liquidate(bytes32 loanId) external",
+    "function calculateTotalOwed(bytes32 loanId) external view returns (uint256)",
+    "function getLoan(bytes32 loanId) external view returns (tuple(bytes32 loanId, address borrower, uint256 amount, uint256 interestRate, uint256 termDays, uint256 createdAt, uint256 dueDate, uint256 amountRepaid, uint8 status))",
+    "function isOverdue(bytes32 loanId) external view returns (bool)",
+    "event LoanCreated(bytes32 indexed loanId, address indexed borrower, uint256 amount, uint256 interestRate, uint256 termDays, uint256 dueDate)",
+    "event LoanActivated(bytes32 indexed loanId, uint256 timestamp)",
+    "event LoanRepayment(bytes32 indexed loanId, address indexed borrower, uint256 amount, uint256 totalRepaid, bool isFullyRepaid)",
+    "event LoanRepaid(bytes32 indexed loanId, uint256 timestamp)",
+    "event LoanDefaulted(bytes32 indexed loanId, uint256 timestamp)",
+    "event LoanLiquidated(bytes32 indexed loanId, uint256 timestamp)"
+];
+
+const COLLATERAL_VAULT_ABI = [
+    "function lockCollateral(bytes32 loanId, address token, uint256 amount) external",
+    "function unlockCollateral(bytes32 loanId) external",
+    "function seizeCollateral(bytes32 loanId, address recipient) external",
+    "function getCollateral(bytes32 loanId) external view returns (tuple(bytes32 loanId, address depositor, address token, uint256 amount, bool isLocked)[])",
+    "function getLockedAmount(bytes32 loanId, address token) external view returns (uint256)",
+    "event CollateralLocked(bytes32 indexed loanId, address indexed depositor, address indexed token, uint256 amount, uint256 index)",
+    "event CollateralUnlocked(bytes32 indexed loanId, address indexed recipient, address indexed token, uint256 amount)",
+    "event CollateralSeized(bytes32 indexed loanId, address indexed token, uint256 amount, address recipient)"
+];
+
+export interface OnChainLoanInfo {
+    loanId: string;
+    borrower: string;
+    amount: string;
+    interestRate: number;
+    termDays: number;
+    createdAt: number;
+    dueDate: number;
+    amountRepaid: string;
+    status: number;
+}
+
+@Injectable()
+export class BlockchainService implements OnModuleInit {
+    private readonly logger = new Logger(BlockchainService.name);
+    private provider: JsonRpcProvider;
+    private wallet: Wallet;
+    private loanCoreContract: Contract;
+    private collateralVaultContract: Contract;
+    private isConnected = false;
+
+    constructor(
+        private readonly configService: ConfigService,
+        private readonly prisma: PrismaService,
+    ) { }
+
+    async onModuleInit() {
+        try {
+            await this.initialize();
+        } catch (error) {
+            this.logger.warn(`Blockchain initialization failed: ${error.message}`);
+            this.logger.warn('Blockchain features will be disabled');
+        }
+    }
+
+    private async initialize() {
+        const rpcUrl = this.configService.get<string>('BLOCKCHAIN_RPC_URL');
+        const privateKey = this.configService.get<string>('PRIVATE_KEY');
+        const loanCoreAddress = this.configService.get<string>('LOAN_CORE_ADDRESS');
+        const vaultAddress = this.configService.get<string>('COLLATERAL_VAULT_ADDRESS');
+
+        if (!rpcUrl || !privateKey || !loanCoreAddress || !vaultAddress) {
+            throw new Error('Missing blockchain configuration');
+        }
+
+        this.provider = new JsonRpcProvider(rpcUrl);
+        this.wallet = new Wallet(privateKey, this.provider);
+
+        this.loanCoreContract = new ethers.Contract(
+            loanCoreAddress,
+            LOAN_CORE_ABI,
+            this.wallet,
+        );
+
+        this.collateralVaultContract = new ethers.Contract(
+            vaultAddress,
+            COLLATERAL_VAULT_ABI,
+            this.wallet,
+        );
+
+        const network = await this.provider.getNetwork();
+        this.logger.log(`Connected to network: ${network.name} (chainId: ${network.chainId})`);
+        this.isConnected = true;
+    }
+
+    isBlockchainConnected(): boolean {
+        return this.isConnected;
+    }
+
+    async createLoanOnChain(
+        amount: bigint,
+        interestRateBps: number,
+        termDays: number,
+    ): Promise<{ txHash: string; loanId: string }> {
+        this.ensureConnected();
+
+        const tx = await this.loanCoreContract.createLoan(
+            amount,
+            interestRateBps,
+            termDays,
+        );
+
+        const receipt = await tx.wait();
+        const loanCreatedEvent = receipt.logs.find(
+            (log: any) => log.fragment?.name === 'LoanCreated',
+        );
+
+        const loanId = loanCreatedEvent?.args?.[0] || '';
+
+        this.logger.log(`Loan created on-chain: ${loanId}, tx: ${receipt.hash}`);
+
+        return {
+            txHash: receipt.hash,
+            loanId,
+        };
+    }
+
+    async activateLoanOnChain(onChainLoanId: string): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.loanCoreContract.activateLoan(onChainLoanId);
+        const receipt = await tx.wait();
+
+        this.logger.log(`Loan activated on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async repayLoanOnChain(
+        onChainLoanId: string,
+        amount: bigint,
+    ): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.loanCoreContract.repay(onChainLoanId, { value: amount });
+        const receipt = await tx.wait();
+
+        this.logger.log(`Loan repayment on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async getLoanFromChain(onChainLoanId: string): Promise<OnChainLoanInfo> {
+        this.ensureConnected();
+
+        const loan = await this.loanCoreContract.getLoan(onChainLoanId);
+
+        return {
+            loanId: loan.loanId,
+            borrower: loan.borrower,
+            amount: loan.amount.toString(),
+            interestRate: Number(loan.interestRate),
+            termDays: Number(loan.termDays),
+            createdAt: Number(loan.createdAt),
+            dueDate: Number(loan.dueDate),
+            amountRepaid: loan.amountRepaid.toString(),
+            status: Number(loan.status),
+        };
+    }
+
+    async isLoanOverdue(onChainLoanId: string): Promise<boolean> {
+        this.ensureConnected();
+        return await this.loanCoreContract.isOverdue(onChainLoanId);
+    }
+
+    async lockCollateralOnChain(
+        onChainLoanId: string,
+        tokenAddress: string,
+        amount: bigint,
+    ): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.collateralVaultContract.lockCollateral(
+            onChainLoanId,
+            tokenAddress,
+            amount,
+        );
+        const receipt = await tx.wait();
+
+        this.logger.log(`Collateral locked on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async unlockCollateralOnChain(onChainLoanId: string): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.collateralVaultContract.unlockCollateral(onChainLoanId);
+        const receipt = await tx.wait();
+
+        this.logger.log(`Collateral unlocked on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async seizeCollateralOnChain(
+        onChainLoanId: string,
+        recipient: string,
+    ): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.collateralVaultContract.seizeCollateral(
+            onChainLoanId,
+            recipient,
+        );
+        const receipt = await tx.wait();
+
+        this.logger.log(`Collateral seized on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async getBalance(address: string): Promise<string> {
+        this.ensureConnected();
+        const balance = await this.provider.getBalance(address);
+        return ethers.formatEther(balance);
+    }
+
+    async getCurrentBlockNumber(): Promise<number> {
+        this.ensureConnected();
+        return await this.provider.getBlockNumber();
+    }
+
+    private ensureConnected() {
+        if (!this.isConnected) {
+            throw new Error('Blockchain service is not connected');
+        }
+    }
+}

@@ -1,0 +1,189 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==============================================
+// ENUMS
+// ==============================================
+
+enum LoanStatus {
+  PENDING
+  ACTIVE
+  REPAID
+  DEFAULTED
+  LIQUIDATED
+}
+
+enum CollateralStatus {
+  LOCKED
+  RELEASED
+  SEIZED
+}
+
+enum RiskLevel {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum UserTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+// ==============================================
+// MODELS
+// ==============================================
+
+model Profile {
+  id              String   @id @default(uuid())
+  walletAddress   String   @unique @map("wallet_address")
+  nonce           String?  @map("nonce") // For wallet signature verification
+  reputationScore Int      @default(50) @map("reputation_score")
+  tier            UserTier @default(BRONZE)
+  totalLoans      Int      @default(0) @map("total_loans")
+  successfulLoans Int      @default(0) @map("successful_loans")
+  defaultedLoans  Int      @default(0) @map("defaulted_loans")
+  totalBorrowed   Float    @default(0) @map("total_borrowed")
+  totalRepaid     Float    @default(0) @map("total_repaid")
+  isBlocked       Boolean  @default(false) @map("is_blocked")
+  metadata        Json?    @map("metadata")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  loans              Loan[]
+  telegramSubscription TelegramSubscription?
+
+  @@map("profiles")
+}
+
+model Loan {
+  id                  String     @id @default(uuid())
+  userId              String     @map("user_id")
+  amount              Float
+  interestRate        Float      @map("interest_rate")
+  termMonths          Int        @map("term_months")
+  status              LoanStatus @default(PENDING)
+  riskLevel           RiskLevel? @map("risk_level")
+  defaultProbability  Float?     @map("default_probability")
+  recommendedAction   String?    @map("recommended_action")
+  amountRepaid        Float      @default(0) @map("amount_repaid")
+  dueDate             DateTime?  @map("due_date")
+  repaidAt            DateTime?  @map("repaid_at")
+  defaultedAt         DateTime?  @map("defaulted_at")
+  liquidatedAt        DateTime?  @map("liquidated_at")
+  onChainTxHash       String?    @map("on_chain_tx_hash")
+  onChainLoanId       String?    @map("on_chain_loan_id")
+  metadata            Json?      @map("metadata")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  profile        Profile         @relation(fields: [userId], references: [id])
+  collaterals    Collateral[]
+  riskAssessment RiskAssessment?
+  repayments     Repayment[]
+
+  @@map("loans")
+}
+
+model Collateral {
+  id            String           @id @default(uuid())
+  loanId        String           @map("loan_id")
+  tokenAddress  String           @map("token_address")
+  tokenSymbol   String           @map("token_symbol")
+  amount        Float
+  valueUsd      Float            @map("value_usd")
+  chainId       Int              @map("chain_id")
+  status        CollateralStatus @default(LOCKED)
+  onChainTxHash String?          @map("on_chain_tx_hash")
+  lockedAt      DateTime         @default(now()) @map("locked_at")
+  releasedAt    DateTime?        @map("released_at")
+  seizedAt      DateTime?        @map("seized_at")
+  metadata      Json?            @map("metadata")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  loan Loan @relation(fields: [loanId], references: [id])
+
+  @@map("collaterals")
+}
+
+model RiskAssessment {
+  id                String    @id @default(uuid())
+  loanId            String    @unique @map("loan_id")
+  creditScore       Int       @map("credit_score")
+  fraudScore        Float     @map("fraud_score")
+  anomalyScore      Float     @map("anomaly_score")
+  riskLevel         RiskLevel @map("risk_level")
+  defaultProbability Float    @map("default_probability")
+  recommendedAction String    @map("recommended_action")
+  confidenceScore   Float?    @map("confidence_score")
+  topFactors        Json?     @map("top_factors") // SHAP explanations
+  mlModelVersion    String?   @map("ml_model_version")
+  processingTimeMs  Int?      @map("processing_time_ms")
+  isFallback        Boolean   @default(false) @map("is_fallback")
+  metadata          Json?     @map("metadata")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  loan Loan @relation(fields: [loanId], references: [id])
+
+  @@map("risk_assessments")
+}
+
+model Repayment {
+  id            String   @id @default(uuid())
+  loanId        String   @map("loan_id")
+  amount        Float
+  onChainTxHash String?  @map("on_chain_tx_hash")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  loan Loan @relation(fields: [loanId], references: [id])
+
+  @@map("repayments")
+}
+
+model TelegramSubscription {
+  id              String   @id @default(uuid())
+  profileId       String   @unique @map("profile_id")
+  telegramUserId  String   @unique @map("telegram_user_id")
+  telegramChatId  String   @map("telegram_chat_id")
+  username        String?  @map("username")
+  isActive        Boolean  @default(true) @map("is_active")
+  notifyLoans     Boolean  @default(true) @map("notify_loans")
+  notifyRepayments Boolean @default(true) @map("notify_repayments")
+  notifyRisk      Boolean  @default(true) @map("notify_risk")
+  notifyAlerts    Boolean  @default(true) @map("notify_alerts")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@map("telegram_subscriptions")
+}
+
+model BlockchainEvent {
+  id              String   @id @default(uuid())
+  chainId         Int      @map("chain_id")
+  contractAddress String   @map("contract_address")
+  eventName       String   @map("event_name")
+  transactionHash String   @map("transaction_hash")
+  blockNumber     BigInt   @map("block_number")
+  logIndex        Int      @map("log_index")
+  data            Json     @map("data")
+  processed       Boolean  @default(false)
+  processedAt     DateTime? @map("processed_at")
+  error           String?  @map("error")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([transactionHash, logIndex])
+  @@map("blockchain_events")
+}

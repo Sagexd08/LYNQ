@@ -1,0 +1,19 @@
+{
+    "features": [
+        "wallet_age_days",
+        "total_transactions",
+        "total_volume_usd",
+        "defi_interactions",
+        "loan_amount",
+        "collateral_value_usd",
+        "term_months",
+        "previous_loans",
+        "successful_repayments",
+        "defaults",
+        "reputation_score",
+        "collateral_ratio"
+    ],
+    "version": "v1.0.0-dev",
+    "created_at": "2026-01-11",
+    "description": "Default feature configuration for credit risk scoring"
+}
