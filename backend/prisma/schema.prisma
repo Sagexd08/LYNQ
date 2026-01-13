@@ -17,6 +17,8 @@ model User {
   metadata             Json?                 @map("metadata")
   createdAt            DateTime              @default(now()) @map("createdAt") @db.Timestamp(6)
   updatedAt            DateTime              @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  phone                String?               @db.VarChar
+  status               UserStatus?           @default(ACTIVE)
   achievements         Achievement[]
   collateral           Collateral[]
   creditScores         CreditScore[]
@@ -25,7 +27,10 @@ model User {
   loans                Loan[]
   mlTrainingData       MlTrainingData[]
   quizAttempts         QuizAttempt[]
+  repayments           repayments[]
+  reputation           reputation?
   reputationActions    ReputationAction[]
+  reputation_events    reputation_events[]
   telegramSubscription TelegramSubscription?
 
   @@index([reputationTier], map: "IDX_users_reputationTier")
@@ -51,9 +56,13 @@ model Loan {
   metadata               Json?                @map("metadata")
   createdAt              DateTime             @default(now()) @map("createdAt") @db.Timestamp(6)
   updatedAt              DateTime             @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  partialExtensionUsed   Boolean?             @default(false)
+  lateDays               Int?                 @default(0)
+  riskLevel              String?              @db.VarChar
   riskAssessments        LoanRiskAssessment[]
   user                   User                 @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_loans_users")
   mlTrainingData         MlTrainingData[]
+  repayments             repayments[]
 
   @@index([createdAt], map: "IDX_loans_createdAt")
   @@index([status], map: "IDX_loans_status")
@@ -234,6 +243,75 @@ model Achievement {
   @@map("achievements")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model repayments {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  loanId          String           @db.Uuid
+  userId          String           @db.Uuid
+  amount          Decimal          @db.Decimal(18, 8)
+  paidAt          DateTime         @default(now()) @db.Timestamp(6)
+  status          RepaymentStatus? @default(COMPLETED)
+  transactionHash String?          @db.VarChar
+  isPartial       Boolean?         @default(false)
+  isEarly         Boolean?         @default(false)
+  isLate          Boolean?         @default(false)
+  lateDays        Int?             @default(0)
+  metadata        Json?
+  createdAt       DateTime?        @default(now()) @db.Timestamp(6)
+  loans           Loan             @relation(fields: [loanId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_repayments_loans")
+  users           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_repayments_users")
+
+  @@index([loanId], map: "IDX_repayments_loanId")
+  @@index([paidAt], map: "IDX_repayments_paidAt")
+  @@index([status], map: "IDX_repayments_status")
+  @@index([userId], map: "IDX_repayments_userId")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model reputation {
+  id                    String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String              @unique @db.Uuid
+  score                 Int                 @default(500)
+  tier                  ReputationTier      @default(BRONZE)
+  totalLoans            Int?                @default(0)
+  successfulRepayments  Int?                @default(0)
+  defaults              Int?                @default(0)
+  latePayments          Int?                @default(0)
+  earlyRepayments       Int?                @default(0)
+  totalVouches          Int?                @default(0)
+  slashedVouches        Int?                @default(0)
+  consecutiveSuccessful Int?                @default(0)
+  longestStreak         Int?                @default(0)
+  lastUpdated           DateTime?           @default(now()) @db.Timestamp(6)
+  createdAt             DateTime?           @default(now()) @db.Timestamp(6)
+  users                 User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_reputation_users")
+  reputation_events     reputation_events[]
+
+  @@index([score], map: "IDX_reputation_score")
+  @@index([tier], map: "IDX_reputation_tier")
+  @@index([userId], map: "IDX_reputation_userId")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model reputation_events {
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String              @db.Uuid
+  reputationId  String              @db.Uuid
+  eventType     ReputationEventType
+  pointsChange  Int
+  previousScore Int
+  newScore      Int
+  metadata      Json?
+  createdAt     DateTime?           @default(now()) @db.Timestamp(6)
+  reputation    reputation          @relation(fields: [reputationId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_reputation_events_reputation")
+  users         User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_reputation_events_users")
+
+  @@index([createdAt], map: "IDX_reputation_events_createdAt")
+  @@index([eventType], map: "IDX_reputation_events_eventType")
+  @@index([reputationId], map: "IDX_reputation_events_reputationId")
+  @@index([userId], map: "IDX_reputation_events_userId")
+}
+
 enum LoanStatus {
   PENDING
   ACTIVE
@@ -259,4 +337,29 @@ enum VouchStatus {
   ACTIVE
   WITHDRAWN
   SLASHED
+}
+
+enum RepaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ReputationEventType {
+  LOAN_REPAID
+  LOAN_DEFAULTED
+  EARLY_REPAYMENT
+  LATE_PAYMENT
+  PARTIAL_REPAYMENT
+  VOUCH_PROVIDED
+  VOUCH_SLASHED
+  KYC_VERIFIED
+  ACCOUNT_BLOCKED
+  ACCOUNT_UNBLOCKED
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
 }
