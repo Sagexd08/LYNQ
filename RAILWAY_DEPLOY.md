@@ -12,7 +12,11 @@
 2. Click "New Project"
 3. Select "Deploy from GitHub repo"
 4. Choose your LYNQ repository
-5. Select the `backend` directory as the root directory (or deploy from root with build command)
+5. **IMPORTANT**: In Railway service settings, set **Root Directory** to `backend`
+   - Go to your service → Settings → Root Directory
+   - Set to: `backend`
+   - This ensures Railway uses `backend/nixpacks.toml` and `backend/package.json`
+   - Without this, Railway will detect `pnpm` from root and fail
 
 ## Step 2: Add Services
 

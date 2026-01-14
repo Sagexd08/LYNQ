@@ -4,7 +4,8 @@
 nixPkgs = ["nodejs_22", "openssl"]
 
 [phases.install]
-cmds = ["npm ci"]
+# Use npm install (works even if package-lock.json is missing or outdated)
+cmds = ["npm install --legacy-peer-deps"]
 
 [phases.build]
 cmds = [

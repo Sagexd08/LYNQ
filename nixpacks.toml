@@ -1,12 +1,15 @@
 # Nixpacks config for Railway deployment
 # IMPORTANT: Set Railway root directory to "backend" in service settings
 # This file is for reference - Railway will use backend/nixpacks.toml when root is set to backend
+# If Railway root is NOT set to backend, this config will be used
 
 [phases.setup]
 nixPkgs = ["nodejs_22", "openssl"]
 
 [phases.install]
-cmds = ["cd backend && npm ci"]
+# Use npm install which works with or without package-lock.json
+# npm install will create/update package-lock.json if needed
+cmds = ["cd backend && npm install --legacy-peer-deps"]
 
 [phases.build]
 cmds = [
