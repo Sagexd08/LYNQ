@@ -1,4 +1,5 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
+const ethers = hre.ethers;
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -17,11 +18,7 @@ async function main() {
     await collateralVault.waitForDeployment();
     const vaultAddress = await collateralVault.getAddress();
     console.log("CollateralVault deployed to:", vaultAddress);
-
-    console.log("\nLinking contracts...");
-    await loanCore.setCollateralVault(vaultAddress);
-    await collateralVault.setLoanCore(loanCoreAddress);
-    console.log("Contracts linked successfully");
+    console.log("\nContracts deployed successfully (no linking required)");
 
     console.log("\n========== Deployment Summary ==========");
     console.log("Network:", (await ethers.provider.getNetwork()).name);

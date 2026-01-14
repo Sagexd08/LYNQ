@@ -1,28 +1,35 @@
 # Dependencies
 node_modules/
-pnpm-lock.yaml
+# Note: pnpm-lock.yaml is tracked for reproducible builds
+# DO NOT add pnpm-lock.yaml to .gitignore
 
 # Build outputs
 dist/
 build/
+.next/
+out/
 
-# Environment variables
+# Environment variables (NEVER commit these!)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
 
-# IDE
+# IDE / Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.cursor/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Logs
 logs/
@@ -36,27 +43,82 @@ lerna-debug.log*
 # Testing
 coverage/
 .nyc_output/
+junit.xml
 
-# Contract artifacts (can be regenerated)
-contracts/ethereum/artifacts/
-contracts/ethereum/cache/
-contracts/ethereum/typechain/
-lynq-ml-service.pem
-# Flow
-flow.json
-contracts/deployments/
+# Smart Contract Artifacts (regenerated on build)
+backend/contracts/ethereum/artifacts/
+backend/contracts/ethereum/cache/
+backend/contracts/ethereum/typechain/
+backend/contracts/deployments/
+*.tsbuildinfo
 
-# Prisma
-backend/prisma/migrations/
+# Prisma (IMPORTANT: migrations MUST be committed!)
+# Only ignore generated client and temporary files
+backend/node_modules/.prisma/
+.prisma/
+# Ignore SQL log files from migrations (temporary execution logs only)
+**/prisma/migrations/**/*.sql.log
+# DO NOT ignore migration directories - they must be version controlled!
+
+# ML Models (stored in S3, not in git)
+backend/ml-service/models/*.pkl
+backend/ml-service/models/*.joblib
+backend/ml-service/models/*.h5
+backend/ml-service/models/*.pt
+backend/ml-service/models/*.pth
+!backend/ml-service/models/.gitkeep
+!backend/ml-service/models/README.md
+
+# AWS / Cloud Keys (CRITICAL - NEVER COMMIT!)
+*.pem
+*.key
+*.p12
+*.pfx
+aws-credentials.json
+gcp-credentials.json
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.swp
+.cache/
 
-# Backend
+# Backend specific
 backend/.env
 backend/dist/
+backend/data/
 
 # Docker
 docker-compose.override.yml
+.dockerignore
+
+# Railway / Deployment
+.railway/
+railway.override.toml
+
+# Python (ML Service)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Frontend
+frontend/dist/
+frontend/.next/
+frontend/out/
+frontend/landing-v2/dist/
+frontend/landing-v2/.next/
+
+# Archive
+archive/

@@ -1,8 +1,10 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
+import * as path from "path";
 
-dotenv.config();
+// Load .env from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000001";
 
@@ -24,6 +26,14 @@ const config: HardhatUserConfig = {
             url: "http://127.0.0.1:8545",
             chainId: 31337,
         },
+        // Mantle Sepolia Testnet - PRIMARY TARGET
+        mantleSepolia: {
+            url: process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz",
+            accounts: [PRIVATE_KEY],
+            chainId: 5003,
+            gasPrice: 1000000000, // 1 gwei
+        },
+        // Keep others for reference
         sepolia: {
             url: process.env.SEPOLIA_RPC_URL || "",
             accounts: [PRIVATE_KEY],
@@ -34,19 +44,11 @@ const config: HardhatUserConfig = {
             accounts: [PRIVATE_KEY],
             chainId: 80002,
         },
-        // Mantle Sepolia Testnet - PRIMARY TARGET
-        mantleSepolia: {
-            url: process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz",
-            accounts: [PRIVATE_KEY],
-            chainId: 5003,
-            gasPrice: 1000000000, // 1 gwei
-        },
     },
     etherscan: {
         apiKey: {
-            sepolia: process.env.SEPOLIA_EXPLORER_API_KEY || "",
-            amoy: process.env.AMOY_EXPLORER_API_KEY || "",
-            mantleSepolia: process.env.MANTLE_EXPLORER_API_KEY || "",
+            mantleSepolia: process.env.MANTLESCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+            sepolia: process.env.ETHERSCAN_API_KEY || "",
         },
         customChains: [
             {

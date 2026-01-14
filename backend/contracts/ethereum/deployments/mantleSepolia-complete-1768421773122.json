@@ -1,0 +1,25 @@
+{
+  "network": "mantleSepolia",
+  "chainId": 5003,
+  "deployedAt": "2026-01-14T20:16:13.121Z",
+  "deployer": "0xa025505514a057D9f7D9aA6992e0f30Fa5072071",
+  "contracts": {
+    "LoanPlatform": "0x2Ec5fD3E16e6fC4170010844969d2458fB192f9E",
+    "TrustScore": "0x15CAaA13e41937178F1B84eDB0193dc54230E27A",
+    "CollateralManager": "0x2074C5959f37CbF5fA2b1782E770B04bfbC93ebA",
+    "InterestRateModel": "0x38d116a3Ed5104fEBB6f0455ce04A03172F28e45",
+    "LoanCore": "0x0E5419f4644afEdE849D24eeDebb9D491b821F9e",
+    "CollateralVault": "0x1470b502711b080C7B9A061FD637A2514f362D10"
+  },
+  "transactions": {
+    "interestRateModel": "0x091e1d95e734d554548d147ae997e407bda2ed655cee7debeb2a55f3b9a10805",
+    "loanPlatform": "0x09150b9dc2900f467a736c648538530ad0c669e1d2773e0b0c1248fd73189afa"
+  },
+  "notes": {
+    "loanCore": "Simple implementation deployed earlier (before LoanPlatform)",
+    "collateralVault": "Simple implementation deployed earlier (before CollateralManager)",
+    "mainContracts": "LoanPlatform, TrustScore, CollateralManager, InterestRateModel",
+    "legacyContracts": "LoanCore, CollateralVault (can be used as alternatives)",
+    "architecture": "LoanPlatform uses TrustScore, CollateralManager, and InterestRateModel"
+  }
+}

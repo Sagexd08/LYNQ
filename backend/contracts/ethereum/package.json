@@ -1,0 +1,26 @@
+{
+  "name": "lynq-ethereum-contracts",
+  "version": "1.0.0",
+  "description": "Ethereum smart contracts for LYNQ lending platform",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "verify": "hardhat verify --network sepolia",
+    "node": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "@types/express": "^5.0.5",
+    "chai": "^4.3.10",
+    "dotenv": "^16.4.0",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.0"
+  }
+}

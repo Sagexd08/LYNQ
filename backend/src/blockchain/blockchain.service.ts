@@ -72,7 +72,10 @@ export class BlockchainService implements OnModuleInit {
     }
 
     private async initialize() {
-        const rpcUrl = this.configService.get<string>('BLOCKCHAIN_RPC_URL');
+        const mantleRpcUrl = this.configService.get<string>('MANTLE_SEPOLIA_RPC_URL');
+        const defaultRpcUrl = this.configService.get<string>('BLOCKCHAIN_RPC_URL');
+        const rpcUrl = mantleRpcUrl || defaultRpcUrl;
+        
         const privateKey = this.configService.get<string>('PRIVATE_KEY');
         const loanCoreAddress = this.configService.get<string>('LOAN_CORE_ADDRESS');
         const vaultAddress = this.configService.get<string>('COLLATERAL_VAULT_ADDRESS');
