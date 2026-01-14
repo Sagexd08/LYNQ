@@ -203,7 +203,6 @@ export class LoansService {
         let collateralLocked = false;
         
         try {
-            // Lock collateral in DB (after on-chain verification)
             await this.collateralService.lockCollateral({
                 loanId,
                 tokenAddress: collateralData.tokenAddress,
@@ -315,6 +314,14 @@ export class LoansService {
 
         const totalOwed = Number(loan.amount) * (1 + Number(loan.interestRate) / 100);
         const amountRepaid = Number(loan.amount) - Number(loan.outstandingAmount);
+        if (amountRepaid < 0 || amountRepaid > Number(loan.amount)) {
+            this.logger.error(
+                `Invalid amountRepaid calculation for loan ${loanId}: ` +
+                `amount=${loan.amount}, outstandingAmount=${loan.outstandingAmount}, amountRepaid=${amountRepaid}`
+            );
+            throw new BadRequestException('Invalid loan state: outstanding amount calculation error');
+        }
+        
         const remaining = totalOwed - amountRepaid;
         const paymentAmount = Math.min(dto.amount, remaining);
 
