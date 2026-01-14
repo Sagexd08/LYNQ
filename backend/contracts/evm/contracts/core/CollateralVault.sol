@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract CollateralVault is Ownable, ReentrancyGuard {
     mapping(uint256 => CollateralInfo) public collaterals;
     mapping(address => mapping(address => uint256)) public userTokenBalance;
-    mapping(address => uint256) public userNonce; // Bug 4: Prevent collateralId collisions
+    mapping(address => uint256) public userNonce;
     address public loanCore; // Allow LoanCore to unlock collateral
 
     struct CollateralInfo {
@@ -28,6 +28,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     );
     
     event CollateralUnlocked(uint256 indexed collateralId);
+    event CollateralSeized(uint256 indexed collateralId, address indexed recipient);
 
     constructor() Ownable(msg.sender) {}
 
@@ -39,7 +40,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         address token,
         uint256 amount,
         uint256 loanId
-    ) external returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         return lockCollateralFor(msg.sender, token, amount, loanId);
     }
 
@@ -59,7 +60,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         // Transfer from owner (who must have approved this contract)
         IERC20(token).transferFrom(owner, address(this), amount);
 
-        // Bug 4: Add nonce to prevent collisions when same user locks same token/amount in same block
+        // Add nonce to prevent collisions when same user locks same token/amount in same block
         uint256 nonce = userNonce[owner]++;
         uint256 collateralId = uint256(
             keccak256(abi.encodePacked(owner, token, amount, block.timestamp, nonce))
@@ -101,5 +102,18 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         uint256 collateralId
     ) external view returns (uint256) {
         return collaterals[collateralId].amount;
+    }
+
+    function seizeCollateral(uint256 collateralId, address recipient) external nonReentrant {
+        CollateralInfo storage collateral = collaterals[collateralId];
+        require(collateral.locked, "Already unlocked/seized");
+        require(msg.sender == loanCore, "Not authorized");
+
+        collateral.locked = false;
+        userTokenBalance[collateral.owner][collateral.token] -= collateral.amount;
+
+        IERC20(collateral.token).transfer(recipient, collateral.amount);
+
+        emit CollateralSeized(collateralId, recipient);
     }
 }

@@ -165,14 +165,6 @@ export class BlockchainService implements OnModuleInit {
 
         const loan = await this.loanCoreContract.getLoan(loanId);
 
-        // Calculate amountRepaid: initialOutstanding - currentOutstanding
-        // Initial outstanding = amount + interest = amount + (amount * interestRate) / 10000
-        // So: amountRepaid = (amount * (10000 + interestRate)) / 10000 - outstandingAmount
-        const initialOutstanding = (BigInt(loan.amount) * BigInt(10000 + Number(loan.interestRate))) / BigInt(10000);
-        const amountRepaid = initialOutstanding > BigInt(loan.outstandingAmount) 
-            ? initialOutstanding - BigInt(loan.outstandingAmount)
-            : BigInt(0);
-
         return {
             loanId: loanId,
             borrower: loan.borrower,
@@ -181,7 +173,7 @@ export class BlockchainService implements OnModuleInit {
             termDays: Number(loan.duration),
             createdAt: Number(loan.startTime),
             dueDate: Number(loan.startTime) + Number(loan.duration),
-            amountRepaid: amountRepaid.toString(),
+            amountRepaid: (BigInt(loan.amount) + BigInt(loan.outstandingAmount) - BigInt(loan.outstandingAmount)).toString(), // Calculate from outstanding
             status: Number(loan.status),
         };
     }

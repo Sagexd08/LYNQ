@@ -10,6 +10,7 @@ import { MlModule } from '../ml/ml.module';
 import { TelegramModule } from '../telegram/telegram.module';
 import { BlockchainModule } from '../blockchain/blockchain.module';
 import { ReputationModule } from '../reputation/reputation.module';
+import { BlockchainSyncProcessor } from './processors/blockchain-sync.processor';
 
 export const QUEUE_NAMES = {
     ML_ASSESSMENT: 'ml-assessment',
@@ -80,6 +81,7 @@ export const QUEUE_NAMES = {
         NotificationProcessor,
         LiquidationProcessor,
         LiquidationSchedulerService,
+        BlockchainSyncProcessor,
     ],
     exports: [BullModule],
 })

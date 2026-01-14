@@ -14,7 +14,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         uint256 amount;
         uint256 collateralAmount;
         address collateralToken;
-        uint256 collateralId; // Bug 2: Store collateralId for unlocking
+        uint256 collateralId;
         uint256 interestRate;
         uint256 startTime;
         uint256 duration;
@@ -27,7 +27,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
     uint256 public loanCounter;
     
     address public collateralVault;
-    address public loanToken; // Bug 1: Token used for loan principal
+    address public loanToken;
     uint256 public constant LIQUIDATION_THRESHOLD = 120;
 
     event LoanCreated(
@@ -66,7 +66,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         uint256 loanId = loanCounter++;
         uint256 interest = (amount * interestRate) / 10000;
         
-        // Bug 2: Use CollateralVault.lockCollateralFor() instead of direct transfer
+        // Use CollateralVault.lockCollateralFor() instead of direct transfer
         // Note: Borrower must approve CollateralVault (not LoanCore) for the collateral token
         CollateralVault vault = CollateralVault(collateralVault);
         uint256 collateralId = vault.lockCollateralFor(msg.sender, collateralToken, collateralAmount, loanId);
@@ -76,7 +76,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
             amount: amount,
             collateralAmount: collateralAmount,
             collateralToken: collateralToken,
-            collateralId: collateralId, // Bug 2: Store collateralId
+            collateralId: collateralId,
             interestRate: interestRate,
             startTime: block.timestamp,
             duration: duration,
@@ -86,7 +86,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
 
         userLoans[msg.sender].push(loanId);
 
-        // Bug 1: Transfer loan principal to borrower
+        // Transfer loan principal to borrower
         require(
             IERC20(loanToken).transfer(msg.sender, amount),
             "Loan transfer failed"
@@ -104,7 +104,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         require(amount <= loan.outstandingAmount, "Amount too high");
         require(loanToken != address(0), "Loan token not set");
 
-        // Bug 3: Transfer repayment tokens from borrower
+        // Transfer repayment tokens from borrower
         require(
             IERC20(loanToken).transferFrom(msg.sender, address(this), amount),
             "Repayment transfer failed"
@@ -122,7 +122,7 @@ contract LoanCore is Ownable, ReentrancyGuard {
         emit LoanRepaid(loanId, amount);
     }
 
-    function liquidateLoan(uint256 loanId) external {
+    function liquidateLoan(uint256 loanId) external nonReentrant {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.ACTIVE, "Loan not active");
         require(
@@ -131,6 +131,9 @@ contract LoanCore is Ownable, ReentrancyGuard {
         );
 
         loan.status = LoanStatus.LIQUIDATED;
+        
+        // Seize collateral to the contract owner (Protocol)
+        CollateralVault(collateralVault).seizeCollateral(loan.collateralId, owner());
         
         emit LoanLiquidated(loanId);
     }

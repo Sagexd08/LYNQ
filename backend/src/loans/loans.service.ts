@@ -4,6 +4,8 @@ import {
     BadRequestException,
     Logger,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { RiskService } from '../risk/risk.service';
 import { CollateralService } from '../collateral/collateral.service';
@@ -11,6 +13,7 @@ import { BlockchainService } from '../blockchain/blockchain.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { RepayLoanDto } from './dto/repay-loan.dto';
 import { ethers } from 'ethers';
+import { QUEUE_NAMES } from '../queues/queues.module';
 
 @Injectable()
 export class LoansService {
@@ -21,6 +24,8 @@ export class LoansService {
         private readonly riskService: RiskService,
         private readonly collateralService: CollateralService,
         private readonly blockchainService: BlockchainService,
+        @InjectQueue(QUEUE_NAMES.BLOCKCHAIN_SYNC)
+        private readonly blockchainSyncQueue: Queue,
     ) { }
 
     async createLoan(userId: string, dto: CreateLoanDto) {
@@ -76,33 +81,6 @@ export class LoansService {
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
 
-        let onChainLoanId: string | null = null;
-        let transactionHash: string | null = null;
-
-        if (this.blockchainService.isBlockchainConnected()) {
-            try {
-                const amountInWei = ethers.parseEther(dto.amount.toString());
-                const interestRateBps = Math.round(riskEvaluation.interestRate * 100);
-
-                const onChainResult = await this.blockchainService.createLoanOnChain(
-                    amountInWei,
-                    interestRateBps,
-                    durationDays,
-                );
-
-                onChainLoanId = onChainResult.loanId;
-                transactionHash = onChainResult.txHash;
-
-                this.logger.log(`Loan created on-chain: ${onChainLoanId}, tx: ${transactionHash}`);
-            } catch (error) {
-                this.logger.error(`Failed to create loan on-chain: ${error.message}`);
-                throw new BadRequestException(`Failed to create loan on-chain: ${error.message}`);
-            }
-        } else {
-            this.logger.error('Blockchain not connected. Cannot create loan.');
-            throw new BadRequestException('Blockchain connection required to create loan');
-        }
-
         const loan = await this.prisma.loan.create({
             data: {
                 userId,
@@ -115,16 +93,39 @@ export class LoansService {
                 durationDays,
                 status: 'PENDING',
                 dueDate,
-                onChainLoanId,
-                transactionHash,
+                onChainLoanId: null,
+                transactionHash: null,
                 riskLevel: riskEvaluation.riskLevel,
+                metadata: {
+                    onChainSync: {
+                        status: 'QUEUED',
+                        queuedAt: new Date().toISOString(),
+                    },
+                },
             },
+        });
+
+        const amountInWei = ethers.parseEther(dto.amount.toString());
+        const collateralAmountWei = ethers.parseEther((dto.collateralValueUsd || 0).toString());
+        const interestRateBps = Math.round(riskEvaluation.interestRate * 100);
+
+        if (!this.blockchainService.isBlockchainConnected()) {
+            this.logger.error('Blockchain not connected. Job will fail fast');
+        }
+
+        await this.blockchainSyncQueue.add('create-loan', {
+            loanId: loan.id,
+            amountWei: amountInWei.toString(),
+            collateralAmountWei: collateralAmountWei.toString(),
+            collateralToken: dto.collateralTokenAddress || '0x0',
+            interestRateBps,
+            durationDays,
         });
 
         await this.riskService.saveRiskAssessment(loan.id, riskEvaluation);
 
         this.logger.log(
-            `Loan created: ${loan.id} for user ${userId}, amount: ${dto.amount}, risk: ${riskEvaluation.riskLevel}, onChain: ${!!onChainLoanId}`,
+            `Loan created: ${loan.id} for user ${userId}, amount: ${dto.amount}, risk: ${riskEvaluation.riskLevel}, onChain sync queued`,
         );
 
         return {
@@ -136,7 +137,8 @@ export class LoansService {
                 maxLoanAmount: riskEvaluation.maxLoanAmount,
                 recommendedAction: riskEvaluation.recommendedAction,
             },
-            isOnChain: !!onChainLoanId,
+            isOnChain: false,
+            onChainSyncStatus: 'QUEUED',
         };
     }
 
