@@ -132,19 +132,24 @@ export class MlService {
         else if (request.walletAgeDays >= 90) score += 50;
         else if (request.walletAgeDays < 30) score -= 50;
 
-        if (request.reputationScore >= 80) score += 150;
-        else if (request.reputationScore >= 60) score += 75;
-        else if (request.reputationScore < 40) score -= 100;
+        const reputationScore = request.reputationScore ?? 50;
+        if (reputationScore >= 80) score += 150;
+        else if (reputationScore >= 60) score += 75;
+        else if (reputationScore < 40) score -= 100;
 
         if (collateralRatio >= 2.0) score += 100;
         else if (collateralRatio >= 1.5) score += 75;
         else if (collateralRatio >= 1.0) score += 25;
         else score -= 100;
 
-        if (request.previousLoans > 0 && request.defaults === 0) {
-            score += 50 * Math.min(request.successfulRepayments, 3);
+        const previousLoans = request.previousLoans ?? 0;
+        const defaults = request.defaults ?? 0;
+        const successfulRepayments = request.successfulRepayments ?? 0;
+        
+        if (previousLoans > 0 && defaults === 0) {
+            score += 50 * Math.min(successfulRepayments, 3);
         }
-        score -= request.defaults * 150;
+        score -= defaults * 150;
 
         score = Math.max(100, Math.min(1000, score));
 
@@ -177,11 +182,11 @@ export class MlService {
         let fraudScore = 0;
         if (request.walletAgeDays < 7) fraudScore += 0.5;
         if (request.totalTransactions < 3) fraudScore += 0.3;
-        if (request.defaults > 2) fraudScore += 0.4;
+        if (defaults > 2) fraudScore += 0.4;
         fraudScore = Math.min(fraudScore, 1.0);
 
         let recommendedAction: RecommendedAction;
-        if (fraudScore > 0.7 || request.defaults >= 2) {
+        if (fraudScore > 0.7 || defaults >= 2) {
             recommendedAction = RecommendedAction.REJECT;
         } else if (fraudScore > 0.4 || riskLevel === RiskLevel.VERY_HIGH) {
             recommendedAction = RecommendedAction.MANUAL_REVIEW;

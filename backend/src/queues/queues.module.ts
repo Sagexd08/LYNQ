@@ -1,27 +1,34 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MlAssessmentProcessor } from './processors/ml-assessment.processor';
 import { NotificationProcessor } from './processors/notification.processor';
+import { LiquidationProcessor } from './processors/liquidation.processor';
+import { LiquidationSchedulerService } from './processors/liquidation-scheduler.service';
 import { MlModule } from '../ml/ml.module';
 import { TelegramModule } from '../telegram/telegram.module';
+import { BlockchainModule } from '../blockchain/blockchain.module';
+import { ReputationModule } from '../reputation/reputation.module';
 
 export const QUEUE_NAMES = {
     ML_ASSESSMENT: 'ml-assessment',
     NOTIFICATIONS: 'notifications',
     BLOCKCHAIN_SYNC: 'blockchain-sync',
     RISK_EVALUATION: 'risk-evaluation',
+    LIQUIDATION: 'liquidation',
 };
 
 @Module({
     imports: [
+        ScheduleModule.forRoot(),
         BullModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 connection: {
-                    host: new URL(configService.get<string>('REDIS_URL', 'redis:
-                    port: parseInt(new URL(configService.get<string>('REDIS_URL', 'redis:
+                    host: new URL(configService.get<string>('REDIS_URL', 'redis://localhost:6379')).hostname,
+                    port: parseInt(new URL(configService.get<string>('REDIS_URL', 'redis://localhost:6379')).port || '6379'),
                 },
                 defaultJobOptions: {
                     removeOnComplete: 1000,
@@ -39,11 +46,19 @@ export const QUEUE_NAMES = {
             { name: QUEUE_NAMES.NOTIFICATIONS },
             { name: QUEUE_NAMES.BLOCKCHAIN_SYNC },
             { name: QUEUE_NAMES.RISK_EVALUATION },
+            { name: QUEUE_NAMES.LIQUIDATION },
         ),
         MlModule,
         TelegramModule,
+        BlockchainModule,
+        ReputationModule,
     ],
-    providers: [MlAssessmentProcessor, NotificationProcessor],
+    providers: [
+        MlAssessmentProcessor,
+        NotificationProcessor,
+        LiquidationProcessor,
+        LiquidationSchedulerService,
+    ],
     exports: [BullModule],
 })
 export class QueuesModule { }

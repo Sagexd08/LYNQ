@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Headers, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { TelegramService, NotificationType } from './telegram.service';
-import { SendNotificationDto } from './dto/send-notification.dto';
+import { TelegramService } from './telegram.service';
+import { SendNotificationDto, NotificationType } from './dto/send-notification.dto';
 
 @ApiTags('Telegram')
 @Controller('telegram')
@@ -34,8 +34,9 @@ export class TelegramController {
     @ApiOperation({ summary: 'Send notification to user' })
     @ApiResponse({ status: 200, description: 'Notification sent' })
     async sendNotification(@Body() dto: SendNotificationDto) {
+        // profileId maps to userId in the service
         const success = await this.telegramService.sendNotification(dto.profileId, {
-            type: dto.type as NotificationType,
+            type: dto.type,
             title: dto.title,
             message: dto.message,
             data: dto.data,

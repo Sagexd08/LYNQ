@@ -23,7 +23,9 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "telegram:setup-webhook": "ts-node scripts/setup-telegram-webhook.ts",
+    "telegram:webhook-info": "node -e \"const token=process.env.TELEGRAM_BOT_TOKEN; require('child_process').exec('curl https://api.telegram.org/bot' + token + '/getWebhookInfo', (e,s)=>console.log(s))\""
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
@@ -34,6 +36,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.0",
     "@nestjs/swagger": "^11.0.7",
     "@nestjs/throttler": "^6.4.0",
     "@prisma/adapter-pg": "^7.2.0",

@@ -11,6 +11,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { LoansService } from './loans.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { RepayLoanDto } from './dto/repay-loan.dto';
+import { ActivateLoanDto } from './dto/activate-loan.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -30,10 +31,10 @@ export class LoansController {
     }
 
     @Post(':id/activate')
-    @ApiOperation({ summary: 'Activate a pending loan' })
+    @ApiOperation({ summary: 'Activate a pending loan with collateral verification' })
     @ApiResponse({ status: 200, description: 'Loan activated' })
-    async activate(@Param('id') id: string) {
-        return this.loansService.activateLoan(id);
+    async activate(@Param('id') id: string, @Body() dto: ActivateLoanDto) {
+        return this.loansService.activateLoan(id, dto);
     }
 
     @Post(':id/repay')

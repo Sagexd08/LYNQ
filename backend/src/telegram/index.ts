@@ -1,4 +1,4 @@
 export * from './telegram.module';
-export * from './telegram.service';
+export { TelegramService } from './telegram.service';
 export * from './telegram.controller';
-export * from './dto';
+export { SendNotificationDto, NotificationType } from './dto/send-notification.dto';

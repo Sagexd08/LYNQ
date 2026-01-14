@@ -7,10 +7,13 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
+  // CORS Configuration - Update CORS_ORIGIN in .env for production
+  const corsOrigin = process.env.CORS_ORIGIN;
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: corsOrigin === '*' ? '*' : corsOrigin?.split(',').map(o => o.trim()) || '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-KEY'],
+    credentials: true,
   });
 
   app.useGlobalPipes(

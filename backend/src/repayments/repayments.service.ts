@@ -31,16 +31,25 @@ export class RepaymentsService {
             throw new NotFoundException('Loan not found');
         }
 
-        if (loan.status === 'repaid') {
+        if (loan.status === 'REPAID') {
             throw new BadRequestException('Loan is already repaid');
         }
 
-        const outcome = classifyRepayment(loan, amount, paidAt);
+        // Create a compatible loan object for classification
+        const loanForClassification = {
+            amount: Number(loan.amount),
+            dueAt: loan.dueDate || new Date(),
+            repayments: loan.repayments.map(r => ({ amount: Number(r.amount) })),
+            partialExtensionUsed: loan.partialExtensionUsed || false,
+        };
+
+        const outcome = classifyRepayment(loanForClassification, amount, paidAt);
 
         return this.prisma.$transaction(async (tx) => {
-            const repayment = await tx.repayment.create({
+            const repayment = await tx.repayments.create({
                 data: {
                     loanId,
+                    userId: loan.userId,
                     amount,
                 },
             });
@@ -63,14 +72,14 @@ export class RepaymentsService {
                         );
                     }
                 } else {
-                    const newDueAt = new Date(loan.dueAt);
-                    newDueAt.setDate(newDueAt.getDate() + PARTIAL_EXTENSION_DAYS);
+                    const newDueDate = new Date(loan.dueDate || new Date());
+                    newDueDate.setDate(newDueDate.getDate() + PARTIAL_EXTENSION_DAYS);
 
                     await tx.loan.update({
                         where: { id: loanId },
                         data: {
                             partialExtensionUsed: true,
-                            dueAt: newDueAt,
+                            dueDate: newDueDate,
                         },
                     });
                 }
@@ -81,7 +90,7 @@ export class RepaymentsService {
             await tx.loan.update({
                 where: { id: loanId },
                 data: {
-                    status: 'repaid',
+                    status: 'REPAID',
                     lateDays: outcome.lateDays,
                 },
             });

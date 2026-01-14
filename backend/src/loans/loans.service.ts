@@ -138,12 +138,12 @@ export class LoansService {
         };
     }
 
-    async activateLoan(loanId: string, collateralData?: {
+    async activateLoan(loanId: string, collateralData: {
         tokenAddress: string;
         tokenSymbol: string;
         amount: number;
         chainId: number;
-        txHash?: string;
+        txHash: string; // Make txHash required
     }) {
         const loan = await this.prisma.loan.findUnique({
             where: { id: loanId },
@@ -157,22 +157,42 @@ export class LoansService {
             throw new BadRequestException('Only pending loans can be activated');
         }
 
-        if (collateralData) {
-            await this.collateralService.lockCollateral({
-                loanId,
-                ...collateralData,
-            });
+        // CRITICAL: Verify collateral transaction on-chain before activating
+        if (this.blockchainService.isBlockchainConnected()) {
+            try {
+                // Verify the collateral lock transaction actually happened
+                const isVerified = await this.blockchainService.verifyCollateralDeposit(
+                    collateralData.txHash,
+                    loan.onChainLoanId,
+                    collateralData.tokenAddress,
+                    collateralData.amount,
+                );
+
+                if (!isVerified) {
+                    throw new BadRequestException('Collateral deposit not verified on-chain');
+                }
+
+                this.logger.log(`Collateral verified on-chain for loan ${loanId}, tx: ${collateralData.txHash}`);
+            } catch (error) {
+                this.logger.error(`Collateral verification failed: ${error.message}`);
+                throw new BadRequestException(`Collateral verification failed: ${error.message}`);
+            }
+        } else {
+            // For MVP on testnet, require blockchain connection
+            throw new BadRequestException('Blockchain connection required for loan activation');
         }
 
-        let activationTxHash: string | null = null;
+        // Lock collateral in DB (after on-chain verification)
+        await this.collateralService.lockCollateral({
+            loanId,
+            ...collateralData,
+        }, loan.userId);
 
-        if (this.blockchainService.isBlockchainConnected() && loan.onChainLoanId) {
-            try {
-                activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
-                this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
-            } catch (error) {
-                this.logger.warn(`Failed to activate loan on-chain: ${error.message}`);
-            }
+        // Activate loan on-chain
+        let activationTxHash: string | null = null;
+        if (loan.onChainLoanId) {
+            activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
+            this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
         }
 
         const updatedLoan = await this.prisma.loan.update({
@@ -180,8 +200,10 @@ export class LoansService {
             data: {
                 status: 'ACTIVE',
                 startDate: new Date(),
+                collateralTokenAddress: collateralData.tokenAddress,
+                collateralAmount: collateralData.amount,
+                transactionHash: activationTxHash || loan.transactionHash,
             },
-            include: { collaterals: true },
         });
 
         const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
@@ -213,21 +235,56 @@ export class LoansService {
             throw new BadRequestException('Only active loans can be repaid');
         }
 
+        // If on-chain loan exists and txHash provided, verify the repayment
+        let onChainVerified = false;
+        if (loan.onChainLoanId && dto.txHash && this.blockchainService.isBlockchainConnected()) {
+            try {
+                onChainVerified = await this.blockchainService.verifyRepayment(
+                    dto.txHash,
+                    loan.onChainLoanId,
+                    dto.amount,
+                );
+
+                if (!onChainVerified) {
+                    throw new BadRequestException('Repayment transaction not verified on-chain');
+                }
+
+                this.logger.log(`Repayment verified on-chain: ${dto.txHash}`);
+            } catch (error) {
+                this.logger.error(`Repayment verification failed: ${error.message}`);
+                throw new BadRequestException(`Repayment verification failed: ${error.message}`);
+            }
+        } else if (loan.onChainLoanId && !dto.txHash) {
+            throw new BadRequestException('Transaction hash required for on-chain loan repayment');
+        }
+
         const totalOwed = Number(loan.amount) * (1 + Number(loan.interestRate) / 100);
         const amountRepaid = Number(loan.outstandingAmount) - Number(loan.amount);
         const remaining = totalOwed - amountRepaid;
         const paymentAmount = Math.min(dto.amount, remaining);
 
-        await this.prisma.repayment.create({
+        await this.prisma.repayments.create({
             data: {
                 loanId,
                 amount: paymentAmount,
-                onChainTxHash: dto.txHash,
+                transactionHash: dto.txHash,
+                userId: loan.userId,
             },
         });
 
         const newOutstanding = Number(loan.outstandingAmount) - paymentAmount;
         const isFullyRepaid = newOutstanding <= 0;
+
+        // If fully repaid, unlock collateral on-chain
+        if (isFullyRepaid && loan.onChainLoanId && this.blockchainService.isBlockchainConnected()) {
+            try {
+                await this.blockchainService.unlockCollateralOnChain(loan.onChainLoanId);
+                this.logger.log(`Collateral unlocked on-chain for loan ${loanId}`);
+            } catch (error) {
+                this.logger.error(`Failed to unlock collateral on-chain: ${error.message}`);
+                // Don't fail the repayment, but log for manual resolution
+            }
+        }
 
         const updatedLoan = await this.prisma.loan.update({
             where: { id: loanId },
@@ -239,7 +296,6 @@ export class LoansService {
         });
 
         if (isFullyRepaid) {
-
             const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
             const userMetadata = (user?.metadata as any) || {};
             userMetadata.successfulLoans = (userMetadata.successfulLoans || 0) + 1;
@@ -253,7 +309,7 @@ export class LoansService {
                 },
             });
 
-            await this.collateralService.unlockCollateral({ loanId });
+            await this.collateralService.unlockCollateral({ loanId }, loan.userId);
 
             this.logger.log(`Loan fully repaid: ${loanId}`);
         }

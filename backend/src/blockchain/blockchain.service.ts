@@ -234,6 +234,124 @@ export class BlockchainService implements OnModuleInit {
         return await this.provider.getBlockNumber();
     }
 
+    async verifyCollateralDeposit(
+        txHash: string,
+        expectedLoanId: string | null,
+        expectedToken: string,
+        expectedAmount: number,
+    ): Promise<boolean> {
+        this.ensureConnected();
+
+        try {
+            const receipt = await this.provider.getTransactionReceipt(txHash);
+            if (!receipt || receipt.status !== 1) {
+                this.logger.warn(`Transaction ${txHash} failed or not found`);
+                return false;
+            }
+
+            // Parse CollateralLocked events from the vault contract
+            for (const log of receipt.logs) {
+                try {
+                    const parsed = this.collateralVaultContract.interface.parseLog({
+                        topics: log.topics as string[],
+                        data: log.data,
+                    });
+
+                    if (parsed?.name === 'CollateralLocked') {
+                        const [loanId, depositor, token, amount] = parsed.args;
+                        
+                        // Verify the event matches expected values
+                        if (
+                            (!expectedLoanId || loanId === expectedLoanId) &&
+                            token.toLowerCase() === expectedToken.toLowerCase() &&
+                            Number(ethers.formatEther(amount)) >= expectedAmount * 0.99 // 1% tolerance
+                        ) {
+                            this.logger.log(`Verified collateral deposit: ${amount} of ${token}`);
+                            return true;
+                        }
+                    }
+                } catch {
+                    // Not a CollateralLocked event, skip
+                }
+            }
+
+            return false;
+        } catch (error) {
+            this.logger.error(`Failed to verify collateral: ${error.message}`);
+            return false;
+        }
+    }
+
+    async verifyRepayment(
+        txHash: string,
+        expectedLoanId: string,
+        expectedAmount: number,
+    ): Promise<boolean> {
+        this.ensureConnected();
+
+        try {
+            const receipt = await this.provider.getTransactionReceipt(txHash);
+            if (!receipt || receipt.status !== 1) {
+                return false;
+            }
+
+            for (const log of receipt.logs) {
+                try {
+                    const parsed = this.loanCoreContract.interface.parseLog({
+                        topics: log.topics as string[],
+                        data: log.data,
+                    });
+
+                    if (parsed?.name === 'LoanRepayment') {
+                        const [loanId, borrower, amount] = parsed.args;
+                        
+                        if (
+                            loanId === expectedLoanId &&
+                            Number(ethers.formatEther(amount)) >= expectedAmount * 0.99
+                        ) {
+                            return true;
+                        }
+                    }
+                } catch {
+                    // Skip non-matching logs
+                }
+            }
+
+            return false;
+        } catch (error) {
+            this.logger.error(`Failed to verify repayment: ${error.message}`);
+            return false;
+        }
+    }
+
+    async markLoanDefaulted(onChainLoanId: string): Promise<string> {
+        this.ensureConnected();
+
+        const tx = await this.loanCoreContract.markDefaulted(onChainLoanId);
+        const receipt = await tx.wait();
+
+        this.logger.log(`Loan marked as defaulted on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
+    async seizeCollateral(onChainLoanId: string): Promise<string> {
+        this.ensureConnected();
+
+        // Get the wallet address as the recipient for seized collateral
+        const recipient = await this.wallet.getAddress();
+
+        const tx = await this.collateralVaultContract.seizeCollateral(
+            onChainLoanId,
+            recipient,
+        );
+        const receipt = await tx.wait();
+
+        this.logger.log(`Collateral seized on-chain: ${onChainLoanId}, tx: ${receipt.hash}`);
+
+        return receipt.hash;
+    }
+
     private ensureConnected() {
         if (!this.isConnected) {
             throw new Error('Blockchain service is not connected');

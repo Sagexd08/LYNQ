@@ -37,12 +37,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# FIXED: Restrict CORS to allowed origins
+import os
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:3003",
+    "https://lynq.finance",          # Production frontend
+    "https://app.lynq.finance",      # Production app
+    os.getenv("BACKEND_URL", ""),    # Backend service URL
+]
+
+# Filter out empty strings
+ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS if origin]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],  # Restrict methods
+    allow_headers=["X-API-KEY", "Content-Type", "Authorization"],
 )
 
 

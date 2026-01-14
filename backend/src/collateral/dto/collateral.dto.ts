@@ -35,6 +35,11 @@ export class UnlockCollateralDto {
     @IsString()
     loanId: string;
 
+    @ApiPropertyOptional({ description: 'Token contract address' })
+    @IsString()
+    @IsOptional()
+    tokenAddress?: string;
+
     @ApiPropertyOptional({ description: 'On-chain transaction hash' })
     @IsString()
     @IsOptional()

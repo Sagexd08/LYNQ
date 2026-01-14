@@ -1,18 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as TelegramBot from 'node-telegram-bot-api';
+import TelegramBot from 'node-telegram-bot-api';
 import { PrismaService } from '../prisma/prisma.service';
-
-export enum NotificationType {
-    LOAN_APPROVED = 'LOAN_APPROVED',
-    LOAN_REJECTED = 'LOAN_REJECTED',
-    REPAYMENT_DUE = 'REPAYMENT_DUE',
-    REPAYMENT_RECEIVED = 'REPAYMENT_RECEIVED',
-    HIGH_RISK_DETECTED = 'HIGH_RISK_DETECTED',
-    COLLATERAL_LOW = 'COLLATERAL_LOW',
-    LOAN_DEFAULTED = 'LOAN_DEFAULTED',
-    SYSTEM_ALERT = 'SYSTEM_ALERT',
-}
+import { NotificationType } from './dto/send-notification.dto';
 
 interface NotificationPayload {
     type: NotificationType;
@@ -297,8 +287,6 @@ Need help? Contact support at lynq.support
                     userId: user.id,
                     chatId: chatId,
                     walletAddress: walletAddress.toLowerCase(),
-                    telegramUserId: userId!,
-                    telegramChatId: chatId,
                     username: username,
                     isActive: true,
                 },
@@ -314,12 +302,12 @@ Need help? Contact support at lynq.support
         }
     }
 
-    async sendNotification(profileId: string, notification: NotificationPayload): Promise<boolean> {
+    async sendNotification(userId: string, notification: NotificationPayload): Promise<boolean> {
         if (!this.isEnabled) return false;
 
         try {
             const subscription = await this.prisma.telegramSubscription.findFirst({
-                where: { profileId, isActive: true },
+                where: { userId, isActive: true },
             });
 
             if (!subscription) return false;
@@ -330,7 +318,7 @@ Need help? Contact support at lynq.support
             const icon = this.getNotificationIcon(notification.type);
             const message = `${icon} *${notification.title}*\n\n${notification.message}`;
 
-            await this.sendMessage(subscription.telegramChatId, message, { parse_mode: 'Markdown' });
+            await this.sendMessage(subscription.chatId, message, { parse_mode: 'Markdown' });
             return true;
         } catch (error) {
             this.logger.error(`Failed to send notification: ${error.message}`);
