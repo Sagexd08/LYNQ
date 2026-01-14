@@ -15,7 +15,7 @@ lightgbm==4.5.0
 
 # AWS SDK Integration
 boto3==1.38.33
-botocore==1.41.33
+# botocore is managed by boto3, no need to pin separately
 
 # Environment & Configuration
 python-dotenv==1.1.0

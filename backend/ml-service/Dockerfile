@@ -16,7 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
-COPY models/ ./models/ 2>/dev/null || mkdir -p ./models
+
+# Create models directory (will be populated at runtime or via volume mount)
+RUN mkdir -p ./models
 
 # Set ownership
 RUN chown -R appuser:appuser /app
