@@ -14,7 +14,7 @@ export function Header() {
 
 	return (
 		<motion.header
-			className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-cyan-400/20"
+			className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10"
 			initial={{ y: -100 }}
 			animate={{ y: 0 }}
 			transition={{ duration: 0.6 }}
@@ -65,7 +65,7 @@ export function Header() {
 					initial={{ opacity: 0, height: 0 }}
 					animate={{ opacity: 1, height: 'auto' }}
 					exit={{ opacity: 0, height: 0 }}
-					className="md:hidden bg-black/95 border-t border-cyan-400/20"
+					className="md:hidden bg-black/95 border-t border-white/10"
 				>
 					<div className="px-6 py-4 space-y-4">
 						<a href="/#learn" className="block text-gray-400 hover:text-white transition">
