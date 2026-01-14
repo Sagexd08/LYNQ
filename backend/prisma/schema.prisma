@@ -56,6 +56,8 @@ model Loan {
   metadata               Json?                @map("metadata")
   createdAt              DateTime             @default(now()) @map("createdAt") @db.Timestamp(6)
   updatedAt              DateTime             @default(now()) @updatedAt @map("updatedAt") @db.Timestamp(6)
+  onChainLoanId          String?              @map("onChainLoanId") @db.VarChar
+  defaultedAt            DateTime?            @map("defaultedAt") @db.Timestamp(6)
   partialExtensionUsed   Boolean?             @default(false)
   lateDays               Int?                 @default(0)
   riskLevel              String?              @db.VarChar
@@ -310,6 +312,43 @@ model reputation_events {
   @@index([eventType], map: "IDX_reputation_events_eventType")
   @@index([reputationId], map: "IDX_reputation_events_reputationId")
   @@index([userId], map: "IDX_reputation_events_userId")
+}
+
+model BlockchainEvent {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chainId         Int       @map("chainId")
+  contractAddress String    @map("contractAddress") @db.VarChar
+  eventName       String    @map("eventName") @db.VarChar
+  transactionHash String    @map("transactionHash") @db.VarChar
+  blockNumber     BigInt    @map("blockNumber")
+  logIndex        Int       @map("logIndex")
+  data            Json      @map("data")
+  processed       Boolean   @default(false) @map("processed")
+  processedAt     DateTime? @map("processedAt") @db.Timestamp(6)
+  createdAt       DateTime  @default(now()) @map("createdAt") @db.Timestamp(6)
+
+  @@unique([transactionHash, logIndex], map: "UQ_blockchain_events_tx_log")
+  @@index([eventName], map: "IDX_blockchain_events_eventName")
+  @@index([processed], map: "IDX_blockchain_events_processed")
+  @@index([contractAddress], map: "IDX_blockchain_events_contractAddress")
+  @@map("blockchain_events")
+}
+
+model RiskApprovalSignature {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  loanId          String   @map("loanId") @db.Uuid
+  walletAddress   String   @map("walletAddress") @db.VarChar
+  approvalHash    String   @map("approvalHash") @db.VarChar
+  signature       String   @map("signature") @db.VarChar
+  expiresAt       DateTime @map("expiresAt") @db.Timestamp(6)
+  used            Boolean  @default(false) @map("used")
+  usedAt          DateTime? @map("usedAt") @db.Timestamp(6)
+  createdAt       DateTime @default(now()) @map("createdAt") @db.Timestamp(6)
+
+  @@index([loanId], map: "IDX_risk_approval_signatures_loanId")
+  @@index([walletAddress], map: "IDX_risk_approval_signatures_walletAddress")
+  @@index([approvalHash], map: "IDX_risk_approval_signatures_approvalHash")
+  @@map("risk_approval_signatures")
 }
 
 enum LoanStatus {

@@ -7,8 +7,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { RiskService } from '../risk/risk.service';
 import { CollateralService } from '../collateral/collateral.service';
+import { BlockchainService } from '../blockchain/blockchain.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { RepayLoanDto } from './dto/repay-loan.dto';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class LoansService {
@@ -18,6 +20,7 @@ export class LoansService {
         private readonly prisma: PrismaService,
         private readonly riskService: RiskService,
         private readonly collateralService: CollateralService,
+        private readonly blockchainService: BlockchainService,
     ) { }
 
     async createLoan(userId: string, dto: CreateLoanDto) {
@@ -69,12 +72,34 @@ export class LoansService {
             );
         }
 
-        const dueDate = new Date();
-        dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
-
         const durationDays = dto.termMonths * 30;
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + dto.termMonths);
+
+        let onChainLoanId: string | null = null;
+        let transactionHash: string | null = null;
+
+        if (this.blockchainService.isBlockchainConnected()) {
+            try {
+                const amountInWei = ethers.parseEther(dto.amount.toString());
+                const interestRateBps = Math.round(riskEvaluation.interestRate * 100);
+
+                const onChainResult = await this.blockchainService.createLoanOnChain(
+                    amountInWei,
+                    interestRateBps,
+                    durationDays,
+                );
+
+                onChainLoanId = onChainResult.loanId;
+                transactionHash = onChainResult.txHash;
+
+                this.logger.log(`Loan created on-chain: ${onChainLoanId}, tx: ${transactionHash}`);
+            } catch (error) {
+                this.logger.warn(`Failed to create loan on-chain, continuing with DB-only: ${error.message}`);
+            }
+        } else {
+            this.logger.warn('Blockchain not connected, creating loan in database only');
+        }
 
         const loan = await this.prisma.loan.create({
             data: {
@@ -88,13 +113,16 @@ export class LoansService {
                 durationDays,
                 status: 'PENDING',
                 dueDate,
+                onChainLoanId,
+                transactionHash,
+                riskLevel: riskEvaluation.riskLevel,
             },
         });
 
         await this.riskService.saveRiskAssessment(loan.id, riskEvaluation);
 
         this.logger.log(
-            `Loan created: ${loan.id} for user ${userId}, amount: ${dto.amount}, risk: ${riskEvaluation.riskLevel}`,
+            `Loan created: ${loan.id} for user ${userId}, amount: ${dto.amount}, risk: ${riskEvaluation.riskLevel}, onChain: ${!!onChainLoanId}`,
         );
 
         return {
@@ -106,6 +134,7 @@ export class LoansService {
                 maxLoanAmount: riskEvaluation.maxLoanAmount,
                 recommendedAction: riskEvaluation.recommendedAction,
             },
+            isOnChain: !!onChainLoanId,
         };
     }
 
@@ -135,9 +164,23 @@ export class LoansService {
             });
         }
 
+        let activationTxHash: string | null = null;
+
+        if (this.blockchainService.isBlockchainConnected() && loan.onChainLoanId) {
+            try {
+                activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
+                this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
+            } catch (error) {
+                this.logger.warn(`Failed to activate loan on-chain: ${error.message}`);
+            }
+        }
+
         const updatedLoan = await this.prisma.loan.update({
             where: { id: loanId },
-            data: { status: 'ACTIVE' },
+            data: {
+                status: 'ACTIVE',
+                startDate: new Date(),
+            },
             include: { collaterals: true },
         });
 
@@ -145,7 +188,7 @@ export class LoansService {
         const userMetadata = (user?.metadata as any) || {};
         userMetadata.totalLoans = (userMetadata.totalLoans || 0) + 1;
         userMetadata.totalBorrowed = (userMetadata.totalBorrowed || 0) + Number(loan.amount);
-        
+
         await this.prisma.user.update({
             where: { id: loan.userId },
             data: { metadata: userMetadata },
@@ -196,12 +239,12 @@ export class LoansService {
         });
 
         if (isFullyRepaid) {
-            
+
             const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
             const userMetadata = (user?.metadata as any) || {};
             userMetadata.successfulLoans = (userMetadata.successfulLoans || 0) + 1;
             userMetadata.totalRepaid = (userMetadata.totalRepaid || 0) + paymentAmount;
-            
+
             await this.prisma.user.update({
                 where: { id: loan.userId },
                 data: {
@@ -215,11 +258,12 @@ export class LoansService {
             this.logger.log(`Loan fully repaid: ${loanId}`);
         }
 
+        const totalRepaid = (Number(loan.amount) - Number(loan.outstandingAmount)) + paymentAmount;
         return {
             ...updatedLoan,
             paymentAmount,
             totalOwed,
-            remainingBalance: totalOwed - newAmountRepaid,
+            remainingBalance: Math.max(0, totalOwed - totalRepaid),
             isFullyRepaid,
         };
     }
@@ -253,7 +297,7 @@ export class LoansService {
         const user = await this.prisma.user.findUnique({ where: { id: loan.userId } });
         const userMetadata = (user?.metadata as any) || {};
         userMetadata.defaultedLoans = (userMetadata.defaultedLoans || 0) + 1;
-        
+
         await this.prisma.user.update({
             where: { id: loan.userId },
             data: {

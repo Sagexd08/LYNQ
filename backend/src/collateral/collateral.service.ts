@@ -4,16 +4,12 @@ import { LockCollateralDto, UnlockCollateralDto } from './dto';
 
 export interface CollateralInfo {
     id: string;
-    loanId: string;
+    userId: string;
     tokenAddress: string;
-    tokenSymbol: string;
     amount: number;
-    valueUsd: number;
-    chainId: number;
+    chain: string | null;
     status: string;
-    lockedAt: Date;
-    releasedAt?: Date;
-    seizedAt?: Date;
+    createdAt: Date;
 }
 
 const TOKEN_PRICES: Record<string, number> = {
@@ -33,7 +29,7 @@ export class CollateralService {
 
     constructor(private readonly prisma: PrismaService) { }
 
-    async lockCollateral(dto: LockCollateralDto): Promise<CollateralInfo> {
+    async lockCollateral(dto: LockCollateralDto, userId: string): Promise<CollateralInfo> {
         const loan = await this.prisma.loan.findUnique({
             where: { id: dto.loanId },
         });
@@ -46,18 +42,17 @@ export class CollateralService {
             throw new BadRequestException('Collateral can only be locked for pending loans');
         }
 
-        const valueUsd = this.calculateValueUsd(dto.tokenSymbol, dto.amount);
+        if (loan.userId !== userId) {
+            throw new BadRequestException('You can only lock collateral for your own loans');
+        }
 
         const collateral = await this.prisma.collateral.create({
             data: {
-                loanId: dto.loanId,
+                userId: userId,
                 tokenAddress: dto.tokenAddress.toLowerCase(),
-                tokenSymbol: dto.tokenSymbol.toUpperCase(),
                 amount: dto.amount,
-                valueUsd,
-                chainId: dto.chainId,
+                chain: dto.chainId?.toString() || 'ethereum',
                 status: 'LOCKED',
-                onChainTxHash: dto.txHash,
             },
         });
 
@@ -66,26 +61,37 @@ export class CollateralService {
         return this.toCollateralInfo(collateral);
     }
 
-    async unlockCollateral(dto: UnlockCollateralDto): Promise<CollateralInfo> {
+    async unlockCollateral(dto: UnlockCollateralDto, userId: string): Promise<CollateralInfo> {
+        // Find collateral by user and status
         const collateral = await this.prisma.collateral.findFirst({
-            where: { loanId: dto.loanId, status: 'LOCKED' },
-            include: { loan: true },
+            where: { 
+                userId: userId,
+                status: 'LOCKED',
+                tokenAddress: dto.tokenAddress?.toLowerCase(),
+            },
         });
 
         if (!collateral) {
-            throw new NotFoundException('Locked collateral not found for this loan');
+            throw new NotFoundException('Locked collateral not found');
         }
 
-        if (collateral.loan.status !== 'REPAID') {
+        // Check if loan is repaid
+        const loan = await this.prisma.loan.findFirst({
+            where: { 
+                id: dto.loanId,
+                userId: userId,
+                status: 'REPAID',
+            },
+        });
+
+        if (!loan) {
             throw new BadRequestException('Collateral can only be unlocked for repaid loans');
         }
 
         const updated = await this.prisma.collateral.update({
             where: { id: collateral.id },
             data: {
-                status: 'RELEASED',
-                releasedAt: new Date(),
-                onChainTxHash: dto.txHash || collateral.onChainTxHash,
+                status: 'UNLOCKED',
             },
         });
 
@@ -95,18 +101,27 @@ export class CollateralService {
     }
 
     async seizeCollateral(loanId: string): Promise<CollateralInfo[]> {
+        const loan = await this.prisma.loan.findUnique({
+            where: { id: loanId },
+        });
+
+        if (!loan) {
+            throw new NotFoundException('Loan not found');
+        }
+
+        if (loan.status !== 'DEFAULTED' && loan.status !== 'LIQUIDATED') {
+            throw new BadRequestException('Collateral can only be seized for defaulted or liquidated loans');
+        }
+
         const collaterals = await this.prisma.collateral.findMany({
-            where: { loanId, status: 'LOCKED' },
-            include: { loan: true },
+            where: { 
+                userId: loan.userId,
+                status: 'LOCKED',
+            },
         });
 
         if (collaterals.length === 0) {
             throw new NotFoundException('No locked collateral found for this loan');
-        }
-
-        const loan = collaterals[0].loan;
-        if (loan.status !== 'DEFAULTED' && loan.status !== 'LIQUIDATED') {
-            throw new BadRequestException('Collateral can only be seized for defaulted or liquidated loans');
         }
 
         const seizedCollaterals: CollateralInfo[] = [];
@@ -115,8 +130,7 @@ export class CollateralService {
             const seized = await this.prisma.collateral.update({
                 where: { id: collateral.id },
                 data: {
-                    status: 'SEIZED',
-                    seizedAt: new Date(),
+                    status: 'LIQUIDATED',
                 },
             });
             seizedCollaterals.push(this.toCollateralInfo(seized));
@@ -127,9 +141,9 @@ export class CollateralService {
         return seizedCollaterals;
     }
 
-    async getCollateralByLoan(loanId: string): Promise<CollateralInfo[]> {
+    async getCollateralByUser(userId: string): Promise<CollateralInfo[]> {
         const collaterals = await this.prisma.collateral.findMany({
-            where: { loanId },
+            where: { userId },
         });
 
         return collaterals.map((c) => this.toCollateralInfo(c));
@@ -147,12 +161,15 @@ export class CollateralService {
         return this.toCollateralInfo(collateral);
     }
 
-    async getTotalCollateralValue(loanId: string): Promise<number> {
+    async getTotalCollateralValue(userId: string): Promise<number> {
         const collaterals = await this.prisma.collateral.findMany({
-            where: { loanId, status: 'LOCKED' },
+            where: { userId, status: 'LOCKED' },
         });
 
-        return collaterals.reduce((sum, c) => sum + c.valueUsd, 0);
+        return collaterals.reduce((sum, c) => {
+            const price = TOKEN_PRICES[c.tokenAddress.toUpperCase()] || 1;
+            return sum + Number(c.amount) * price;
+        }, 0);
     }
 
     async updateCollateralValue(id: string): Promise<CollateralInfo> {
@@ -164,34 +181,30 @@ export class CollateralService {
             throw new NotFoundException('Collateral not found');
         }
 
-        const newValueUsd = this.calculateValueUsd(collateral.tokenSymbol, collateral.amount);
+        // Update last valuation
+        const price = TOKEN_PRICES[collateral.tokenAddress.toUpperCase()] || 1;
+        const newValue = Number(collateral.amount) * price;
 
         const updated = await this.prisma.collateral.update({
             where: { id },
-            data: { valueUsd: newValueUsd },
+            data: {
+                lastValuation: newValue,
+                lastValuationAt: new Date(),
+            },
         });
 
         return this.toCollateralInfo(updated);
     }
 
-    private calculateValueUsd(tokenSymbol: string, amount: number): number {
-        const price = TOKEN_PRICES[tokenSymbol.toUpperCase()] || 1;
-        return amount * price;
-    }
-
     private toCollateralInfo(collateral: any): CollateralInfo {
         return {
             id: collateral.id,
-            loanId: collateral.loanId,
+            userId: collateral.userId,
             tokenAddress: collateral.tokenAddress,
-            tokenSymbol: collateral.tokenSymbol,
-            amount: collateral.amount,
-            valueUsd: collateral.valueUsd,
-            chainId: collateral.chainId,
+            amount: Number(collateral.amount),
+            chain: collateral.chain,
             status: collateral.status,
-            lockedAt: collateral.lockedAt,
-            releasedAt: collateral.releasedAt,
-            seizedAt: collateral.seizedAt,
+            createdAt: collateral.createdAt,
         };
     }
 }

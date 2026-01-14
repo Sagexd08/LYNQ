@@ -97,9 +97,9 @@ API requests are rate-limited. Default limits:
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  logger.log(`🚀 LYNQ API running on http:
-  logger.log(`📚 API Documentation: http:
-  logger.log(`❤️ Health Check: http:
+  logger.log(`🚀 LYNQ API running on http://localhost:${port}`);
+  logger.log(`📚 API Documentation: http://localhost:${port}/docs`);
+  logger.log(`❤️ Health Check: http://localhost:${port}/health`);
 }
 
 bootstrap();

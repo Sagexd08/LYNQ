@@ -3,20 +3,11 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
+  root: './landing-v2',
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@shared': path.resolve(__dirname, './src/shared'),
-      '@landing': path.resolve(__dirname, './src/landing'),
-      '@app': path.resolve(__dirname, './src/app'),
-      '@components': path.resolve(__dirname, './src/shared/components'),
-      '@services': path.resolve(__dirname, './src/shared/services'),
-      '@store': path.resolve(__dirname, './src/shared/store'),
-      '@config': path.resolve(__dirname, './src/shared/config'),
-      '@hooks': path.resolve(__dirname, './src/shared/hooks'),
-      '@utils': path.resolve(__dirname, './src/shared/utils'),
-      '@types': path.resolve(__dirname, './src/shared/types'),
+      '@': path.resolve(__dirname, './landing-v2/src'),
     },
   },
   server: {
@@ -24,6 +15,7 @@ export default defineConfig({
     open: true,
   },
   build: {
+    outDir: '../dist',
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {

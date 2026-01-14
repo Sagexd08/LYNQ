@@ -17,7 +17,7 @@ export class AdminService {
     async setUserStatus(id: string, isBlocked: boolean) {
         const user = await this.prisma.user.update({
             where: { id },
-            data: { status: isBlocked ? 'blocked' : 'active' },
+            data: { status: isBlocked ? 'BLOCKED' : 'ACTIVE' },
         });
         return user;
     }
@@ -42,8 +42,8 @@ export class AdminService {
         return await this.prisma.loan.update({
             where: { id: loanId },
             data: {
-                dueAt: yesterday,
-                status: 'overdue' 
+                dueDate: yesterday,
+                status: 'DEFAULTED' // Mark as defaulted when overdue
             },
         });
     }

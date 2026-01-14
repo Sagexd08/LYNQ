@@ -35,17 +35,21 @@ export class RiskService {
     ) { }
 
     async evaluateLoanRisk(dto: RiskEvaluationDto): Promise<RiskEvaluationResult> {
-        
+
+        const normalizedAddress = dto.walletAddress.toLowerCase();
         const userRows = await this.prisma.$queryRaw<Array<{ id: string }>>`
             SELECT id FROM users 
-            WHERE "walletAddresses" @> ${JSON.stringify([dto.walletAddress.toLowerCase()])}::jsonb
+            WHERE EXISTS (
+                SELECT 1 FROM jsonb_array_elements_text("walletAddresses") AS addr
+                WHERE LOWER(addr) = ${normalizedAddress}
+            )
             LIMIT 1
         `;
-        
+
         if (userRows.length === 0) {
             throw new NotFoundException('User not found');
         }
-        
+
         const user = await this.prisma.user.findUnique({
             where: { id: userRows[0].id },
             include: {

@@ -199,7 +199,7 @@ export class ReputationService {
                 },
             });
 
-            if (!user || user.status !== 'blocked') {
+            if (!user || user.status !== 'BLOCKED') {
                 return false;
             }
 
@@ -209,13 +209,13 @@ export class ReputationService {
             }
 
             const reputation = user.reputation;
-            if (!reputation || reputation.cleanCycleCount < 1) {
+            if (!reputation) {
                 return false;
             }
 
             await tx.user.update({
                 where: { id: userId },
-                data: { status: 'active' },
+                data: { status: 'ACTIVE' },
             });
 
             await tx.reputationEvent.create({

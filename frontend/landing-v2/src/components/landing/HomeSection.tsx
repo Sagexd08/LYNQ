@@ -58,7 +58,7 @@ export function HomeSection() {
 					className="relative h-[500px] lg:h-full lg:min-h-[600px]"
 				>
 					<Suspense fallback={<div className="w-full h-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center"><span className="text-gray-400">Loading 3D scene...</span></div>}>
-						<Spline scene="https:
+						<Spline scene="https://prod.spline.design/fVI7osVNsN6xgxlO/scene.splinecode" />
 					</Suspense>
 				</motion.div>
 			</div>

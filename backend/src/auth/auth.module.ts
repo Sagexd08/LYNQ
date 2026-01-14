@@ -15,12 +15,19 @@ import { PrismaModule } from '../prisma/prisma.module';
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get<string>('JWT_EXPIRATION', '24h'),
-                },
-            }),
+            useFactory: (configService: ConfigService) => {
+                const secret = configService.get<string>('JWT_SECRET');
+                if (!secret) {
+                    throw new Error('JWT_SECRET is not defined');
+                }
+                const expiresIn = configService.get<string>('JWT_EXPIRATION', '24h') || '24h';
+                return {
+                    secret,
+                    signOptions: {
+                        expiresIn: expiresIn,
+                    } as { expiresIn: string },
+                };
+            },
         }),
     ],
     controllers: [AuthController],

@@ -8,8 +8,12 @@ export class UsersService {
 
     async create(createUserDto: CreateUserDto) {
         try {
+            // Generate email from phone since email is required in schema
+            const email = `${createUserDto.phone.replace(/\D/g, '')}@lynq.local`;
+            
             return await this.prisma.user.create({
                 data: {
+                    email: email,
                     phone: createUserDto.phone,
                     reputation: {
                         create: {
@@ -23,7 +27,7 @@ export class UsersService {
             });
         } catch (error: any) {
             if (error.code === 'P2002') {
-                throw new ConflictException('User with this phone already exists');
+                throw new ConflictException('User with this phone or email already exists');
             }
             throw error;
         }

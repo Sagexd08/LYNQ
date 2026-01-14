@@ -14,14 +14,14 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRATION: z.string().default('24h'),
 
-  ML_SERVICE_URL: z.string().url().default('http:
+  ML_SERVICE_URL: z.string().url().default('http://localhost:5000'),
   ML_API_KEY: z.string().min(8),
 
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_ADMIN_CHAT_ID: z.string().optional(),
   TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
 
-  REDIS_URL: z.string().default('redis:
+  REDIS_URL: z.string().default('redis://localhost:6379'),
 
   BLOCKCHAIN_RPC_URL: z.string().url().optional(),
   BLOCKCHAIN_RPC_URL_POLYGON: z.string().url().optional(),
@@ -34,12 +34,12 @@ export type EnvConfig = z.infer<typeof envSchema>;
 
 export function validateEnv(config: Record<string, unknown>): EnvConfig {
   const result = envSchema.safeParse(config);
-  
+
   if (!result.success) {
-    const errors = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('\n');
+    const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('\n');
     throw new Error(`Environment validation failed:\n${errors}`);
   }
-  
+
   return result.data;
 }
 
@@ -55,4 +55,4 @@ export function validateEnv(config: Record<string, unknown>): EnvConfig {
   providers: [ConfigService],
   exports: [ConfigService],
 })
-export class ConfigModule {}
+export class ConfigModule { }

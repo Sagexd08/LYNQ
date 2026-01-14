@@ -157,6 +157,18 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
             logIndex: 0,
             data,
         });
+
+        try {
+            const existingLoan = await this.prisma.loan.findFirst({
+                where: { onChainLoanId: data.loanId },
+            });
+
+            if (!existingLoan) {
+                this.logger.log(`No matching DB loan for on-chain loan ${data.loanId}, may be a direct contract call`);
+            }
+        } catch (error) {
+            this.logger.error(`Error processing LoanCreated event: ${error.message}`);
+        }
     }
 
     private async handleLoanRepaid(data: any) {
@@ -171,6 +183,26 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
             logIndex: 0,
             data,
         });
+
+        try {
+            const loan = await this.prisma.loan.findFirst({
+                where: { onChainLoanId: data.loanId },
+            });
+
+            if (loan && loan.status !== 'REPAID') {
+                await this.prisma.loan.update({
+                    where: { id: loan.id },
+                    data: {
+                        status: 'REPAID',
+                        repaidDate: new Date(data.timestamp * 1000),
+                        outstandingAmount: 0,
+                    },
+                });
+                this.logger.log(`Synced loan ${loan.id} status to REPAID from on-chain event`);
+            }
+        } catch (error) {
+            this.logger.error(`Error syncing LoanRepaid event: ${error.message}`);
+        }
     }
 
     private async handleLoanDefaulted(data: any) {
@@ -185,6 +217,25 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
             logIndex: 0,
             data,
         });
+
+        try {
+            const loan = await this.prisma.loan.findFirst({
+                where: { onChainLoanId: data.loanId },
+            });
+
+            if (loan && loan.status !== 'DEFAULTED') {
+                await this.prisma.loan.update({
+                    where: { id: loan.id },
+                    data: {
+                        status: 'DEFAULTED',
+                        defaultedAt: new Date(data.timestamp * 1000),
+                    },
+                });
+                this.logger.log(`Synced loan ${loan.id} status to DEFAULTED from on-chain event`);
+            }
+        } catch (error) {
+            this.logger.error(`Error syncing LoanDefaulted event: ${error.message}`);
+        }
     }
 
     private async handleCollateralLocked(data: any) {

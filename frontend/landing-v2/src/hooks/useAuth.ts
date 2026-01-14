@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { authApi } from '@/lib/api/auth';
 import { WalletChallengeRequest, WalletVerifyRequest, Profile } from '@/lib/api/types';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/store/useStore';
 
 export function useAuth() {
   const queryClient = useQueryClient();

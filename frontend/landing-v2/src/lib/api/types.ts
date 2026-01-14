@@ -11,7 +11,7 @@ export interface WalletChallengeResponse {
 export interface WalletVerifyRequest {
   walletAddress: string;
   signature: string;
-  nonce: string; 
+  nonce: string;
 }
 
 export interface WalletVerifyResponse {
@@ -65,6 +65,9 @@ export interface Loan {
   defaultedAt?: string;
   createdAt: string;
   updatedAt: string;
+  onChainLoanId?: string;
+  transactionHash?: string;
+  isOnChain?: boolean;
   riskAssessment?: RiskAssessment;
   collaterals?: Collateral[];
 }

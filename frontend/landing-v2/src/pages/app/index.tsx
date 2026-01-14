@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Wallet, Link2, CheckCircle } from 'lucide-react';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
 import { Button } from '@/components/shared/Buttons';
 import { useAuth } from '@/hooks/useAuth';
 import { useLoans } from '@/hooks/useLoans';
 import { useRiskEvaluation } from '@/hooks/useRisk';
+import { useWallet } from '@/hooks/useWallet';
+import { useLoanContract } from '@/hooks/useLoanContract';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import toast from 'react-hot-toast';
 
@@ -21,10 +23,13 @@ function AppContent() {
   const { profile, disconnect } = useAuth();
   const { loans, isLoading: loansLoading, createLoan, isCreatingLoan } = useLoans();
   const { evaluateRisk, riskData, isLoading: riskLoading } = useRiskEvaluation();
-  
+  const wallet = useWallet();
+  const loanContract = useLoanContract();
+
   const [loanAmount, setLoanAmount] = useState('');
   const [termMonths, setTermMonths] = useState('6');
   const [collateralValue, setCollateralValue] = useState('');
+  const [useOnChain, setUseOnChain] = useState(true);
 
   const handleEvaluateRisk = async () => {
     if (!loanAmount || !termMonths) {
@@ -40,7 +45,7 @@ function AppContent() {
         collateralValueUsd: collateralValue ? parseFloat(collateralValue) : undefined,
       });
     } catch (error) {
-      
+
     }
   };
 
@@ -51,6 +56,26 @@ function AppContent() {
     }
 
     try {
+      if (useOnChain && wallet.isConnected && loanContract.isContractAvailable) {
+        toast.loading('Creating loan on blockchain...', { id: 'onchain-create' });
+
+        const termDays = parseInt(termMonths) * 30;
+        const interestRateBps = riskData ? Math.round(riskData.interestRate * 100) : 1000;
+
+        const onChainResult = await loanContract.createLoanOnChain({
+          amount: parseFloat(loanAmount),
+          interestRateBps,
+          termDays,
+        });
+
+        if (onChainResult) {
+          toast.success(`Loan created on-chain! TX: ${onChainResult.txHash.slice(0, 10)}...`, { id: 'onchain-create' });
+        } else {
+          toast.error(loanContract.error || 'Failed to create on-chain loan', { id: 'onchain-create' });
+          return;
+        }
+      }
+
       await createLoan({
         amount: parseFloat(loanAmount),
         termMonths: parseInt(termMonths),
@@ -60,7 +85,7 @@ function AppContent() {
       setLoanAmount('');
       setCollateralValue('');
     } catch (error) {
-      
+
     }
   };
 
@@ -68,7 +93,7 @@ function AppContent() {
     <div className="bg-black text-white min-h-screen">
       <Header />
       <main className="pt-28 pb-16 px-6 max-w-6xl mx-auto">
-        {}
+        { }
         <div className="mb-8 p-6 bg-gray-900 rounded-lg border border-gray-800">
           <div className="flex justify-between items-start">
             <div>
@@ -100,10 +125,68 @@ function AppContent() {
           </div>
         </div>
 
-        {}
+        {/* Wallet Connection Section */}
+        <div className="mb-8 p-6 bg-gray-900 rounded-lg border border-gray-800">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <Wallet className="w-6 h-6 text-cyan-400" />
+                Blockchain Wallet
+              </h2>
+              {wallet.isConnected ? (
+                <div className="space-y-1 text-gray-300">
+                  <p>
+                    <span className="text-cyan-400">Address:</span>{' '}
+                    {wallet.address?.slice(0, 6)}...{wallet.address?.slice(-4)}
+                  </p>
+                  <p>
+                    <span className="text-cyan-400">Network:</span>{' '}
+                    <span className="flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      {wallet.chainName}
+                    </span>
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-400">Connect your wallet for on-chain transactions</p>
+              )}
+            </div>
+            {wallet.isConnected ? (
+              <Button variant="secondary" onClick={wallet.disconnect}>
+                Disconnect Wallet
+              </Button>
+            ) : (
+              <Button onClick={wallet.connect} disabled={wallet.isConnecting}>
+                {wallet.isConnecting ? 'Connecting...' : 'Connect Wallet'}
+              </Button>
+            )}
+          </div>
+          {wallet.error && (
+            <p className="mt-2 text-red-400 text-sm">{wallet.error}</p>
+          )}
+        </div>
+
+        { }
         <div className="mb-8 p-6 bg-gray-900 rounded-lg border border-gray-800">
           <h2 className="text-2xl font-bold mb-4">Request a Loan</h2>
           <div className="space-y-4">
+            {/* On-Chain Toggle */}
+            <div className="flex items-center gap-3 p-3 bg-gray-800 rounded border border-gray-700">
+              <input
+                type="checkbox"
+                id="onchain-toggle"
+                checked={useOnChain}
+                onChange={(e) => setUseOnChain(e.target.checked)}
+                className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500"
+              />
+              <label htmlFor="onchain-toggle" className="flex items-center gap-2 cursor-pointer">
+                <Link2 className="w-5 h-5 text-cyan-400" />
+                <span className="font-medium">Create loan on blockchain</span>
+                {!wallet.isConnected && useOnChain && (
+                  <span className="text-xs text-yellow-400">(requires wallet connection)</span>
+                )}
+              </label>
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2">
                 Loan Amount (USD)
@@ -186,7 +269,7 @@ function AppContent() {
           </div>
         </div>
 
-        {}
+        { }
         <div className="p-6 bg-gray-900 rounded-lg border border-gray-800">
           <h2 className="text-2xl font-bold mb-4">Your Loans</h2>
           {loansLoading ? (
