@@ -44,6 +44,8 @@ const config: HardhatUserConfig = {
     },
     etherscan: {
         apiKey: {
+            sepolia: process.env.SEPOLIA_EXPLORER_API_KEY || "",
+            amoy: process.env.AMOY_EXPLORER_API_KEY || "",
             mantleSepolia: process.env.MANTLE_EXPLORER_API_KEY || "",
         },
         customChains: [

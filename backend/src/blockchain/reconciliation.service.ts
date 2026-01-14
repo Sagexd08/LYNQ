@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { formatUnits } from 'ethers';
 import { PrismaService } from '../prisma/prisma.service';
 import { BlockchainService, OnChainLoanInfo } from './blockchain.service';
 import { LoanStatus } from '@prisma/client';
@@ -46,7 +47,14 @@ export class ReconciliationService {
                     discrepancies++;
                 }
             } catch (error) {
-                this.logger.error(`Failed to reconcile loan ${loan.id}: ${error.message}`);
+                const errorMessage = error instanceof Error 
+                    ? error.message 
+                    : String(error);
+                const errorStack = error instanceof Error ? error.stack : undefined;
+                this.logger.error(
+                    `Failed to reconcile loan ${loan.id}: ${errorMessage}`,
+                    errorStack
+                );
             }
         }
 
@@ -80,11 +88,13 @@ export class ReconciliationService {
             discrepancy = true;
         }
 
-        // Check repayment amount mismatch
-        const onChainRepaid = Number(onChainLoan.amountRepaid) / 1e18; // Convert from wei
+        const onChainRepaidWei = BigInt(onChainLoan.amountRepaid.toString());
+        const dbOutstandingWei = BigInt(Math.floor(Number(dbLoan.outstandingAmount) * 1e18));
+        const dbAmountWei = BigInt(Math.floor(Number(dbLoan.amount) * 1e18));
+        const expectedOutstandingWei = dbAmountWei - onChainRepaidWei;
+        const onChainRepaid = parseFloat(formatUnits(onChainLoan.amountRepaid, 18));
         const dbOutstanding = Number(dbLoan.outstandingAmount);
-        const dbAmount = Number(dbLoan.amount);
-        const expectedOutstanding = dbAmount - onChainRepaid;
+        const expectedOutstanding = parseFloat(formatUnits(expectedOutstandingWei.toString(), 18));
 
         if (Math.abs(dbOutstanding - expectedOutstanding) > 0.01) {
             this.logger.warn(

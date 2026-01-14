@@ -3,6 +3,8 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { BlockchainService } from '../src/blockchain/blockchain.service';
+import { ethers } from 'ethers';
 
 describe('Loan Flow E2E (e2e)', () => {
     let app: INestApplication;
@@ -12,24 +14,68 @@ describe('Loan Flow E2E (e2e)', () => {
     let loanId: string;
 
     const testWallet = '0x1234567890123456789012345678901234567890';
+    const testPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000001';
+    const testWalletSigner = new ethers.Wallet(testPrivateKey);
+
+    const mockBlockchainService = {
+        isBlockchainConnected: jest.fn().mockReturnValue(true),
+        verifyCollateralDeposit: jest.fn().mockResolvedValue(true),
+        verifyRepayment: jest.fn().mockResolvedValue(true),
+        createLoanOnChain: jest.fn().mockResolvedValue({
+            loanId: '0x' + '1'.repeat(64),
+            txHash: '0x' + '2'.repeat(64),
+        }),
+        activateLoanOnChain: jest.fn().mockResolvedValue('0x' + '3'.repeat(64)),
+        unlockCollateralOnChain: jest.fn().mockResolvedValue(undefined),
+        getLoanFromChain: jest.fn().mockResolvedValue({
+            loanId: '0x' + '1'.repeat(64),
+            borrower: testWallet,
+            amount: ethers.parseEther('1000').toString(),
+            interestRate: 500,
+            termDays: 180,
+            createdAt: Math.floor(Date.now() / 1000),
+            dueDate: Math.floor(Date.now() / 1000) + 180 * 24 * 60 * 60,
+            amountRepaid: '0',
+            status: 1,
+        }),
+    };
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [AppModule],
-        }).compile();
+        })
+            .overrideProvider(BlockchainService)
+            .useValue(mockBlockchainService)
+            .compile();
 
         app = moduleFixture.createNestApplication();
         prisma = moduleFixture.get<PrismaService>(PrismaService);
         await app.init();
 
         // Setup: Create test user and get auth token
-        // In real test, you'd use a test wallet to sign
+        // Request challenge
         const challengeRes = await request(app.getHttpServer())
             .post('/api/v1/auth/wallet/challenge')
             .send({ walletAddress: testWallet });
 
-        // Mock signature verification for test
-        // Note: In production, you'd need to actually sign the challenge
+        expect(challengeRes.status).toBe(200);
+        const { nonce, message } = challengeRes.body;
+
+        // Sign the message with test wallet
+        const signature = await testWalletSigner.signMessage(message);
+
+        // Verify signature and get token
+        const verifyRes = await request(app.getHttpServer())
+            .post('/api/v1/auth/wallet/verify')
+            .send({
+                walletAddress: testWallet,
+                signature,
+                nonce,
+            });
+
+        expect(verifyRes.status).toBe(200);
+        authToken = verifyRes.body.accessToken;
+        userId = verifyRes.body.profile.id;
     });
 
     afterAll(async () => {
@@ -84,37 +130,52 @@ describe('Loan Flow E2E (e2e)', () => {
         });
 
         it('3. should activate loan with collateral', async () => {
+            // Mock successful verification
+            mockBlockchainService.verifyCollateralDeposit.mockResolvedValueOnce(true);
+            mockBlockchainService.activateLoanOnChain.mockResolvedValueOnce('0x' + '3'.repeat(64));
+
             const res = await request(app.getHttpServer())
                 .post(`/api/v1/loans/${loanId}/activate`)
                 .set('Authorization', `Bearer ${authToken}`)
                 .send({
-                    tokenAddress: '0xDeadBeef...',
+                    tokenAddress: '0xDeadBeef00000000000000000000000000000000',
                     tokenSymbol: 'MNT',
-                    amount: 1500,
+                    amount: '1500',
                     chainId: 5003,
-                    txHash: '0xMockTxHash...',
+                    txHash: '0x' + '4'.repeat(64),
                 });
 
-            // This will fail without actual on-chain tx, but tests the flow
-            expect([201, 400]).toContain(res.status);
+            // With mocked blockchain service, expect success
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('status');
+            expect(res.body.status).toBe('ACTIVE');
         });
 
         it('4. should repay loan', async () => {
-            // First, manually activate for test
+            // Ensure loan is active and has onChainLoanId
             await prisma.loan.update({
                 where: { id: loanId },
-                data: { status: 'ACTIVE', startDate: new Date() },
+                data: { 
+                    status: 'ACTIVE', 
+                    startDate: new Date(),
+                    onChainLoanId: '0x' + '1'.repeat(64),
+                },
             });
+
+            // Mock successful repayment verification
+            mockBlockchainService.verifyRepayment.mockResolvedValueOnce(true);
 
             const res = await request(app.getHttpServer())
                 .post(`/api/v1/loans/${loanId}/repay`)
                 .set('Authorization', `Bearer ${authToken}`)
                 .send({
                     amount: 1050, // Principal + interest
-                    txHash: '0xMockRepayTxHash...',
+                    txHash: '0x' + '5'.repeat(64),
                 });
 
-            expect([201, 400]).toContain(res.status);
+            // With mocked blockchain service, expect success
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('paymentAmount');
         });
 
         it('5. should update reputation after repayment', async () => {

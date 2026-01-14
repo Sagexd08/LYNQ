@@ -9,11 +9,35 @@ async function bootstrap() {
 
   // CORS Configuration - Update CORS_ORIGIN in .env for production
   const corsOrigin = process.env.CORS_ORIGIN;
+  const corsAllowlist = corsOrigin
+    ? corsOrigin.split(',').map(o => o.trim()).filter(o => o.length > 0)
+    : [];
+  const isWildcard = corsOrigin === '*';
+  const credentials = !isWildcard; // Never use credentials with wildcard
+
   app.enableCors({
-    origin: corsOrigin === '*' ? '*' : corsOrigin?.split(',').map(o => o.trim()) || '*',
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // If wildcard is set and credentials is false, allow any origin
+      if (isWildcard && !credentials) {
+        return callback(null, true);
+      }
+
+      // Check against allowlist
+      if (corsAllowlist.includes(origin)) {
+        return callback(null, origin);
+      }
+
+      // Origin not allowed
+      callback(new Error('Not allowed by CORS'), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-KEY'],
-    credentials: true,
+    credentials: credentials,
   });
 
   app.useGlobalPipes(

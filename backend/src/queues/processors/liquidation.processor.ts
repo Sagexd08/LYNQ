@@ -93,12 +93,24 @@ export class LiquidationProcessor extends WorkerHost {
                 loanId,
             );
 
-            // 4. Update user metadata
-            const userMetadata = (loan.user?.metadata as any) || {};
-            userMetadata.defaultedLoans = (userMetadata.defaultedLoans || 0) + 1;
-            await this.prisma.user.update({
-                where: { id: loan.userId },
-                data: { metadata: userMetadata },
+            // 4. Update user metadata atomically to prevent race conditions
+            // Use a transaction with row locking to ensure atomic increment
+            await this.prisma.$transaction(async (tx) => {
+                // Lock the user row for update
+                await tx.$executeRaw`
+                    SELECT id FROM users WHERE id = ${loan.userId} FOR UPDATE
+                `;
+                
+                // Atomically increment defaultedLoans in JSON metadata using PostgreSQL JSONB functions
+                await tx.$executeRaw`
+                    UPDATE users
+                    SET metadata = jsonb_set(
+                        COALESCE(metadata, '{}'::jsonb),
+                        '{defaultedLoans}',
+                        to_jsonb(COALESCE((metadata->>'defaultedLoans')::int, 0) + 1)
+                    )
+                    WHERE id = ${loan.userId}
+                `;
             });
 
             // 5. Notify user

@@ -141,7 +141,7 @@ export class LoansService {
     async activateLoan(loanId: string, collateralData: {
         tokenAddress: string;
         tokenSymbol: string;
-        amount: number;
+        amount: string | number;
         chainId: number;
         txHash: string; // Make txHash required
     }) {
@@ -157,15 +157,29 @@ export class LoansService {
             throw new BadRequestException('Only pending loans can be activated');
         }
 
+        // Convert amount to number if it's a string
+        const collateralAmount = typeof collateralData.amount === 'string' 
+            ? parseFloat(collateralData.amount) 
+            : collateralData.amount;
+
+        if (isNaN(collateralAmount) || collateralAmount <= 0) {
+            throw new BadRequestException('Invalid collateral amount');
+        }
+
         // CRITICAL: Verify collateral transaction on-chain before activating
         if (this.blockchainService.isBlockchainConnected()) {
+            // Ensure loan has on-chain ID before verification
+            if (!loan.onChainLoanId) {
+                throw new BadRequestException('Loan does not have an on-chain ID. Cannot verify collateral deposit.');
+            }
+
             try {
                 // Verify the collateral lock transaction actually happened
                 const isVerified = await this.blockchainService.verifyCollateralDeposit(
                     collateralData.txHash,
                     loan.onChainLoanId,
                     collateralData.tokenAddress,
-                    collateralData.amount,
+                    collateralAmount,
                 );
 
                 if (!isVerified) {
@@ -174,25 +188,50 @@ export class LoansService {
 
                 this.logger.log(`Collateral verified on-chain for loan ${loanId}, tx: ${collateralData.txHash}`);
             } catch (error) {
-                this.logger.error(`Collateral verification failed: ${error.message}`);
-                throw new BadRequestException(`Collateral verification failed: ${error.message}`);
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                this.logger.error(`Collateral verification failed: ${errorMessage}`);
+                throw new BadRequestException(`Collateral verification failed: ${errorMessage}`);
             }
         } else {
             // For MVP on testnet, require blockchain connection
             throw new BadRequestException('Blockchain connection required for loan activation');
         }
 
-        // Lock collateral in DB (after on-chain verification)
-        await this.collateralService.lockCollateral({
-            loanId,
-            ...collateralData,
-        }, loan.userId);
-
-        // Activate loan on-chain
+        // Lock collateral in DB and activate loan on-chain within error handling
+        // This ensures we can rollback collateral lock if on-chain activation fails
         let activationTxHash: string | null = null;
-        if (loan.onChainLoanId) {
-            activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
-            this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
+        
+        try {
+            // Lock collateral in DB (after on-chain verification)
+            await this.collateralService.lockCollateral({
+                loanId,
+                tokenAddress: collateralData.tokenAddress,
+                tokenSymbol: collateralData.tokenSymbol,
+                amount: collateralAmount,
+                chainId: collateralData.chainId,
+                txHash: collateralData.txHash,
+            }, loan.userId);
+
+            // Activate loan on-chain
+            if (loan.onChainLoanId) {
+                activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
+                this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
+            }
+        } catch (error) {
+            // If activation fails, unlock collateral to maintain consistency
+            try {
+                await this.collateralService.unlockCollateral({ loanId }, loan.userId);
+                this.logger.warn(`Collateral unlocked due to activation failure for loan ${loanId}`);
+            } catch (unlockError) {
+                const unlockErrorMessage = unlockError instanceof Error ? unlockError.message : String(unlockError);
+                this.logger.error(
+                    `Failed to unlock collateral after activation failure for loan ${loanId}: ${unlockErrorMessage}`
+                );
+            }
+            
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            this.logger.error(`Loan activation failed for ${loanId}: ${errorMessage}`);
+            throw error;
         }
 
         const updatedLoan = await this.prisma.loan.update({
@@ -201,7 +240,7 @@ export class LoansService {
                 status: 'ACTIVE',
                 startDate: new Date(),
                 collateralTokenAddress: collateralData.tokenAddress,
-                collateralAmount: collateralData.amount,
+                collateralAmount: collateralAmount,
                 transactionHash: activationTxHash || loan.transactionHash,
             },
         });
@@ -235,9 +274,12 @@ export class LoansService {
             throw new BadRequestException('Only active loans can be repaid');
         }
 
-        // If on-chain loan exists and txHash provided, verify the repayment
         let onChainVerified = false;
-        if (loan.onChainLoanId && dto.txHash && this.blockchainService.isBlockchainConnected()) {
+        if (loan.onChainLoanId && dto.txHash) {
+            if (!this.blockchainService.isBlockchainConnected()) {
+                throw new BadRequestException('Blockchain connection required for on-chain loan repayment');
+            }
+
             try {
                 onChainVerified = await this.blockchainService.verifyRepayment(
                     dto.txHash,
@@ -251,15 +293,16 @@ export class LoansService {
 
                 this.logger.log(`Repayment verified on-chain: ${dto.txHash}`);
             } catch (error) {
-                this.logger.error(`Repayment verification failed: ${error.message}`);
-                throw new BadRequestException(`Repayment verification failed: ${error.message}`);
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                this.logger.error(`Repayment verification failed: ${errorMessage}`);
+                throw new BadRequestException(`Repayment verification failed: ${errorMessage}`);
             }
         } else if (loan.onChainLoanId && !dto.txHash) {
             throw new BadRequestException('Transaction hash required for on-chain loan repayment');
         }
 
         const totalOwed = Number(loan.amount) * (1 + Number(loan.interestRate) / 100);
-        const amountRepaid = Number(loan.outstandingAmount) - Number(loan.amount);
+        const amountRepaid = Number(loan.amount) - Number(loan.outstandingAmount);
         const remaining = totalOwed - amountRepaid;
         const paymentAmount = Math.min(dto.amount, remaining);
 

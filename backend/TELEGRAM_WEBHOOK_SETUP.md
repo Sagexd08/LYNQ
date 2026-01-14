@@ -79,8 +79,8 @@ curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getWebhookInfo"
 ### Local Development (ngrok)
 
 ```bash
-# Install ngrok: npm install -g ngrok
-ngrok http 3000
+# Install ngrok from: https://ngrok.com/download
+# Or via apt (Linux): curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrokngrok http 3000
 # Use the HTTPS URL provided: https://abc123.ngrok.io/api/v1/telegram/webhook
 ```
 

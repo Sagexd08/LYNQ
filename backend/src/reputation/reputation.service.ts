@@ -100,7 +100,7 @@ export class ReputationService {
                 },
             });
 
-            if (scoreChange !== 0) {
+            if (scoreChange !== 0 || eventType === ReputationEventType.PARTIAL_REPAYMENT) {
                 await tx.reputation_events.create({
                     data: {
                         userId,

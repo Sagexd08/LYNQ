@@ -81,7 +81,11 @@ async function setupWebhook() {
             process.exit(1);
         }
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        if (error instanceof Error) {
+            console.error('❌ Error:', error.message);
+        } else {
+            console.error('❌ Error:', String(error));
+        }
         process.exit(1);
     }
 }

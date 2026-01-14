@@ -34,11 +34,14 @@ export class RepaymentsService {
         if (loan.status === 'REPAID') {
             throw new BadRequestException('Loan is already repaid');
         }
+        if (!loan.dueDate) {
+            throw new BadRequestException('Loan dueDate is required for repayment classification');
+        }
 
         // Create a compatible loan object for classification
         const loanForClassification = {
             amount: Number(loan.amount),
-            dueAt: loan.dueDate || new Date(),
+            dueAt: loan.dueDate,
             repayments: loan.repayments.map(r => ({ amount: Number(r.amount) })),
             partialExtensionUsed: loan.partialExtensionUsed || false,
         };
@@ -72,7 +75,7 @@ export class RepaymentsService {
                         );
                     }
                 } else {
-                    const newDueDate = new Date(loan.dueDate || new Date());
+                    const newDueDate = new Date(loan.dueDate!);
                     newDueDate.setDate(newDueDate.getDate() + PARTIAL_EXTENSION_DAYS);
 
                     await tx.loan.update({

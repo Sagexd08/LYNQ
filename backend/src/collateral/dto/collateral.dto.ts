@@ -37,6 +37,7 @@ export class UnlockCollateralDto {
 
     @ApiPropertyOptional({ description: 'Token contract address' })
     @IsString()
+    @IsEthereumAddress()
     @IsOptional()
     tokenAddress?: string;
 

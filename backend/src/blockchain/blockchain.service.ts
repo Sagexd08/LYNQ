@@ -31,6 +31,10 @@ const COLLATERAL_VAULT_ABI = [
     "event CollateralSeized(bytes32 indexed loanId, address indexed token, uint256 amount, address recipient)"
 ];
 
+const ERC20_ABI = [
+    "function decimals() external view returns (uint8)"
+];
+
 export interface OnChainLoanInfo {
     loanId: string;
     borrower: string;
@@ -51,6 +55,7 @@ export class BlockchainService implements OnModuleInit {
     private loanCoreContract: Contract;
     private collateralVaultContract: Contract;
     private isConnected = false;
+    private tokenDecimalsCache = new Map<string, number>();
 
     constructor(
         private readonly configService: ConfigService,
@@ -234,6 +239,36 @@ export class BlockchainService implements OnModuleInit {
         return await this.provider.getBlockNumber();
     }
 
+    private async getTokenDecimals(tokenAddress: string): Promise<number> {
+        const normalizedAddress = tokenAddress.toLowerCase();
+        
+        // Check cache first
+        if (this.tokenDecimalsCache.has(normalizedAddress)) {
+            return this.tokenDecimalsCache.get(normalizedAddress)!;
+        }
+
+        try {
+            const tokenContract = new ethers.Contract(
+                tokenAddress,
+                ERC20_ABI,
+                this.provider,
+            );
+            const decimals = await tokenContract.decimals();
+            const decimalsNumber = Number(decimals);
+            
+            // Cache the result
+            this.tokenDecimalsCache.set(normalizedAddress, decimalsNumber);
+            
+            return decimalsNumber;
+        } catch (error) {
+            this.logger.warn(`Failed to fetch decimals for token ${tokenAddress}, defaulting to 18: ${error.message}`);
+            // Default to 18 decimals if fetch fails
+            const defaultDecimals = 18;
+            this.tokenDecimalsCache.set(normalizedAddress, defaultDecimals);
+            return defaultDecimals;
+        }
+    }
+
     async verifyCollateralDeposit(
         txHash: string,
         expectedLoanId: string | null,
@@ -263,11 +298,16 @@ export class BlockchainService implements OnModuleInit {
                         // Verify the event matches expected values
                         if (
                             (!expectedLoanId || loanId === expectedLoanId) &&
-                            token.toLowerCase() === expectedToken.toLowerCase() &&
-                            Number(ethers.formatEther(amount)) >= expectedAmount * 0.99 // 1% tolerance
+                            token.toLowerCase() === expectedToken.toLowerCase()
                         ) {
-                            this.logger.log(`Verified collateral deposit: ${amount} of ${token}`);
-                            return true;
+                            // Fetch token decimals and compare using formatUnits
+                            const decimals = await this.getTokenDecimals(token);
+                            const formattedAmount = Number(ethers.formatUnits(amount, decimals));
+                            
+                            if (formattedAmount >= expectedAmount * 0.99) { // 1% tolerance
+                                this.logger.log(`Verified collateral deposit: ${formattedAmount} of ${token} (decimals: ${decimals})`);
+                                return true;
+                            }
                         }
                     }
                 } catch {
