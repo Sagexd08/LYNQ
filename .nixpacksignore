@@ -1,0 +1,6 @@
+frontend/
+backend/contracts/
+backend/ml-service/
+*.md
+.git/
+node_modules/
