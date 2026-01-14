@@ -9,5 +9,4 @@ import { RepaymentsService } from './repayments.service';
   controllers: [RepaymentsController],
   providers: [RepaymentsService],
 })
-export class RepaymentsModule { }
-
+export class RepaymentsModule {}

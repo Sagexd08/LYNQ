@@ -8,9 +8,9 @@ import { ReconciliationService } from './reconciliation.service';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-    imports: [ConfigModule, PrismaModule, ScheduleModule],
-    controllers: [BlockchainController],
-    providers: [BlockchainService, EventListenerService, ReconciliationService],
-    exports: [BlockchainService],
+  imports: [ConfigModule, PrismaModule, ScheduleModule],
+  controllers: [BlockchainController],
+  providers: [BlockchainService, EventListenerService, ReconciliationService],
+  exports: [BlockchainService],
 })
-export class BlockchainModule { }
+export class BlockchainModule {}

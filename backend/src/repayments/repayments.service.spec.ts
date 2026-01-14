@@ -54,7 +54,9 @@ describe('RepaymentsService', () => {
       loan: {
         findUnique: jest.fn(),
       },
-      $transaction: jest.fn((callback: (tx: any) => Promise<any>) => callback(mockTx)),
+      $transaction: jest.fn((callback: (tx: any) => Promise<any>) =>
+        callback(mockTx),
+      ),
     };
 
     reputationService = {
@@ -96,7 +98,7 @@ describe('RepaymentsService', () => {
           data: expect.objectContaining({
             partialExtensionUsed: true,
           }),
-        })
+        }),
       );
       expect(reputationService.applyRepaymentOutcome).not.toHaveBeenCalled();
     });
@@ -114,7 +116,7 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.EARLY,
         0,
-        'loan-1'
+        'loan-1',
       );
     });
 
@@ -127,7 +129,7 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.ON_TIME,
         0,
-        'loan-1'
+        'loan-1',
       );
     });
 
@@ -144,7 +146,7 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.LATE,
         expect.any(Number),
-        'loan-1'
+        'loan-1',
       );
     });
   });
@@ -161,7 +163,9 @@ describe('RepaymentsService', () => {
 
       const updateCall = mockTx.loan.update.mock.calls[0][0];
       expect(updateCall.data.partialExtensionUsed).toBe(true);
-      expect(updateCall.data.dueAt.getDate()).toBe(mockLoan.dueAt.getDate() + 3);
+      expect(updateCall.data.dueAt.getDate()).toBe(
+        mockLoan.dueAt.getDate() + 3,
+      );
     });
 
     it('PARTIAL: second extension should mark as LATE with -1 penalty', async () => {
@@ -178,7 +182,7 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.LATE,
         1,
-        'loan-1'
+        'loan-1',
       );
     });
 
@@ -193,7 +197,7 @@ describe('RepaymentsService', () => {
             status: 'repaid',
             lateDays: 0,
           }),
-        })
+        }),
       );
     });
 
@@ -226,7 +230,7 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.EARLY,
         0,
-        'loan-1'
+        'loan-1',
       );
     });
 
@@ -255,14 +259,16 @@ describe('RepaymentsService', () => {
         'user-1',
         RepaymentClassification.LATE,
         expect.any(Number),
-        'loan-1'
+        'loan-1',
       );
     });
   });
 
   describe('STEP 3.5: Blocking & Unblocking', () => {
     it('should handle blocked user response from reputation service', async () => {
-      reputationService.applyRepaymentOutcome.mockResolvedValue({ blocked: true });
+      reputationService.applyRepaymentOutcome.mockResolvedValue({
+        blocked: true,
+      });
       prisma.loan.findUnique.mockResolvedValue(mockLoan);
 
       const result = await service.create({ loanId: 'loan-1', amount: 1000 });
@@ -273,18 +279,18 @@ describe('RepaymentsService', () => {
     it('should throw NotFoundException if loan not found', async () => {
       prisma.loan.findUnique.mockResolvedValue(null);
 
-      await expect(service.create({ loanId: 'invalid', amount: 500 })).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        service.create({ loanId: 'invalid', amount: 500 }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if loan already repaid', async () => {
       const repaidLoan = { ...mockLoan, status: 'repaid' };
       prisma.loan.findUnique.mockResolvedValue(repaidLoan);
 
-      await expect(service.create({ loanId: 'loan-1', amount: 500 })).rejects.toThrow(
-        BadRequestException
-      );
+      await expect(
+        service.create({ loanId: 'loan-1', amount: 500 }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -304,7 +310,7 @@ describe('RepaymentsService', () => {
           data: expect.objectContaining({
             partialExtensionUsed: true,
           }),
-        })
+        }),
       );
     });
 
@@ -322,7 +328,7 @@ describe('RepaymentsService', () => {
           data: expect.objectContaining({
             status: 'repaid',
           }),
-        })
+        }),
       );
     });
   });

@@ -7,10 +7,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { SignatureService } from './signature.service';
 
 @Module({
-    imports: [MlModule, PrismaModule, ConfigModule],
-    controllers: [RiskController],
-    providers: [RiskService, SignatureService],
-    exports: [RiskService, SignatureService],
+  imports: [MlModule, PrismaModule, ConfigModule],
+  controllers: [RiskController],
+  providers: [RiskService, SignatureService],
+  exports: [RiskService, SignatureService],
 })
-export class RiskModule { }
-
+export class RiskModule {}

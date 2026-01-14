@@ -13,7 +13,9 @@ describe('ReputationController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReputationController],
-      providers: [{ provide: ReputationService, useValue: mockReputationService }],
+      providers: [
+        { provide: ReputationService, useValue: mockReputationService },
+      ],
     }).compile();
 
     controller = module.get<ReputationController>(ReputationController);

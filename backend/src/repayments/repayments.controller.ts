@@ -4,10 +4,10 @@ import { CreateRepaymentDto } from './dto/create-repayment.dto';
 
 @Controller('repayments')
 export class RepaymentsController {
-    constructor(private readonly repaymentsService: RepaymentsService) { }
+  constructor(private readonly repaymentsService: RepaymentsService) {}
 
-    @Post()
-    create(@Body() createRepaymentDto: CreateRepaymentDto) {
-        return this.repaymentsService.create(createRepaymentDto);
-    }
+  @Post()
+  create(@Body() createRepaymentDto: CreateRepaymentDto) {
+    return this.repaymentsService.create(createRepaymentDto);
+  }
 }

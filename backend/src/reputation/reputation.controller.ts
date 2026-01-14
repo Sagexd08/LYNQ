@@ -3,16 +3,15 @@ import { ReputationService } from './reputation.service';
 
 @Controller('reputation')
 export class ReputationController {
-    constructor(private readonly reputationService: ReputationService) { }
+  constructor(private readonly reputationService: ReputationService) {}
 
-    @Get(':userId')
-    getScore(@Param('userId') userId: string) {
-        return this.reputationService.getScore(userId);
-    }
+  @Get(':userId')
+  getScore(@Param('userId') userId: string) {
+    return this.reputationService.getScore(userId);
+  }
 
-    @Get(':userId/history')
-    getHistory(@Param('userId') userId: string) {
-        return this.reputationService.getHistory(userId);
-    }
+  @Get(':userId/history')
+  getHistory(@Param('userId') userId: string) {
+    return this.reputationService.getHistory(userId);
+  }
 }
-
