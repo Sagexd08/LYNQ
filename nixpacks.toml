@@ -4,7 +4,7 @@
 # If Railway root is NOT set to backend, this config will be used
 
 [phases.setup]
-nixPkgs = ["nodejs_22", "openssl"]
+nixPkgs = ["nodejs_23", "openssl"]
 
 [phases.install]
 # Use npm install which works with or without package-lock.json
