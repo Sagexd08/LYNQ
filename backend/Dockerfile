@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -9,10 +9,11 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Use pnpm if pnpm-lock.yaml exists, otherwise npm
+# Use npm install (not npm ci) to handle cases where package-lock.json may be out of sync
 RUN if [ -f "pnpm-lock.yaml" ]; then \
       pnpm install --frozen-lockfile; \
     else \
-      npm ci; \
+      npm install --legacy-peer-deps; \
     fi
 
 COPY . .
@@ -23,7 +24,7 @@ RUN if [ -f "pnpm-lock.yaml" ]; then \
       npm run build && npx prisma generate; \
     fi
 
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 
