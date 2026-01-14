@@ -25,9 +25,11 @@ const envSchema = z.object({
 
   BLOCKCHAIN_RPC_URL: z.string().url().optional(),
   BLOCKCHAIN_RPC_URL_POLYGON: z.string().url().optional(),
+  MANTLE_SEPOLIA_RPC_URL: z.string().url().optional(),
   PRIVATE_KEY: z.string().optional(),
   LOAN_CORE_ADDRESS: z.string().optional(),
   COLLATERAL_VAULT_ADDRESS: z.string().optional(),
+  CORS_ORIGIN: z.string().optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
