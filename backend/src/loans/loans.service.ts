@@ -95,10 +95,12 @@ export class LoansService {
 
                 this.logger.log(`Loan created on-chain: ${onChainLoanId}, tx: ${transactionHash}`);
             } catch (error) {
-                this.logger.warn(`Failed to create loan on-chain, continuing with DB-only: ${error.message}`);
+                this.logger.error(`Failed to create loan on-chain: ${error.message}`);
+                throw new BadRequestException(`Failed to create loan on-chain: ${error.message}`);
             }
         } else {
-            this.logger.warn('Blockchain not connected, creating loan in database only');
+            this.logger.error('Blockchain not connected. Cannot create loan.');
+            throw new BadRequestException('Blockchain connection required to create loan');
         }
 
         const loan = await this.prisma.loan.create({
