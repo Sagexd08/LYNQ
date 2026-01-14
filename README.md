@@ -109,36 +109,39 @@ docker-compose logs -f
 
 ```
 LYNQ/
-├── src/                          # NestJS Backend
-│   ├── auth/                     # Wallet authentication
-│   ├── loans/                    # Loan management
-│   ├── collateral/               # Collateral management
-│   ├── risk/                     # Risk engine
-│   ├── ml/                       # ML service client
-│   ├── blockchain/               # Smart contract integration
-│   ├── telegram/                 # Telegram bot
-│   ├── queues/                   # BullMQ queue system
-│   ├── health/                   # Health checks
-│   └── main.ts
-├── ml-service/                   # FastAPI ML Service
-│   ├── app/
-│   │   ├── api/                  # API routes
-│   │   ├── core/                 # Config, security
-│   │   ├── models/               # Model loading
-│   │   ├── schemas/              # Pydantic schemas
-│   │   └── services/             # Inference, explainability
-│   ├── Dockerfile
-│   └── requirements.txt
-├── contracts/                    # Solidity smart contracts
-│   ├── contracts/
-│   │   ├── LoanCore.sol
-│   │   └── CollateralVault.sol
-│   ├── scripts/
-│   └── hardhat.config.ts
-├── prisma/
-│   └── schema.prisma
+├── backend/                      # NestJS Backend
+│   ├── src/
+│   │   ├── auth/                 # Wallet authentication
+│   │   ├── loans/                # Loan management
+│   │   ├── collateral/           # Collateral management
+│   │   ├── risk/                 # Risk engine
+│   │   ├── ml/                   # ML service client
+│   │   ├── blockchain/           # Smart contract integration
+│   │   ├── telegram/             # Telegram bot
+│   │   ├── queues/               # BullMQ queue system
+│   │   ├── health/               # Health checks
+│   │   └── main.ts
+│   ├── prisma/                   # Prisma schema & migrations
+│   ├── contracts/                # Solidity smart contracts
+│   ├── ml-service/               # FastAPI ML Service
+│   │   ├── app/
+│   │   │   ├── api/              # API routes
+│   │   │   ├── core/            # Config, security
+│   │   │   ├── models/          # Model loading
+│   │   │   ├── schemas/         # Pydantic schemas
+│   │   │   └── services/        # Inference, explainability
+│   │   ├── terraform/           # AWS infrastructure
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   ├── railway.toml             # Railway config
+│   ├── nixpacks.toml            # Nixpacks build config
+│   └── package.json
+├── frontend/                     # Next.js Frontend
+├── railway.json                  # Railway deployment config
+├── nixpacks.toml                 # Root Nixpacks config
+├── RAILWAY_DEPLOY.md            # Deployment guide
 ├── docker-compose.yml
-└── package.json
+└── package.json                  # Root workspace config
 ```
 
 ## 🔧 API Endpoints
@@ -175,6 +178,8 @@ LYNQ/
 
 - **API Docs**: `http://localhost:3000/docs`
 - **ML Service**: `http://localhost:8000/docs`
+- **Railway Deployment**: See [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md)
+- **ML Service Deployment**: See `backend/ml-service/README.md`
 
 ## 🔐 Environment Variables
 
@@ -213,27 +218,49 @@ npm run test:cov
 
 ## 🚢 Deployment
 
-### Backend (Railway/Fly.io)
-```bash
-# Using Railway
-railway login
-railway deploy
+### Backend (Railway)
 
-# Using Fly.io
-fly launch
-fly deploy
-```
+**Quick Setup:**
+1. Connect GitHub repository to Railway
+2. Set **Root Directory** to `backend` in Railway service settings
+3. Add environment variables (see [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md))
+4. Railway will auto-deploy on push to main branch
 
-### ML Service (AWS EC2)
+**Detailed Guide:** See [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md) for complete deployment instructions.
+
+**Key Configuration:**
+- Root Directory: `backend` (required)
+- Build: Uses `backend/nixpacks.toml` or `railway.json`
+- Database: Supabase or Railway PostgreSQL
+- Redis: Railway Redis service
+
+### ML Service (AWS EC2 + API Gateway)
+
+**Deployment Steps:**
+1. Deploy ML service to EC2 instance
+2. Set up AWS API Gateway with API key authentication
+3. Configure TLS security policy (TLS 1.2 recommended)
+4. Update backend `ML_SERVICE_URL` to API Gateway endpoint
+
+**Quick Deploy:**
 ```bash
 # On EC2 instance
-docker build -t lynq-ml .
-docker run -d -p 8000:8000 lynq-ml
+cd backend/ml-service
+docker build -t lynq-ml-service .
+docker run -d -p 8000:8000 --env-file .env lynq-ml-service
+```
+
+**Terraform Setup:**
+```bash
+cd backend/ml-service/terraform
+terraform init
+terraform plan
+terraform apply
 ```
 
 ### Smart Contracts
 ```bash
-cd contracts
+cd backend/contracts
 npm install
 npx hardhat compile
 npx hardhat run scripts/deploy.ts --network sepolia
