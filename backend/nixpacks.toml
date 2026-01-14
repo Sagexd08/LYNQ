@@ -1,0 +1,18 @@
+# Nixpacks config for Railway - use this when root directory is set to "backend"
+
+[phases.setup]
+nixPkgs = ["nodejs_23", "openssl"]
+
+[phases.install]
+# Use npm install (works even if package-lock.json is missing or outdated)
+cmds = ["npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = [
+  "npm run build",
+  "npm run prisma:generate",
+  "npx prisma migrate deploy"
+]
+
+[start]
+cmd = "npm run start:prod"

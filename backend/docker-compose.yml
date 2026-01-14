@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (local development, use Supabase in production)
+  postgres:
+    image: postgres:15
+    container_name: lynq_db
+    environment:
+      POSTGRES_USER: lynq_user
+      POSTGRES_PASSWORD: lynq_password
+      POSTGRES_DB: lynq_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lynq_user -d lynq_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for BullMQ and caching
+  redis:
+    image: redis:7-alpine
+    container_name: lynq_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ML Service (FastAPI)
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: lynq_ml
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_SOURCE=local
+      - API_KEY=${ML_API_KEY:-dev-api-key}
+      - ENABLE_SHAP=false
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./ml-service/models:/app/models
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # NestJS Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lynq_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://lynq_user:lynq_password@postgres:5432/lynq_db
+      - REDIS_URL=redis://redis:6379
+      - ML_SERVICE_URL=http://ml-service:8000
+      - ML_API_KEY=${ML_API_KEY:-dev-api-key}
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-min-32-characters}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

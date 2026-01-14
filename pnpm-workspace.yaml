@@ -1,4 +1,7 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'contracts/evm'
+  - 'backend'
+  - 'apps/backend'
+  - 'frontend'
+  - 'frontend/landing-v2'
+  - 'backend/contracts'
+  - 'apps/backend/contracts'

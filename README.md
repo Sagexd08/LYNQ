@@ -1,408 +1,303 @@
-# LYNQ - Decentralized Finance Platform
+# LYNQ - Multi-chain DeFi Lending Platform
 
 <div align="center">
-  <img src="public/logo.ico" alt="LYNQ Logo" width="100"/>
-  
-  **Borrow. Build. Belong.**
-  
-  *A comprehensive multi-chain DeFi platform*
-
-  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-  [![Multi-Chain](https://img.shields.io/badge/Built%20on-Multi--Chain-00D4AA.svg)](https://aptos.dev)
-  [![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB.svg)](https://react.dev)
-  [![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6.svg)](https://typescriptlang.org)
+  <h3>AI-Powered Credit Risk Assessment for DeFi Lending</h3>
+  <p>A comprehensive decentralized lending platform with machine learning risk assessment, multi-chain support, and Telegram bot integration.</p>
 </div>
 
 ---
 
-## Overview
+## 🏗️ Architecture
 
-LYNQ is a revolutionary decentralized finance platform supporting multiple blockchain networks. Our mission is to democratize access to financial services while maintaining the highest standards of security, compliance, and user experience. We provide innovative lending solutions for both crypto-native users and Web3 newcomers across Ethereum, Aptos, and Flow networks.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Next.js Frontend                           │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      NestJS Backend                             │
+└─────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────┘
+      │         │         │         │         │         │
+      ▼         ▼         ▼         ▼         ▼         ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│Supabase │ │FastAPI  │ │Telegram │ │  Smart  │ │ Redis   │ │BullMQ   │
+│Auth+DB  │ │ML Svc   │ │Bot API  │ │Contracts│ │ Cache   │ │ Queues  │
+└─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
+                │
+                ▼
+          ┌───────────┐
+          │  AWS S3   │
+          │  Models   │
+          └───────────┘
+```
 
-### Key Features
+## 📋 Features
 
-- **Multi-Chain Support**: Ethereum, Aptos, and Flow blockchain integration
-- **Dual Loan System**: Collateral-based Big Loans & Real-money-backed Small Loans
-- **Web3 Onboarding**: Locked mainnet tokens for beginners
-- **Reputation System**: Build onchain trust and unlock better rates
-- **Telegram Notifications**: Real-time loan updates and alerts
-- **Multi-Wallet Integration**: MetaMask, Coinbase Wallet, and Flow-compatible wallets
-- **Compliance First**: MiCA Framework & RBI Digital Lending Guidelines compliant
-- **No-KYC Options**: Privacy-preserving financial services
+### Core Features
+- **Wallet Authentication**: Sign-in with Ethereum wallet (EIP-4361)
+- **AI Credit Scoring**: ML-powered risk assessment with SHAP explainability
+- **Multi-chain Support**: Ethereum Sepolia, Polygon Amoy testnets
+- **Smart Contracts**: On-chain loan and collateral management
+- **Real-time Notifications**: Telegram bot for alerts and status updates
 
----
+### Technical Highlights
+- **NestJS Backend**: Modular, scalable architecture
+- **FastAPI ML Service**: High-performance credit scoring
+- **BullMQ Queues**: Async job processing
+- **Prisma ORM**: Type-safe database access
+- **Swagger Docs**: Comprehensive API documentation
 
-## Architecture
-
-### Big Loans (Collateral-Based)
-- **Collateral Types**: Digital assets, NFTs, staking positions
-- **Loan-to-Value Ratio**: 70-80% of collateral value
-- **Features**:
-  - Extended repayment windows
-  - Real-time collateral monitoring
-  - Automatic liquidation protection
-  - Reputation-based rewards
-- **Compliance**: MiCA collateral standards + RBI Digital Lending Guidelines (2022)
-
-### Small Loans (Real-Money Backed)
-- **Collateral**: Real-world money deposits
-- **Target Audience**: Web3 newcomers and micro-borrowers
-- **Features**:
-  - Short-term, low-value loans
-  - No-KYC required
-  - 10% late fee structure
-  - Onchain reputation building
-- **Use Case**: Perfect for exploring DeFi without prior crypto exposure
-
-### Web3 Onboarding Experience
-- **Locked Mainnet Tokens**: Non-withdrawable, platform-exclusive Aptos tokens
-- **Learning Environment**: Safe space to understand trading and staking
-- **Developer Friendly**: Test smart contracts with mainnet behavior
-- **Reputation Building**: Real onchain activity tracking
-- **Compliance**: FATF Guidance (2021) compliant
-
----
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm, yarn, or pnpm
-- Compatible Web3 wallet (MetaMask, Coinbase Wallet, Flow-compatible, etc.)
 
-### Installation
+- Node.js 18+
+- Python 3.11+
+- Docker & Docker Compose
+- PostgreSQL 15+
+- Redis 7+
 
+### Local Development
+
+1. **Clone and install dependencies**
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/lynq.git
-cd lynq
-
-# Install dependencies
+git clone <repository-url>
+cd LYNQ
 npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
 ```
 
-### Environment Setup
+2. **Set up environment**
 ```bash
 cp .env.example .env
-# Configure your environment variables
+# Edit .env with your configuration
 ```
 
-Required environment variables:
-- `VITE_PARTICLE_PROJECT_ID` - Particle Network project ID
-- `VITE_PARTICLE_CLIENT_KEY` - Particle Network client key
-- `VITE_PARTICLE_APP_ID` - Particle Network app ID
-- `VITE_TELEGRAM_BOT_TOKEN` - Telegram bot token for notifications (optional)
-- `VITE_TELEGRAM_DEFAULT_CHAT_ID` - Default Telegram chat ID (optional)
-- `VITE_DEFAULT_NETWORK` - Default network (mainnet/testnet)
+3. **Start services**
+```bash
+# Start PostgreSQL and Redis
+docker-compose up -d postgres redis
 
----
+# Generate Prisma client
+npm run prisma:generate
 
-## Multi-Chain Architecture
+# Apply migrations
+npm run prisma:migrate
 
-### Supported Blockchains
+# Start development server
+npm run start:dev
+```
 
-#### Ethereum (EVM)
-- **Mainnet**: Production Ethereum blockchain
-- **Sepolia Testnet**: Testing environment
-- **Wallets**: MetaMask, Coinbase Wallet, WalletConnect
-- **Smart Contracts**: Solidity-based lending contracts
-- **Features**: Full EVM compatibility, gas optimization
+4. **Start ML Service**
+```bash
+cd ml-service
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
 
-#### Aptos
-- **Network**: High-performance Aptos blockchain
-- **Language**: Move smart contracts
-- **Wallets**: Petra, Martian, Aptos-compatible wallets
-- **Features**: 160K+ TPS capability, advanced resource management
+### Using Docker Compose
 
-#### Flow
-- **Network**: Flow blockchain with FCL integration
-- **Language**: Cadence smart contracts
-- **Wallets**: Flow-compatible wallets via FCL
-- **Features**: Developer-friendly architecture, composability
+```bash
+# Start all services
+docker-compose up -d
 
-### Cross-Chain Features
-- **Unified Interface**: Single UI for all supported blockchains
-- **Multi-Wallet Support**: Connect with different wallets per chain
-- **Network Switching**: Seamless switching between supported networks
-- **Consistent UX**: Same lending experience across all chains
+# View logs
+docker-compose logs -f
+```
 
----
-
-## Smart Contract Information
-
-### Flow Blockchain (Cadence)
-
-**LoanPlatform Contract**
-- **Language**: Cadence
-- **Location**: `contracts/LoanPlatform.cdc`
-
-#### Contract Functions
-- `createLoan()` - Create a new loan with borrower, amount, interest, and duration
-- `getLoan()` - Retrieve loan details by ID
-- `applyRepayment()` - Apply payment to existing loan
-- `calculateTotalOwed()` - Calculate total amount owed including interest
-
-#### Events
-- `LoanCreated` - Emitted when a new loan is created
-- `LoanRepaid` - Emitted when a loan is repaid
-
-### Additional Smart Contract Platforms
-
-#### Ethereum (EVM)
-- **Status**: Integration ready
-- **Standards**: ERC-20, ERC-721 compatible
-- **Gas Optimization**: Advanced gas efficiency patterns
-
-#### Aptos (Move)
-- **Status**: Integration ready  
-- **Standards**: Aptos Coin Standard, Token Standard
-- **Resource Model**: Advanced resource safety
-
----
-
-## Technology Stack
-
-### Frontend
-- **React 18** - Modern UI framework with Suspense and code splitting
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling with custom design system
-- **Framer Motion** - Smooth animations and transitions
-- **Vite** - Lightning-fast build tool with HMR
-- **Axios** - HTTP client for API interactions
-- **React Hot Toast** - Toast notifications
-
-### Blockchain Infrastructure
-- **Multi-Chain SDKs**:
-  - `@onflow/fcl` - Flow blockchain integration
-  - `ethers` - Ethereum/EVM integration
-  - `@coinbase/wallet-sdk` - Coinbase Wallet integration
-  - `@metamask/detect-provider` - MetaMask integration
-- **Smart Contract Languages**:
-  - Cadence (Flow)
-  - Solidity (Ethereum)
-  - Move (Aptos)
-
-### Services & Integrations
-- **Telegram Bot API** - Real-time notifications
-- **CoinGecko API** - Market data and pricing
-- **Particle Network** - Wallet infrastructure
-- **Axios** - HTTP requests
-
-### Development Tools
-- **ESLint** - Code linting and quality
-- **PostCSS** - CSS processing and optimization
-- **pnpm/npm** - Package management
-- **Git** - Version control
-
----
-
-## Project Architecture
-
-### Directory Structure
+## 📁 Project Structure
 
 ```
 LYNQ/
-├── contracts/           # Smart contracts
-│   ├── LoanPlatform.cdc # Flow/Cadence contract
-│   └── scripts/         # Deployment scripts
-├── src/
-│   ├── components/      # React components
-│   │   ├── card/        # Loan card components
-│   │   ├── dashboard/   # Dashboard views
-│   │   ├── landing/     # Landing page sections
-│   │   ├── loan/        # Loan management
-│   │   ├── marketplace/ # Trading interface
-│   │   ├── wallet/      # Wallet integration
-│   │   └── hooks/       # Custom React hooks
-│   ├── config/          # Configuration files
-│   ├── constants/       # Constants and types
-│   ├── services/        # Business logic & APIs
-│   │   ├── telegramService.ts      # Telegram notifications
-│   │   ├── loanRepaymentService.ts # Loan management
-│   │   ├── flowLoanService.ts      # Flow integration
-│   │   └── userTelegramService.ts  # User-Telegram mapping
-│   ├── types/           # TypeScript type definitions
-│   └── utils/           # Utility functions
-├── scripts/             # Build and deployment scripts
-├── dist/                # Production build output
-└── public/              # Static assets
+├── backend/                      # NestJS Backend
+│   ├── src/
+│   │   ├── auth/                 # Wallet authentication
+│   │   ├── loans/                # Loan management
+│   │   ├── collateral/           # Collateral management
+│   │   ├── risk/                 # Risk engine
+│   │   ├── ml/                   # ML service client
+│   │   ├── blockchain/           # Smart contract integration
+│   │   ├── telegram/             # Telegram bot
+│   │   ├── queues/               # BullMQ queue system
+│   │   ├── health/               # Health checks
+│   │   └── main.ts
+│   ├── prisma/                   # Prisma schema & migrations
+│   ├── contracts/                # Solidity smart contracts
+│   ├── ml-service/               # FastAPI ML Service
+│   │   ├── app/
+│   │   │   ├── api/              # API routes
+│   │   │   ├── core/            # Config, security
+│   │   │   ├── models/          # Model loading
+│   │   │   ├── schemas/         # Pydantic schemas
+│   │   │   └── services/        # Inference, explainability
+│   │   ├── terraform/           # AWS infrastructure
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   ├── railway.toml             # Railway config
+│   ├── nixpacks.toml            # Nixpacks build config
+│   └── package.json
+├── frontend/                     # Next.js Frontend
+├── railway.json                  # Railway deployment config
+├── nixpacks.toml                 # Root Nixpacks config
+├── RAILWAY_DEPLOY.md            # Deployment guide
+├── docker-compose.yml
+└── package.json                  # Root workspace config
 ```
 
-### Key Components
+## 🔧 API Endpoints
 
-#### Wallet Integration
-- **Multi-Wallet Support**: Automatic detection and connection
-- **Persistence**: Session management and auto-reconnect
-- **Network Switching**: Seamless chain switching
-- **Error Handling**: Comprehensive error boundaries
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/wallet/challenge` | Get sign-in challenge |
+| POST | `/api/v1/auth/wallet/verify` | Verify signature & login |
+| GET | `/api/v1/auth/me` | Get current user |
 
-#### Notification System
-- **Telegram Bot**: Real-time notifications via Telegram Bot API
-- **User Mapping**: LocalStorage-based wallet-to-chat mapping
-- **Event Types**: Loan granted, payment received, overdue alerts
-- **Optional**: Graceful degradation when not configured
+### Loans
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/loans` | Create loan request |
+| GET | `/api/v1/loans` | Get user's loans |
+| GET | `/api/v1/loans/:id` | Get loan details |
+| POST | `/api/v1/loans/:id/repay` | Make repayment |
 
-#### Loan Management
-- **Dual System**: Big loans (collateral) and small loans (real-money)
-- **Repayment Tracking**: Real-time payment application
-- **State Management**: Custom hooks for loan state
-- **Credit Scoring**: Trust score calculation and tracking
+### Risk Assessment
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/risk/evaluate` | Evaluate loan risk |
+| GET | `/api/v1/risk/:loanId` | Get risk assessment |
 
-### Security Features
-- **Input Validation**: Comprehensive validation patterns
-- **Rate Limiting**: API and transaction rate limits
-- **XSS Protection**: Content Security Policy
-- **Error Boundaries**: React error handling
-- **Audit Logging**: Security event tracking
+### Health
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | System health status |
+| GET | `/health/live` | Liveness probe |
+| GET | `/health/ready` | Readiness probe |
 
----
+## 📚 Documentation
 
-## Roadmap
+- **API Docs**: `http://localhost:3000/docs`
+- **ML Service**: `http://localhost:8000/docs`
+- **Railway Deployment**: See [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md)
+- **ML Service Deployment**: See `backend/ml-service/README.md`
 
-### Phase 1: Foundation (Q1 2025) ✅
-- [x] Core lending platform development
-- [x] Basic reputation system
-- [x] Collateral-based Big Loans
-- [x] Real-money Small Loans
-- [x] Web3 onboarding with locked tokens
-- [x] Initial compliance framework
-- [x] **Multi-Chain Integration**
-  - Ethereum/EVM support
-  - Flow blockchain integration
-  - Aptos blockchain support
-- [x] **Wallet Infrastructure**
-  - MetaMask integration
-  - Coinbase Wallet support
-  - Flow FCL integration
-  - Auto-detection and connection
-- [x] **Telegram Notifications**
-  - Real-time loan status updates
-  - Payment notifications
-  - Overdue alerts
+## 🔐 Environment Variables
 
-### Phase 2: Enhanced Features (Q2 2025)
-- [ ] **No-Collateral Loans**
-  - High-reputation user loans
-  - Advanced credit scoring
-  - Dynamic interest rates
-- [ ] **Advanced Reputation System**
-  - Cross-platform reputation tracking
-  - Gamification elements
-  - Community governance tokens
-- [ ] **Mobile Application**
-  - iOS and Android apps
-  - Push notifications
-  - Biometric authentication
+### Backend
+```env
+DATABASE_URL=postgresql://...
+SUPABASE_URL=https://...
+SUPABASE_ANON_KEY=...
+JWT_SECRET=your-jwt-secret-min-32-chars
+ML_SERVICE_URL=http://localhost:8000
+ML_API_KEY=your-ml-api-key
+TELEGRAM_BOT_TOKEN=...
+REDIS_URL=redis://localhost:6379
+BLOCKCHAIN_RPC_URL=https://sepolia.infura.io/v3/...
+```
 
-### Phase 3: Financial Infrastructure (Q3 2025)
-- [ ] **Enhanced DeFi Features**
-  - Yield farming opportunities
-  - Liquidity mining programs
-  - Automated investment strategies
-- [ ] **Cross-Chain Integration**
-  - Ethereum bridge
-  - Polygon support
-  - Multi-chain collateral
-- [ ] **Trading & Swapping**
-  - DEX integration
-  - Token swapping functionality
-  - Automated market making
-- [ ] **Institutional Features**
-  - Corporate lending solutions
-  - Bulk transaction processing
-  - Advanced analytics dashboard
+### ML Service
+```env
+MODEL_SOURCE=local
+API_KEY=your-ml-api-key
+ENABLE_SHAP=true
+```
 
-### Phase 4: Banking Solutions (Q4 2025)
-- [ ] **Payment Infrastructure**
-  - Failed UPI settlement resolution
-  - Payment lag solutions
-  - Stablecoin alternatives
-- [ ] **Bridging Features**
-  - Cross-chain asset bridging
-  - Multi-network liquidity
-  - Seamless chain interactions
-- [ ] **Fiat Integration**
-  - Seamless fiat ramps
-  - Bank account linking
-  - Traditional payment methods
+## 🧪 Testing
 
-### Phase 5: Ultimate Financial Product (Q1 2026)
-- [ ] **Crypto-Native Credit Card System**
-  - Direct wallet integration
-  - Real-time spending limits
-  - Cashback in platform tokens
-  - Aptos-based transaction processing
-  - Complete DeFi credit solution
-- [ ] **Platform Optimization**
-  - Performance enhancements
-  - Advanced security features
-  - User experience refinements
+```bash
+# Unit tests
+npm run test
 
-### Platform Completion (2026)
-The LYNQ platform will reach its complete vision with the crypto-native credit card system, representing the ultimate integration of traditional finance convenience with decentralized finance innovation, all built natively on the Aptos blockchain.
+# E2E tests
+npm run test:e2e
 
----
+# Coverage
+npm run test:cov
+```
 
-## Market Impact
+## 🚢 Deployment
 
-### Target Metrics
-- **100K+** Active users by end of 2025
-- **$50M+** Total value locked (TVL)
-- **25+** Countries supported
-- **99.9%** Platform uptime
-- **<2 seconds** Average transaction time
+### Backend (Railway)
 
-### Competitive Advantages
-- ✅ **Regulatory Compliance**: First-mover in MiCA compliance
-- ✅ **User Experience**: Web2-like experience with Web3 benefits
-- ✅ **Aptos Performance**: 160K+ TPS capability
-- ✅ **Innovation**: Unique locked mainnet token system
-- ✅ **Accessibility**: No-KYC options for privacy
+**Quick Setup:**
+1. Connect GitHub repository to Railway
+2. Set **Root Directory** to `backend` in Railway service settings
+3. Add environment variables (see [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md))
+4. Railway will auto-deploy on push to main branch
 
----
+**Detailed Guide:** See [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md) for complete deployment instructions.
 
-## Contributing
+**Key Configuration:**
+- Root Directory: `backend` (required)
+- Build: Uses `backend/nixpacks.toml` or `railway.json`
+- Database: Supabase or Railway PostgreSQL
+- Redis: Railway Redis service
 
-We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+### ML Service (AWS EC2 + API Gateway)
 
-### Development Workflow
+**Deployment Steps:**
+1. Deploy ML service to EC2 instance
+2. Set up AWS API Gateway with API key authentication
+3. Configure TLS security policy (TLS 1.2 recommended)
+4. Update backend `ML_SERVICE_URL` to API Gateway endpoint
+
+**Quick Deploy:**
+```bash
+# On EC2 instance
+cd backend/ml-service
+docker build -t lynq-ml-service .
+docker run -d -p 8000:8000 --env-file .env lynq-ml-service
+```
+
+**Terraform Setup:**
+```bash
+cd backend/ml-service/terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+### Smart Contracts
+```bash
+cd backend/contracts
+npm install
+npx hardhat compile
+npx hardhat run scripts/deploy.ts --network sepolia
+```
+
+## 📊 Risk Scoring
+
+The ML service evaluates credit risk based on:
+- **Wallet Age**: Account history length
+- **Transaction History**: Volume and frequency
+- **DeFi Activity**: Protocol interactions
+- **Reputation Score**: Platform performance
+- **Collateral Ratio**: Loan-to-value ratio
+
+### Risk Levels
+| Level | Score Range | Default Interest |
+|-------|-------------|------------------|
+| VERY_LOW | 800-1000 | 5% |
+| LOW | 700-799 | 7.5% |
+| MEDIUM | 600-699 | 10% |
+| HIGH | 500-599 | 15% |
+| VERY_HIGH | 100-499 | 20% |
+
+## 🤝 Contributing
+
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Write tests
-5. Submit a pull request
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
----
+## 📄 License
 
-## Security & Compliance
-
-### Security Measures
-- Multi-signature wallet integration
-- Smart contract audits by leading firms
-- Real-time monitoring and alerts
-- Formal verification of critical functions
-
-### Regulatory Compliance
-- **MiCA Framework** compliance
-- **RBI Digital Lending Guidelines (2022)** adherence
-- **FATF Guidance (2021)** implementation
-- Regular compliance audits
-
----
-
-## Disclaimer
-
-LYNQ is a DeFi platform that involves financial risk. Please ensure you understand the risks involved before using our services. This is not financial advice. Always do your own research and consider consulting with financial professionals.
+UNLICENSED - All rights reserved
 
 ---
 
 <div align="center">
-  <p><strong>Built with ❤️ by the LYNQ Team</strong></p>
-  <p>Empowering the future of decentralized finance</p>
+  <p>Built with ❤️ by the LYNQ Team</p>
 </div>

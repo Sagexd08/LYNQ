@@ -1,24 +1,64 @@
 # Dependencies
 node_modules/
-pnpm-lock.yaml
+.pnpm-store/
+.npm/
 
-# Build outputs
+# Production
 dist/
 build/
+out/
 
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# IDE
-.vscode/
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE settings
 .idea/
+.vscode/
 *.swp
 *.swo
-*~
+
+# Framework specific
+.next/
+.nuxt/
+.nest/
+coverage/
+
+# Docker
+docker-compose.override.yml
+
+# Temporary
+tmp/
+temp/
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
 # OS
 .DS_Store
@@ -30,33 +70,92 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Testing
+coverage/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Misc
+.cache/
+*.tgz
+node_modules
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Testing
 coverage/
 .nyc_output/
 
-# Contract artifacts (can be regenerated)
-contracts/ethereum/artifacts/
-contracts/ethereum/cache/
-contracts/ethereum/typechain/
+# TypeScript
+*.tsbuildinfo
 
-# Flow
-flow.json
-contracts/deployments/
+# Vite
+.vite/
 
-# Prisma
-backend/prisma/migrations/
+# Turbo
+.turbo/
+
+# Cache
+.cache/
+.eslintcache
+.stylelintcache
+
+# Debug
+debug/
+*.debug
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.temp
 
-# Backend
-backend/.env
-backend/dist/
+# Misc
+*.pem
+*.key
+.vercel
 
-# Docker
-docker-compose.override.yml
+# Package locks (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
