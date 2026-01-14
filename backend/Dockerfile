@@ -18,10 +18,18 @@ RUN if [ -f "pnpm-lock.yaml" ]; then \
 
 COPY . .
 
+# Generate Prisma client BEFORE building (TypeScript needs it)
 RUN if [ -f "pnpm-lock.yaml" ]; then \
-      pnpm run build && pnpm exec prisma generate; \
+      pnpm exec prisma generate; \
     else \
-      npm run build && npx prisma generate; \
+      npx prisma generate; \
+    fi
+
+# Now build the application
+RUN if [ -f "pnpm-lock.yaml" ]; then \
+      pnpm run build; \
+    else \
+      npm run build; \
     fi
 
 FROM node:24-alpine AS runner
