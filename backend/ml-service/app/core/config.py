@@ -49,3 +49,13 @@ class Settings(BaseSettings):
     def has_explicit_credentials(self) -> bool:
         """Check if explicit AWS credentials are configured"""
         return bool(self.AWS_ACCESS_KEY_ID and self.AWS_SECRET_ACCESS_KEY)
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    """Get cached settings instance"""
+    return Settings()
+
+
+# Create a global settings instance
+settings = get_settings()
