@@ -5,9 +5,9 @@ import { TelegramController } from './telegram.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-    imports: [ConfigModule, PrismaModule],
-    controllers: [TelegramController],
-    providers: [TelegramService],
-    exports: [TelegramService],
+  imports: [ConfigModule, PrismaModule],
+  controllers: [TelegramController],
+  providers: [TelegramService],
+  exports: [TelegramService],
 })
-export class TelegramModule { }
+export class TelegramModule {}

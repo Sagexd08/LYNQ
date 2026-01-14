@@ -9,5 +9,4 @@ import { ReputationService } from './reputation.service';
   providers: [ReputationService],
   exports: [ReputationService],
 })
-export class ReputationModule { }
-
+export class ReputationModule {}

@@ -12,5 +12,4 @@ import { BlockchainModule } from '../blockchain/blockchain.module';
   providers: [LoansService],
   exports: [LoansService],
 })
-export class LoansModule { }
-
+export class LoansModule {}

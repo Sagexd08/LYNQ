@@ -1,9 +1,14 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigModule as NestConfigModule, ConfigService } from '@nestjs/config';
+import {
+  ConfigModule as NestConfigModule,
+  ConfigService,
+} from '@nestjs/config';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.coerce.number().default(3000),
 
   DATABASE_URL: z.string().url(),
@@ -38,7 +43,9 @@ export function validateEnv(config: Record<string, unknown>): EnvConfig {
   const result = envSchema.safeParse(config);
 
   if (!result.success) {
-    const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('\n');
+    const errors = result.error.issues
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join('\n');
     throw new Error(`Environment validation failed:\n${errors}`);
   }
 
@@ -57,4 +64,4 @@ export function validateEnv(config: Record<string, unknown>): EnvConfig {
   providers: [ConfigService],
   exports: [ConfigService],
 })
-export class ConfigModule { }
+export class ConfigModule {}

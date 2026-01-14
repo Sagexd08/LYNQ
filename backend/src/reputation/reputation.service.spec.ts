@@ -39,7 +39,9 @@ describe('ReputationService', () => {
       reputationEvent: {
         findMany: jest.fn(),
       },
-      $transaction: jest.fn((callback: (tx: any) => Promise<any>) => callback(mockTx)),
+      $transaction: jest.fn((callback: (tx: any) => Promise<any>) =>
+        callback(mockTx),
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -62,7 +64,11 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.EARLY, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.EARLY,
+        0,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -71,7 +77,7 @@ describe('ReputationService', () => {
             cleanCycleCount: 1,
             consecutiveLateCount: 0,
           }),
-        })
+        }),
       );
       expect(mockTx.reputationEvent.create).toHaveBeenCalled();
     });
@@ -81,7 +87,11 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.ON_TIME, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.ON_TIME,
+        0,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -89,7 +99,7 @@ describe('ReputationService', () => {
             score: 60,
             cleanCycleCount: 1,
           }),
-        })
+        }),
       );
     });
 
@@ -97,14 +107,18 @@ describe('ReputationService', () => {
       mockTx.reputation.findUnique.mockResolvedValue({ ...mockReputation });
       mockTx.reputation.update.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.PARTIAL, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.PARTIAL,
+        0,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             score: 50,
           }),
-        })
+        }),
       );
       expect(mockTx.reputationEvent.create).not.toHaveBeenCalled();
     });
@@ -114,7 +128,11 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.LATE, 1);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.LATE,
+        1,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -123,7 +141,7 @@ describe('ReputationService', () => {
             consecutiveLateCount: 1,
             cleanCycleCount: 0,
           }),
-        })
+        }),
       );
     });
 
@@ -137,7 +155,11 @@ describe('ReputationService', () => {
       mockTx.user.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      const result = await service.applyRepaymentOutcome('user-1', RepaymentClassification.LATE, 1);
+      const result = await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.LATE,
+        1,
+      );
 
       expect(result.blocked).toBe(true);
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
@@ -147,12 +169,12 @@ describe('ReputationService', () => {
             consecutiveLateCount: 2,
             maxScoreBeforeLastPenalty: 50,
           }),
-        })
+        }),
       );
       expect(mockTx.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { status: 'blocked' },
-        })
+        }),
       );
     });
 
@@ -165,7 +187,11 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.ON_TIME, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.ON_TIME,
+        0,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -173,7 +199,7 @@ describe('ReputationService', () => {
             consecutiveLateCount: 0,
             cleanCycleCount: 1,
           }),
-        })
+        }),
       );
     });
 
@@ -188,7 +214,11 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.EARLY, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.EARLY,
+        0,
+      );
 
       const updateCall = mockTx.reputation.update.mock.calls[0][0];
       expect(updateCall.data.score).toBeLessThanOrEqual(55);
@@ -203,14 +233,18 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.EARLY, 0);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.EARLY,
+        0,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             score: 100,
           }),
-        })
+        }),
       );
     });
 
@@ -223,14 +257,18 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.LATE, 1);
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.LATE,
+        1,
+      );
 
       expect(mockTx.reputation.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             score: 0,
           }),
-        })
+        }),
       );
     });
 
@@ -239,14 +277,19 @@ describe('ReputationService', () => {
       mockTx.reputation.update.mockResolvedValue({});
       mockTx.reputationEvent.create.mockResolvedValue({});
 
-      await service.applyRepaymentOutcome('user-1', RepaymentClassification.EARLY, 0, 'loan-123');
+      await service.applyRepaymentOutcome(
+        'user-1',
+        RepaymentClassification.EARLY,
+        0,
+        'loan-123',
+      );
 
       expect(mockTx.reputationEvent.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             loanId: 'loan-123',
           }),
-        })
+        }),
       );
     });
   });

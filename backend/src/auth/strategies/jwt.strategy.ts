@@ -6,26 +6,26 @@ import { AuthService, JwtPayload } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        private readonly configService: ConfigService,
-        private readonly authService: AuthService,
-    ) {
-        const secret = configService.get<string>('JWT_SECRET');
-        if (!secret) {
-            throw new Error('JWT_SECRET is not defined');
-        }
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: secret,
-        });
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {
+    const secret = configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET is not defined');
     }
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: secret,
+    });
+  }
 
-    async validate(payload: JwtPayload) {
-        try {
-            return await this.authService.validateJwtPayload(payload);
-        } catch {
-            throw new UnauthorizedException('Invalid token');
-        }
+  async validate(payload: JwtPayload) {
+    try {
+      return await this.authService.validateJwtPayload(payload);
+    } catch {
+      throw new UnauthorizedException('Invalid token');
     }
+  }
 }

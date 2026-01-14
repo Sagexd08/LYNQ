@@ -4,9 +4,9 @@ import { CollateralController } from './collateral.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-    imports: [PrismaModule],
-    controllers: [CollateralController],
-    providers: [CollateralService],
-    exports: [CollateralService],
+  imports: [PrismaModule],
+  controllers: [CollateralController],
+  providers: [CollateralService],
+  exports: [CollateralService],
 })
-export class CollateralModule { }
+export class CollateralModule {}

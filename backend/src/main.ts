@@ -8,7 +8,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const corsOrigin = process.env.CORS_ORIGIN;
   app.enableCors({
-    origin: corsOrigin === '*' ? '*' : corsOrigin?.split(',').map(o => o.trim()) || '*',
+    origin:
+      corsOrigin === '*'
+        ? '*'
+        : corsOrigin?.split(',').map((o) => o.trim()) || '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-KEY'],
     credentials: true,
@@ -31,7 +34,8 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('LYNQ API')
-    .setDescription(`
+    .setDescription(
+      `
 # LYNQ - Multi-chain DeFi Lending Platform
 
 LYNQ is a decentralized lending platform with AI-powered risk assessment.
@@ -54,7 +58,8 @@ Most endpoints require JWT authentication. Obtain a token through the wallet aut
 API requests are rate-limited. Default limits:
 - 100 requests per minute for authenticated users
 - 20 requests per minute for unauthenticated endpoints
-    `)
+    `,
+    )
     .setVersion('1.0.0')
     .addBearerAuth(
       {
