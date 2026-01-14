@@ -199,9 +199,8 @@ export class LoansService {
             throw new BadRequestException('Blockchain connection required for loan activation');
         }
 
-        // Lock collateral in DB and activate loan on-chain within error handling
-        // This ensures we can rollback collateral lock if on-chain activation fails
         let activationTxHash: string | null = null;
+        let collateralLocked = false;
         
         try {
             // Lock collateral in DB (after on-chain verification)
@@ -213,6 +212,7 @@ export class LoansService {
                 chainId: collateralData.chainId,
                 txHash: collateralData.txHash,
             }, loan.userId);
+            collateralLocked = true;
 
             // Activate loan on-chain
             if (loan.onChainLoanId) {
@@ -221,14 +221,24 @@ export class LoansService {
             }
         } catch (error) {
             // If activation fails, unlock collateral to maintain consistency
-            try {
-                await this.collateralService.unlockCollateral({ loanId }, loan.userId);
-                this.logger.warn(`Collateral unlocked due to activation failure for loan ${loanId}`);
-            } catch (unlockError) {
-                const unlockErrorMessage = unlockError instanceof Error ? unlockError.message : String(unlockError);
-                this.logger.error(
-                    `Failed to unlock collateral after activation failure for loan ${loanId}: ${unlockErrorMessage}`
-                );
+            if (collateralLocked) {
+                try {
+                    await this.collateralService.unlockCollateral({ loanId }, loan.userId);
+                    this.logger.warn(`Collateral unlocked due to activation failure for loan ${loanId}`);
+                } catch (unlockError) {
+                    const unlockErrorMessage = unlockError instanceof Error ? unlockError.message : String(unlockError);
+                    this.logger.error(
+                        `CRITICAL: Failed to unlock collateral after activation failure for loan ${loanId}: ${unlockErrorMessage}. ` +
+                        `Manual intervention required - collateral is locked but loan activation failed.`
+                    );
+                    // Throw a specific error that indicates collateral is stuck
+                    const activationErrorMessage = error instanceof Error ? error.message : String(error);
+                    throw new BadRequestException(
+                        `Loan activation failed and collateral unlock also failed. ` +
+                        `Loan ID: ${loanId}. Activation error: ${activationErrorMessage}. ` +
+                        `Unlock error: ${unlockErrorMessage}. Manual intervention required.`
+                    );
+                }
             }
             
             const errorMessage = error instanceof Error ? error.message : String(error);
