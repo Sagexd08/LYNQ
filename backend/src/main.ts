@@ -6,38 +6,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
-
-  // CORS Configuration - Update CORS_ORIGIN in .env for production
   const corsOrigin = process.env.CORS_ORIGIN;
-  const corsAllowlist = corsOrigin
-    ? corsOrigin.split(',').map(o => o.trim()).filter(o => o.length > 0)
-    : [];
-  const isWildcard = corsOrigin === '*';
-  const credentials = !isWildcard; // Never use credentials with wildcard
-
   app.enableCors({
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      // If wildcard is set and credentials is false, allow any origin
-      if (isWildcard && !credentials) {
-        return callback(null, true);
-      }
-
-      // Check against allowlist
-      if (corsAllowlist.includes(origin)) {
-        return callback(null, origin);
-      }
-
-      // Origin not allowed
-      callback(new Error('Not allowed by CORS'), false);
-    },
+    origin: corsOrigin === '*' ? '*' : corsOrigin?.split(',').map(o => o.trim()) || '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-KEY'],
-    credentials: credentials,
+    credentials: true,
   });
 
   app.useGlobalPipes(
