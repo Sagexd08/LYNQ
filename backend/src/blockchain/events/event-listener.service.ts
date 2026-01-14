@@ -4,18 +4,14 @@ import { ethers, JsonRpcProvider, Contract } from 'ethers';
 import { PrismaService } from '../../prisma/prisma.service';
 
 const LOAN_CORE_ABI = [
-    "event LoanCreated(bytes32 indexed loanId, address indexed borrower, uint256 amount, uint256 interestRate, uint256 termDays, uint256 dueDate)",
-    "event LoanActivated(bytes32 indexed loanId, uint256 timestamp)",
-    "event LoanRepayment(bytes32 indexed loanId, address indexed borrower, uint256 amount, uint256 totalRepaid, bool isFullyRepaid)",
-    "event LoanRepaid(bytes32 indexed loanId, uint256 timestamp)",
-    "event LoanDefaulted(bytes32 indexed loanId, uint256 timestamp)",
-    "event LoanLiquidated(bytes32 indexed loanId, uint256 timestamp)"
+    "event LoanCreated(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 collateralAmount)",
+    "event LoanRepaid(uint256 indexed loanId, uint256 amount)",
+    "event LoanLiquidated(uint256 indexed loanId)"
 ];
 
 const COLLATERAL_VAULT_ABI = [
-    "event CollateralLocked(bytes32 indexed loanId, address indexed depositor, address indexed token, uint256 amount, uint256 index)",
-    "event CollateralUnlocked(bytes32 indexed loanId, address indexed recipient, address indexed token, uint256 amount)",
-    "event CollateralSeized(bytes32 indexed loanId, address indexed token, uint256 amount, address recipient)"
+    "event CollateralLocked(uint256 indexed collateralId, address indexed owner, address token, uint256 amount, uint256 loanId)",
+    "event CollateralUnlocked(uint256 indexed collateralId)"
 ];
 
 @Injectable()
@@ -81,33 +77,30 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
     private setupLoanCoreListeners() {
         this.loanCoreContract.on(
             'LoanCreated',
-            async (loanId, borrower, amount, interestRate, termDays, dueDate, event) => {
+            async (loanId, borrower, amount, collateralAmount, event) => {
                 await this.handleLoanCreated({
-                    loanId,
+                    loanId: loanId.toString(),
                     borrower,
                     amount: amount.toString(),
-                    interestRate: Number(interestRate),
-                    termDays: Number(termDays),
-                    dueDate: Number(dueDate),
+                    collateralAmount: collateralAmount.toString(),
                     transactionHash: event.log.transactionHash,
                     blockNumber: event.log.blockNumber,
                 });
             },
         );
 
-        this.loanCoreContract.on('LoanRepaid', async (loanId, timestamp, event) => {
+        this.loanCoreContract.on('LoanRepaid', async (loanId, amount, event) => {
             await this.handleLoanRepaid({
-                loanId,
-                timestamp: Number(timestamp),
+                loanId: loanId.toString(),
+                amount: amount.toString(),
                 transactionHash: event.log.transactionHash,
                 blockNumber: event.log.blockNumber,
             });
         });
 
-        this.loanCoreContract.on('LoanDefaulted', async (loanId, timestamp, event) => {
-            await this.handleLoanDefaulted({
-                loanId,
-                timestamp: Number(timestamp),
+        this.loanCoreContract.on('LoanLiquidated', async (loanId, event) => {
+            await this.handleLoanLiquidated({
+                loanId: loanId.toString(),
                 transactionHash: event.log.transactionHash,
                 blockNumber: event.log.blockNumber,
             });
@@ -117,13 +110,13 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
     private setupCollateralVaultListeners() {
         this.collateralVaultContract.on(
             'CollateralLocked',
-            async (loanId, depositor, token, amount, index, event) => {
+            async (collateralId, owner, token, amount, loanId, event) => {
                 await this.handleCollateralLocked({
-                    loanId,
-                    depositor,
+                    collateralId: collateralId.toString(),
+                    loanId: loanId.toString(),
+                    owner,
                     token,
                     amount: amount.toString(),
-                    index: Number(index),
                     transactionHash: event.log.transactionHash,
                     blockNumber: event.log.blockNumber,
                 });
@@ -131,13 +124,10 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
         );
 
         this.collateralVaultContract.on(
-            'CollateralSeized',
-            async (loanId, token, amount, recipient, event) => {
-                await this.handleCollateralSeized({
-                    loanId,
-                    token,
-                    amount: amount.toString(),
-                    recipient,
+            'CollateralUnlocked',
+            async (collateralId, event) => {
+                await this.handleCollateralUnlocked({
+                    collateralId: collateralId.toString(),
                     transactionHash: event.log.transactionHash,
                     blockNumber: event.log.blockNumber,
                 });
@@ -189,29 +179,43 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
                 where: { onChainLoanId: data.loanId },
             });
 
-            if (loan && loan.status !== 'REPAID') {
-                await this.prisma.loan.update({
-                    where: { id: loan.id },
-                    data: {
-                        status: 'REPAID',
-                        repaidDate: new Date(data.timestamp * 1000),
-                        outstandingAmount: 0,
-                    },
-                });
-                this.logger.log(`Synced loan ${loan.id} status to REPAID from on-chain event`);
+            if (loan) {
+                // Update outstanding amount and status if fully repaid
+                const updateData: any = {};
+                if (data.amount && loan.outstandingAmount) {
+                    const repaidAmount = BigInt(data.amount);
+                    const currentOutstanding = BigInt(loan.outstandingAmount);
+                    const newOutstanding = currentOutstanding > repaidAmount 
+                        ? (currentOutstanding - repaidAmount).toString() 
+                        : '0';
+                    updateData.outstandingAmount = newOutstanding;
+                    
+                    if (newOutstanding === '0') {
+                        updateData.status = 'REPAID';
+                        updateData.repaidDate = new Date();
+                    }
+                }
+                
+                if (Object.keys(updateData).length > 0) {
+                    await this.prisma.loan.update({
+                        where: { id: loan.id },
+                        data: updateData,
+                    });
+                    this.logger.log(`Synced loan ${loan.id} repayment from on-chain event`);
+                }
             }
         } catch (error) {
             this.logger.error(`Error syncing LoanRepaid event: ${error.message}`);
         }
     }
 
-    private async handleLoanDefaulted(data: any) {
-        this.logger.log(`LoanDefaulted event: ${data.loanId}`);
+    private async handleLoanLiquidated(data: any) {
+        this.logger.log(`LoanLiquidated event: ${data.loanId}`);
 
         await this.saveBlockchainEvent({
             chainId: await this.getChainId(),
             contractAddress: await this.loanCoreContract.getAddress(),
-            eventName: 'LoanDefaulted',
+            eventName: 'LoanLiquidated',
             transactionHash: data.transactionHash,
             blockNumber: data.blockNumber,
             logIndex: 0,
@@ -223,18 +227,18 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
                 where: { onChainLoanId: data.loanId },
             });
 
-            if (loan && loan.status !== 'DEFAULTED') {
+            if (loan && loan.status !== 'LIQUIDATED') {
                 await this.prisma.loan.update({
                     where: { id: loan.id },
                     data: {
-                        status: 'DEFAULTED',
-                        defaultedAt: new Date(data.timestamp * 1000),
+                        status: 'LIQUIDATED',
+                        defaultedAt: new Date(),
                     },
                 });
-                this.logger.log(`Synced loan ${loan.id} status to DEFAULTED from on-chain event`);
+                this.logger.log(`Synced loan ${loan.id} status to LIQUIDATED from on-chain event`);
             }
         } catch (error) {
-            this.logger.error(`Error syncing LoanDefaulted event: ${error.message}`);
+            this.logger.error(`Error syncing LoanLiquidated event: ${error.message}`);
         }
     }
 
@@ -252,13 +256,13 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
-    private async handleCollateralSeized(data: any) {
-        this.logger.log(`CollateralSeized event: ${data.loanId}`);
+    private async handleCollateralUnlocked(data: any) {
+        this.logger.log(`CollateralUnlocked event: ${data.collateralId}`);
 
         await this.saveBlockchainEvent({
             chainId: await this.getChainId(),
             contractAddress: await this.collateralVaultContract.getAddress(),
-            eventName: 'CollateralSeized',
+            eventName: 'CollateralUnlocked',
             transactionHash: data.transactionHash,
             blockNumber: data.blockNumber,
             logIndex: 0,
