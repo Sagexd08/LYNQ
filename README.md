@@ -1302,28 +1302,6 @@ Yes! Our platform is fully mobile-responsive and works with:
 
 </details>
 
----
-
-## 🗺️ Community & Social
-
-<div align="center">
-
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/lynq)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow%20Us-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/LYNQProtocol)
-[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/LYNQProtocol)
-[![Medium](https://img.shields.io/badge/Medium-Read%20Blog-000000?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@LYNQProtocol)
-
-### 📢 Stay Updated
-
-🔔 **Newsletter**: Subscribe for weekly updates  
-📖 **Blog**: Read our latest research and insights  
-🎥 **YouTube**: Watch tutorials and demos  
-📣 **Announcements**: Follow for important updates
-
-</div>
-
----
-
 ## 🙏 Acknowledgments
 
 Built with amazing open-source projects:
