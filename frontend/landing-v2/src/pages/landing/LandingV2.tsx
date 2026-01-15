@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
+import { LoadingPage } from '@/components/shared/LoadingPage';
 import { HomeSection } from '@/components/landing/HomeSection';
 import { ProductIntroSection } from '@/components/landing/ProductIntroSection';
 import { CoreLoopSection } from '@/components/landing/CoreLoopSection';
@@ -13,6 +15,21 @@ import { UserPersonasSection } from '@/components/landing/UserPersonasSection';
 import { CTASection } from '@/components/landing/CTASection';
 
 export default function LandingV2() {
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		// Hide loading page after 3 seconds
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 3000);
+
+		return () => clearTimeout(timer);
+	}, []);
+
+	if (isLoading) {
+		return <LoadingPage />;
+	}
+
 	return (
 		<div className="bg-black text-white min-h-screen antialiased">
 			<Header />
@@ -22,6 +39,9 @@ export default function LandingV2() {
 
 				{/* What is LYNQ? */}
 				<ProductIntroSection />
+
+				{/* Why Mantle */}
+				<NetworkSection />
 
 				{/* The Core Loop: Learn -> Build Reputation -> Unlock Lending */}
 				<CoreLoopSection />
@@ -37,9 +57,6 @@ export default function LandingV2() {
 
 				{/* How LYNQ Works: Technical features */}
 				<SystemExplanationSection />
-
-				{/* Why Mantle */}
-				<NetworkSection />
 
 				{/* Security & Trust */}
 				<SecuritySection />
