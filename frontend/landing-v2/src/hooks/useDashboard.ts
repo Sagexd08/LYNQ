@@ -116,7 +116,7 @@ export function useProtocolStats() {
 export function useRecentLoans(limit: number = 5) {
     const [loans, setLoans] = useState<Loan[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
 
     const fetchLoans = useCallback(async () => {
         setIsLoading(true);

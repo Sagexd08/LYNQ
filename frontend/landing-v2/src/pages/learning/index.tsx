@@ -7,13 +7,13 @@ import {
   XCircle,
   Award,
   ArrowRight,
-  ArrowLeft,
+
   PlayCircle,
   RotateCcw,
-  DollarSign,
+
   AlertCircle,
   BookOpen,
-  Clock,
+
   ChevronRight,
   ChevronLeft, // Added ChevronLeft import
 } from 'lucide-react';
@@ -23,7 +23,7 @@ import { Footer } from '@/components/shared/Footer';
 import { LESSONS } from '@/data/lessons';
 import { useLearningStore, useSandboxStore } from '@/store/useStore';
 
-function LearningPage() {
+export default function LearningPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Infrastructure Background */}
@@ -629,23 +629,4 @@ function ProgressTracker() {
   );
 }
 
-export default function LearningPage() {
-  return (
-    <div className="bg-black text-white min-h-screen relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="fixed inset-0 z-0 opacity-30 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-600/20 blur-[100px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-600/20 blur-[100px] rounded-full" />
-      </div>
 
-      <Header />
-      <div className="relative z-10">
-        <LearningHero />
-        <LessonSlides />
-        <Sandbox />
-        <ProgressTracker />
-        <Footer />
-      </div>
-    </div>
-  );
-}
