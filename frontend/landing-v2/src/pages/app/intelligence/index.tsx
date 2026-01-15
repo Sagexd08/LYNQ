@@ -142,7 +142,7 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
     return (
         <div className="space-y-6">
             {/* Current Score */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <Panel title="Current Credit Score" isLoading={isLoading}>
                     <div className="flex items-center justify-center py-6">
                         <ScoreDisplay score={score} maxScore={1000} label="LYNQ Score" size="lg" />
@@ -153,8 +153,8 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                     </div>
                 </Panel>
 
-                <Panel title="Factor Breakdown" className="col-span-2" isLoading={isLoading}>
-                    <div className="grid grid-cols-2 gap-4">
+                <Panel title="Factor Breakdown" className="lg:col-span-2" isLoading={isLoading}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {creditFactors.map((factor) => (
                             <div key={factor.name} className="space-y-1">
                                 <div className="flex justify-between text-sm">
@@ -164,7 +164,7 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                                 <RiskBar value={factor.impact} max={100} size="sm" showValue={false} />
                                 <div className="flex justify-between text-xs">
                                     <span className="text-gray-600">{factor.description}</span>
-                                    <span className={factor.trend === 'up' ? 'text-green-400' : factor.trend === 'down' ? 'text-red-400' : 'text-gray-500'}>
+                                    <span className={factor.trend === 'up' ? 'text-emerald-400' : factor.trend === 'down' ? 'text-rose-400' : 'text-gray-500'}>
                                         {factor.trend === 'up' ? '↑' : factor.trend === 'down' ? '↓' : '→'} {factor.change}
                                     </span>
                                 </div>
@@ -180,7 +180,7 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                     {scoreHistory.map((point, i) => (
                         <div key={i} className="flex flex-col items-center gap-1 flex-1">
                             <div
-                                className="w-full bg-gradient-to-t from-cyan-500/30 to-cyan-500/10 rounded-t hover:from-cyan-500/50 hover:to-cyan-500/20 transition-colors cursor-pointer"
+                                className="w-full bg-gradient-to-t from-primary-500/30 to-primary-500/10 rounded-t hover:from-primary-500/50 hover:to-primary-500/20 transition-colors cursor-pointer"
                                 style={{ height: `${(point.score / 1000) * 180}px` }}
                                 title={`Day ${point.date}: ${Math.round(point.score)}`}
                             />
@@ -192,12 +192,12 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
 
             {/* What-if Simulator */}
             <Panel title="What-If Simulator">
-                <div className="grid grid-cols-4 gap-6">
-                    <div className="col-span-3 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div className="lg:col-span-3 space-y-6">
                         <div>
                             <div className="flex justify-between text-sm mb-2">
                                 <span className="text-gray-400">Loan Amount</span>
-                                <span className="font-mono text-cyan-400">${loanAmount.toLocaleString()}</span>
+                                <span className="font-mono text-primary-400">${loanAmount.toLocaleString()}</span>
                             </div>
                             <input
                                 type="range"
@@ -206,13 +206,13 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                                 step="1000"
                                 value={loanAmount}
                                 onChange={(e) => setLoanAmount(Number(e.target.value))}
-                                className="w-full h-2 bg-[#1a1a1f] rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                className="w-full h-2 bg-surface-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>
                         <div>
                             <div className="flex justify-between text-sm mb-2">
                                 <span className="text-gray-400">Collateral Value</span>
-                                <span className="font-mono text-cyan-400">${collateral.toLocaleString()}</span>
+                                <span className="font-mono text-primary-400">${collateral.toLocaleString()}</span>
                             </div>
                             <input
                                 type="range"
@@ -221,13 +221,13 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                                 step="1000"
                                 value={collateral}
                                 onChange={(e) => setCollateral(Number(e.target.value))}
-                                className="w-full h-2 bg-[#1a1a1f] rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                className="w-full h-2 bg-surface-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>
                         <div>
                             <div className="flex justify-between text-sm mb-2">
                                 <span className="text-gray-400">Term (Months)</span>
-                                <span className="font-mono text-cyan-400">{term} months</span>
+                                <span className="font-mono text-primary-400">{term} months</span>
                             </div>
                             <input
                                 type="range"
@@ -235,29 +235,29 @@ function CreditEngineTab({ isLoading }: { isLoading: boolean }) {
                                 max="24"
                                 value={term}
                                 onChange={(e) => setTerm(Number(e.target.value))}
-                                className="w-full h-2 bg-[#1a1a1f] rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                className="w-full h-2 bg-surface-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>
                         <button
                             onClick={handleSimulate}
                             disabled={evaluating}
-                            className="w-full py-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-2.5 bg-primary-500/10 border border-primary-500/30 rounded-lg text-primary-400 hover:bg-primary-500/20 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {evaluating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                             {evaluating ? 'Calculating...' : 'Run Simulation'}
                         </button>
                     </div>
-                    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-[#111114] to-[#0a0a0c] rounded-lg p-4 border border-[#1f1f25]">
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-surface-100/50 to-surface-50/50 rounded-xl p-4 border border-white/5 shadow-sm">
                         <span className="text-xs text-gray-500 mb-2">Projected Rate</span>
-                        <span className="text-3xl font-mono font-bold text-cyan-400">
+                        <span className="text-3xl font-mono font-bold text-primary-400">
                             {riskData?.interestRate?.toFixed(1) || (8 + (loanAmount / collateral) * 5 - term * 0.1).toFixed(1)}%
                         </span>
                         <span className="text-xs text-gray-600 mt-2">APR</span>
                         {riskData && (
                             <div className="mt-4 text-center">
                                 <span className="text-xs text-gray-500">Risk Level</span>
-                                <div className={`text-sm font-medium ${riskData.riskLevel === 'VERY_LOW' || riskData.riskLevel === 'LOW' ? 'text-green-400' :
-                                    riskData.riskLevel === 'MEDIUM' ? 'text-amber-400' : 'text-red-400'
+                                <div className={`text-sm font-medium ${riskData.riskLevel === 'VERY_LOW' || riskData.riskLevel === 'LOW' ? 'text-emerald-400' :
+                                    riskData.riskLevel === 'MEDIUM' ? 'text-amber-400' : 'text-rose-400'
                                     }`}>
                                     {riskData.riskLevel}
                                 </div>
@@ -284,7 +284,7 @@ function FraudDetectionTab({ isLoading }: { isLoading: boolean }) {
         <div className="space-y-6">
             <MetricRow columns={4}>
                 <MetricCard label="Fraud Score" value="0.02" subValue="/1.0" variant="highlight" isLoading={isLoading} />
-                <MetricCard label="Risk Flags" value="0" variant="highlight" icon={<CheckCircle className="w-4 h-4 text-green-400" />} isLoading={isLoading} />
+                <MetricCard label="Risk Flags" value="0" variant="highlight" icon={<CheckCircle className="w-4 h-4 text-emerald-400" />} isLoading={isLoading} />
                 <MetricCard label="Suspicious Patterns" value="None" isLoading={isLoading} />
                 <MetricCard label="Last Check" value="2m ago" icon={<Activity className="w-4 h-4" />} isLoading={isLoading} />
             </MetricRow>
@@ -298,17 +298,17 @@ function FraudDetectionTab({ isLoading }: { isLoading: boolean }) {
             </Panel>
 
             <Panel title="Detection Factors" isLoading={isLoading}>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {fraudFactors.map((factor) => (
                         <Card key={factor.name}>
                             <div className="flex items-start justify-between mb-2">
                                 <span className="text-sm text-gray-400">{factor.name}</span>
                                 {factor.status === 'clear' ? (
-                                    <CheckCircle className="w-4 h-4 text-green-400" />
+                                    <CheckCircle className="w-4 h-4 text-emerald-400" />
                                 ) : factor.status === 'warning' ? (
                                     <AlertTriangle className="w-4 h-4 text-amber-400" />
                                 ) : (
-                                    <XCircle className="w-4 h-4 text-red-400" />
+                                    <XCircle className="w-4 h-4 text-rose-400" />
                                 )}
                             </div>
                             <p className="text-xs text-gray-600">{factor.description}</p>
@@ -347,7 +347,7 @@ function EnsembleModelsTab({ isLoading }: { isLoading: boolean }) {
                 />
             </Panel>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Panel title="Agreement Matrix" isLoading={isLoading}>
                     <div className="grid grid-cols-5 gap-1 font-mono text-xs">
                         <div className="p-2" />
@@ -360,8 +360,8 @@ function EnsembleModelsTab({ isLoading }: { isLoading: boolean }) {
                                 {row.map((val, j) => (
                                     <div
                                         key={`${i}-${j}`}
-                                        className={`p-2 text-center rounded ${val >= 0.9 ? 'bg-green-500/20 text-green-400' :
-                                            val >= 0.7 ? 'bg-cyan-500/20 text-cyan-400' :
+                                        className={`p-2 text-center rounded ${val >= 0.9 ? 'bg-emerald-500/20 text-emerald-400' :
+                                            val >= 0.7 ? 'bg-primary-500/20 text-primary-400' :
                                                 'bg-amber-500/20 text-amber-400'
                                             }`}
                                     >
@@ -374,7 +374,7 @@ function EnsembleModelsTab({ isLoading }: { isLoading: boolean }) {
                 </Panel>
 
                 <Panel title="Model Confidence" isLoading={isLoading}>
-                    <div className="flex items-center justify-around py-4">
+                    <div className="flex items-center justify-around py-4 flex-wrap gap-4">
                         <ConfidenceMeter value={0.94} label="XGBoost" />
                         <ConfidenceMeter value={0.89} label="Random Forest" />
                         <ConfidenceMeter value={0.87} label="Neural Net" />
@@ -428,7 +428,7 @@ function PredictiveAnalyticsTab({ intelligenceData, isLoading }: { intelligenceD
                     label="Market Outlook"
                     value="Bullish"
                     subValue="72% confidence"
-                    icon={<TrendingUp className="w-4 h-4 text-green-400" />}
+                    icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
                     isLoading={isLoading}
                 />
             </MetricRow>
@@ -436,25 +436,25 @@ function PredictiveAnalyticsTab({ intelligenceData, isLoading }: { intelligenceD
             {/* Insights Section */}
             {intelligenceData?.insights && intelligenceData.insights.length > 0 && (
                 <Panel title="AI Insights" isLoading={isLoading}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {intelligenceData.insights.map((insight: any) => (
                             <Card key={insight.id}>
                                 <div className="flex items-start gap-3">
-                                    <div className={`p-2 rounded ${insight.type === 'opportunity' ? 'bg-green-500/10' :
-                                        insight.type === 'warning' ? 'bg-amber-500/10' : 'bg-cyan-500/10'
+                                    <div className={`p-2 rounded ${insight.type === 'opportunity' ? 'bg-emerald-500/10' :
+                                        insight.type === 'warning' ? 'bg-amber-500/10' : 'bg-primary-500/10'
                                         }`}>
                                         {insight.type === 'opportunity' ? (
-                                            <Lightbulb className="w-4 h-4 text-green-400" />
+                                            <Lightbulb className="w-4 h-4 text-emerald-400" />
                                         ) : insight.type === 'warning' ? (
                                             <AlertTriangle className="w-4 h-4 text-amber-400" />
                                         ) : (
-                                            <Target className="w-4 h-4 text-cyan-400" />
+                                            <Target className="w-4 h-4 text-primary-400" />
                                         )}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-gray-300">{insight.title}</span>
-                                            <span className={`text-xs px-2 py-0.5 rounded ${insight.impact === 'high' ? 'bg-red-500/10 text-red-400' :
+                                            <span className={`text-xs px-2 py-0.5 rounded ${insight.impact === 'high' ? 'bg-rose-500/10 text-rose-400' :
                                                 insight.impact === 'medium' ? 'bg-amber-500/10 text-amber-400' :
                                                     'bg-gray-500/10 text-gray-400'
                                                 }`}>
@@ -463,7 +463,7 @@ function PredictiveAnalyticsTab({ intelligenceData, isLoading }: { intelligenceD
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">{insight.description}</p>
                                         {insight.actionable && (
-                                            <button className="mt-2 text-xs px-3 py-1 bg-[#111114] border border-[#1f1f25] rounded hover:border-cyan-500/30 text-gray-400 hover:text-cyan-400 transition-colors">
+                                            <button className="mt-2 text-xs px-3 py-1 bg-surface-100/50 border border-white/10 rounded hover:border-primary-500/30 text-gray-400 hover:text-primary-400 transition-colors">
                                                 Take Action
                                             </button>
                                         )}
@@ -475,7 +475,7 @@ function PredictiveAnalyticsTab({ intelligenceData, isLoading }: { intelligenceD
                 </Panel>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Panel title="Default Probability Forecast" isLoading={isLoading}>
                     <div className="h-48 flex items-end justify-between gap-1 px-4">
                         {defaultForecast.map((point, i) => (

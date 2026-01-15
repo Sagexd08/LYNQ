@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AppShell } from '@/components/app/AppShell';
 import { Panel, Card } from '@/components/ui/Section';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,19 +29,19 @@ export default function SettingsPage() {
     return (
         <AppShell>
             <div className="max-w-5xl mx-auto">
-                <div className="flex gap-6">
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar */}
-                    <div className="w-48 flex-shrink-0">
-                        <div className="space-y-1">
+                    <div className="w-full lg:w-48 flex-shrink-0">
+                        <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded transition-colors ${activeTab === tab.id
-                                            ? 'bg-cyan-500/10 text-cyan-400'
-                                            : 'text-gray-500 hover:text-gray-300 hover:bg-[#111114]'
+                                        className={`flex-shrink-0 lg:w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all ${activeTab === tab.id
+                                            ? 'bg-primary-500/10 text-primary-400 shadow-sm border border-primary-500/20'
+                                            : 'text-gray-500 hover:text-gray-200 hover:bg-surface-100/50 border border-transparent'
                                             }`}
                                     >
                                         <Icon className="w-4 h-4" />
@@ -71,10 +71,10 @@ function ProfileTab() {
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
     };
 
@@ -87,9 +87,9 @@ function ProfileTab() {
                         value={profile?.walletAddress || 'Not connected'}
                         action={profile?.walletAddress ? <CopyButton text={profile.walletAddress} /> : null}
                     />
-                    <SettingRow 
-                        label="Account Created" 
-                        value={formatDate(profile?.createdAt)} 
+                    <SettingRow
+                        label="Account Created"
+                        value={formatDate(profile?.createdAt)}
                     />
                     <SettingRow label="Email" value="Not connected" action={
                         <button className="text-xs text-cyan-400 hover:underline">Connect</button>
@@ -281,21 +281,14 @@ function SecurityTab() {
 
 function ConnectionsTab() {
     const { profile } = useAuth();
-    const [connectedServices, setConnectedServices] = useState<Array<{
-        name: string;
-        icon: typeof Bell;
-        description: string;
-        connected: boolean;
-    }>>([]);
+    const [telegramState, setTelegramState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+    const [pairingCode, setPairingCode] = useState('');
 
-    useEffect(() => {
-        // TODO: Fetch connected services from API when endpoint is available
-        setConnectedServices([
-            { name: 'Telegram', icon: Bell, description: 'Receive notifications via Telegram', connected: false },
-            { name: 'Discord', icon: Globe, description: 'Connect your Discord account', connected: false },
-            { name: 'Twitter', icon: Globe, description: 'Link for social verification', connected: false },
-        ]);
-    }, []);
+    const startTelegramConnection = () => {
+        setTelegramState('connecting');
+        // Simulate generating a code
+        setPairingCode(`LYNQ-${Math.floor(1000 + Math.random() * 9000)}`);
+    };
 
     const formatAddress = (address?: string) => {
         if (!address) return 'Not connected';
@@ -310,17 +303,17 @@ function ConnectionsTab() {
                         <Card>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-[#1a1a1f] rounded-full flex items-center justify-center">
-                                        <Wallet className="w-5 h-5 text-cyan-400" />
+                                    <div className="w-10 h-10 bg-surface-100 rounded-full flex items-center justify-center border border-white/5">
+                                        <Wallet className="w-5 h-5 text-primary-400" />
                                     </div>
                                     <div>
-                                        <span className="text-sm text-gray-200">Connected Wallet</span>
+                                        <span className="text-sm text-gray-200 font-medium">Connected Wallet</span>
                                         <p className="text-xs text-gray-500 font-mono">{formatAddress(profile.walletAddress)}</p>
                                     </div>
                                 </div>
-                                <span className="flex items-center gap-1 text-green-400 text-xs">
-                                    <span className="w-2 h-2 bg-green-400 rounded-full" />
-                                    Primary
+                                <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                                    Active
                                 </span>
                             </div>
                         </Card>
@@ -328,43 +321,128 @@ function ConnectionsTab() {
                         <p className="text-sm text-gray-500">No wallet connected</p>
                     )}
                 </div>
-                <button className="mt-4 text-sm px-4 py-2 bg-[#111114] border border-[#1f1f25] rounded hover:border-cyan-500/30 text-gray-400 hover:text-cyan-400 transition-colors">
+                <button className="mt-4 text-sm px-4 py-2 bg-surface-100/50 border border-white/10 rounded-lg hover:border-primary-500/30 text-gray-400 hover:text-primary-400 transition-colors">
                     Connect Another Wallet
                 </button>
             </Panel>
 
-            <Panel title="Connected Services">
-                <div className="space-y-4">
-                    {connectedServices.length > 0 ? (
-                        connectedServices.map((service) => (
-                            <div key={service.name} className="flex items-center justify-between py-2">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${service.connected ? 'bg-cyan-500/10' : 'bg-[#1a1a1f]'
-                                        }`}>
-                                        <service.icon className={`w-5 h-5 ${service.connected ? 'text-cyan-400' : 'text-gray-600'}`} />
-                                    </div>
-                                    <div>
-                                        <span className="text-sm text-gray-200">{service.name}</span>
-                                        <p className="text-xs text-gray-500">{service.description}</p>
-                                    </div>
-                                </div>
-                                {service.connected ? (
-                                    <button className="text-xs text-red-400 hover:underline">Disconnect</button>
-                                ) : (
-                                    <button className="text-xs text-cyan-400 hover:underline">Connect</button>
-                                )}
+            <Panel title="Telegram Integration">
+                {telegramState === 'disconnected' && (
+                    <div className="text-center py-6">
+                        <div className="w-16 h-16 bg-[#229ED9]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#229ED9]/20">
+                            <Bell className="w-8 h-8 text-[#229ED9]" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-200 mb-2">Connect Telegram Bot</h3>
+                        <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+                            Get instant alerts about your loan health, margin calls, and market updates directly in Telegram.
+                        </p>
+                        <button
+                            onClick={startTelegramConnection}
+                            className="bg-[#229ED9] hover:bg-[#1c8bc0] text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[#229ED9]/20"
+                        >
+                            Connect Telegram
+                        </button>
+                    </div>
+                )}
+
+                {telegramState === 'connecting' && (
+                    <div className="bg-surface-50/50 rounded-xl p-6 border border-white/5">
+                        <div className="flex flex-col md:flex-row gap-8 items-center">
+                            <div className="flex-1 space-y-4">
+                                <h4 className="text-base font-medium text-white">Link your account</h4>
+                                <ol className="space-y-3 text-sm text-gray-400">
+                                    <li className="flex gap-3">
+                                        <span className="w-6 h-6 rounded-full bg-surface-100 flex items-center justify-center text-xs border border-white/10">1</span>
+                                        <span>Open the LYNQ Bot on Telegram</span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <span className="w-6 h-6 rounded-full bg-surface-100 flex items-center justify-center text-xs border border-white/10">2</span>
+                                        <span>Click "Start" or type <code className="bg-black/30 px-1 rounded">/start</code></span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <span className="w-6 h-6 rounded-full bg-surface-100 flex items-center justify-center text-xs border border-white/10">3</span>
+                                        <span>Send the code below to the bot</span>
+                                    </li>
+                                </ol>
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-gray-500">No services available</p>
-                    )}
+                            <div className="bg-black/40 p-6 rounded-xl border border-white/10 text-center min-w-[200px]">
+                                <span className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Your Pairing Code</span>
+                                <div className="text-3xl font-mono font-bold text-primary-400 tracking-wider mb-2">{pairingCode}</div>
+                                <p className="text-xs text-gray-600">Expires in 5:00</p>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-white/5">
+                            <button
+                                onClick={() => setTelegramState('disconnected')}
+                                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <a
+                                href="https://t.me/Lynq_bot"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-sm rounded-lg transition-colors font-medium"
+                            >
+                                Open Telegram Bot
+                            </a>
+                        </div>
+                    </div>
+                )}
+
+                {telegramState === 'connected' && (
+                    <div className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-medium text-emerald-400">Telegram Connected</h4>
+                                <p className="text-xs text-emerald-500/70">@username • Active</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setTelegramState('disconnected')}
+                            className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+                        >
+                            Disconnect
+                        </button>
+                    </div>
+                )}
+            </Panel>
+
+            <Panel title="Other Connections">
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center border border-white/5">
+                                <Globe className="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div>
+                                <span className="text-sm text-gray-200">Discord</span>
+                                <p className="text-xs text-gray-500">Connect for community roles</p>
+                            </div>
+                        </div>
+                        <button className="text-xs text-primary-400 hover:text-primary-300 transition-colors">Connect</button>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center border border-white/5">
+                                <Globe className="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div>
+                                <span className="text-sm text-gray-200">X (Twitter)</span>
+                                <p className="text-xs text-gray-500">Link for social verification</p>
+                            </div>
+                        </div>
+                        <button className="text-xs text-primary-400 hover:text-primary-300 transition-colors">Connect</button>
+                    </div>
                 </div>
             </Panel>
         </div>
     );
 }
 
-// Helper Components
 function SettingRow({ label, value, action }: { label: string; value: string; action?: React.ReactNode }) {
     return (
         <div className="flex items-center justify-between py-2">
@@ -384,15 +462,15 @@ function ToggleSetting({ label, description, defaultChecked }: { label: string; 
         <div className="flex items-center justify-between py-2">
             <div>
                 <span className="text-sm text-gray-300">{label}</span>
-                <p className="text-xs text-gray-600">{description}</p>
+                <p className="text-xs text-gray-500">{description}</p>
             </div>
             <button
                 onClick={() => setChecked(!checked)}
-                className={`w-10 h-5 rounded-full transition-colors ${checked ? 'bg-cyan-500' : 'bg-[#1a1a1f]'
+                className={`w-11 h-6 rounded-full transition-colors relative ${checked ? 'bg-primary-500' : 'bg-surface-200'
                     }`}
             >
                 <span
-                    className={`block w-4 h-4 rounded-full bg-white transform transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'
+                    className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'
                         }`}
                 />
             </button>

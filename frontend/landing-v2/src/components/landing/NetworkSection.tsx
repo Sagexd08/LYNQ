@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import Spline from '@splinetool/react-spline';
 
 export function NetworkSection() {
 	const ref = useRef(null);
@@ -15,7 +16,7 @@ export function NetworkSection() {
 
 	return (
 		<section ref={ref} className="py-20 px-6 bg-black">
-			<div className="max-w-4xl mx-auto">
+			<div className="max-w-6xl mx-auto">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -23,6 +24,11 @@ export function NetworkSection() {
 					className="text-center"
 				>
 					<h2 className="text-4xl font-bold text-white mb-8">Why Mantle</h2>
+
+					{/* Spline 3D Scene */}
+					<div className="w-full h-[400px] mb-8 rounded-xl overflow-hidden">
+						<Spline scene="https://prod.spline.design/QXq5yiAIyNxJdTRB/scene.splinecode" />
+					</div>
 
 					<div className="space-y-4">
 						{features.map((feature, idx) => (

@@ -13,7 +13,7 @@ import { BlockchainService } from '../blockchain/blockchain.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { RepayLoanDto } from './dto/repay-loan.dto';
 import { ethers } from 'ethers';
-import { QUEUE_NAMES } from '../queues/queues.module';
+import { QUEUE_NAMES } from '../queues/queue-names.const';
 
 @Injectable()
 export class LoansService {

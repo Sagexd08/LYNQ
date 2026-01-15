@@ -46,9 +46,15 @@ coverage/
 junit.xml
 
 # Smart Contract Artifacts (regenerated on build)
+backend/contracts/artifacts/
+backend/contracts/cache/
+backend/contracts/typechain-types/
 backend/contracts/ethereum/artifacts/
 backend/contracts/ethereum/cache/
 backend/contracts/ethereum/typechain/
+backend/contracts/evm/artifacts/
+backend/contracts/evm/cache/
+backend/contracts/evm/typechain-types/
 backend/contracts/deployments/
 *.tsbuildinfo
 

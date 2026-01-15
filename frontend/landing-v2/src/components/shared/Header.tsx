@@ -22,10 +22,12 @@ export function Header() {
 		>
 			<nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 				<a
+					
 					href="/"
-					className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent"
+					className="flex items-center -my-6"
 				>
-					LYNQ
+					{/* <img src="/LYNQ.png" alt="LYNQ" className="h-20 w-auto" /> */}
+					<img src="/svg.svg" alt="LYNQ" className="h-32 w-auto" />
 				</a>
 
 				<div className="hidden md:flex items-center gap-8">

@@ -31,7 +31,7 @@ interface CardProps {
 export function Card({ children, className = '', onClick, hover = false }: CardProps) {
     return (
         <div
-            className={`bg-[#0d0d0f] border border-[#1f1f25] rounded-lg p-4 ${hover || onClick ? 'hover:border-gray-600 transition-colors cursor-pointer' : ''
+            className={`bg-surface-50/50 backdrop-blur-sm border border-white/5 rounded-xl p-5 ${hover || onClick ? 'hover:border-white/20 hover:bg-surface-100/50 transition-colors cursor-pointer' : ''
                 } ${className}`}
             onClick={onClick}
         >
@@ -51,15 +51,15 @@ interface PanelProps {
 
 export function Panel({ title, children, headerAction, noPadding, className = '', isLoading = false }: PanelProps) {
     return (
-        <div className={`bg-[#0d0d0f] border border-[#1f1f25] rounded-lg overflow-hidden ${className}`}>
-            <div className="flex items-center justify-between px-4 py-3 bg-[#111114] border-b border-[#1f1f25]">
+        <div className={`bg-surface-50/50 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden ${className}`}>
+            <div className="flex items-center justify-between px-5 py-3 bg-surface-100/30 border-b border-white/5">
                 <h3 className="text-sm font-medium text-gray-300">{title}</h3>
                 {headerAction}
             </div>
-            <div className={noPadding ? '' : 'p-4'}>
+            <div className={noPadding ? '' : 'p-5'}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-primary-400 animate-spin" />
                     </div>
                 ) : (
                     children
@@ -79,11 +79,11 @@ export function InlineInspector({ label, value, onClick }: InlineInspectorProps)
     return (
         <button
             onClick={onClick}
-            className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-[#111114] border border-[#1f1f25] rounded hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-colors group"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-surface-100/50 border border-white/5 rounded-lg hover:border-primary-500/30 hover:bg-primary-500/5 transition-colors group"
         >
             <span className="text-gray-500">{label}:</span>
-            <span className="font-mono text-gray-300 group-hover:text-cyan-400">{value}</span>
-            <ChevronRight className="w-3 h-3 text-gray-600 group-hover:text-cyan-400" />
+            <span className="font-mono text-gray-300 group-hover:text-primary-400">{value}</span>
+            <ChevronRight className="w-3 h-3 text-gray-600 group-hover:text-primary-400" />
         </button>
     );
 }

@@ -160,21 +160,21 @@ export default function MarketsPage() {
                 )}
 
                 {/* Market Details Grid */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Top Pools */}
                     <Panel title="Top Performing Pools" isLoading={poolsLoading}>
                         <div className="space-y-3">
                             {topPools.map((pool, index) => (
                                 <div
                                     key={pool.asset}
-                                    className="flex items-center justify-between p-3 bg-[#111114] rounded border border-[#1f1f25] hover:border-[#2a2a32] transition-colors"
+                                    className="flex items-center justify-between p-3 bg-surface-100/30 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
-                                            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-cyan-400">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-primary-500/20 to-accent-purple/20 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
                                                 {pool.asset.slice(0, 2)}
                                             </div>
-                                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0a0a0c] rounded-full flex items-center justify-center text-[10px] font-bold text-amber-400">
+                                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-background rounded-full flex items-center justify-center text-[10px] font-bold text-amber-400">
                                                 {index + 1}
                                             </div>
                                         </div>
@@ -184,7 +184,7 @@ export default function MarketsPage() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className="font-mono text-green-400">{pool.apy}%</span>
+                                        <span className="font-mono text-emerald-400">{pool.apy}%</span>
                                         <span className="text-xs text-gray-600 block">APY</span>
                                     </div>
                                 </div>
@@ -219,7 +219,7 @@ export default function MarketsPage() {
                             {riskDistribution.map((item) => (
                                 <div
                                     key={item.tier}
-                                    className="flex items-center justify-between p-3 bg-[#111114] rounded border border-[#1f1f25]"
+                                    className="flex items-center justify-between p-3 bg-surface-100/30 rounded-lg border border-white/5"
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={`w-3 h-3 rounded-full ${item.color}`} />
@@ -242,23 +242,23 @@ export default function MarketsPage() {
                 <Section title="Market Trends (7 Days)">
                     {trendsLoading ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             {displayTrends.map((trend) => (
                                 <Card key={trend.metric}>
                                     <div className="flex items-start justify-between mb-2">
                                         <span className="text-xs text-gray-500 uppercase tracking-wider">{trend.metric}</span>
                                         {trend.direction === 'up' ? (
-                                            <TrendingUp className="w-4 h-4 text-green-400" />
+                                            <TrendingUp className="w-4 h-4 text-emerald-400" />
                                         ) : (
-                                            <TrendingDown className="w-4 h-4 text-red-400" />
+                                            <TrendingDown className="w-4 h-4 text-rose-400" />
                                         )}
                                     </div>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-2xl font-mono font-semibold text-gray-100">{trend.value}</span>
-                                        <span className={`text-sm ${trend.direction === 'up' ? 'text-green-400' : 'text-red-400'}`}>
+                                        <span className={`text-sm ${trend.direction === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>
                                             {trend.change}
                                         </span>
                                     </div>

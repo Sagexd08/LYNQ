@@ -33,10 +33,20 @@ export class TelegramService implements OnModuleInit {
         }
 
         try {
-            this.bot = new TelegramBot(token, { polling: true });
-            this.setupCommandHandlers();
+            // Use webhook mode in production, polling in development
+            const useWebhook = this.configService.get<string>('NODE_ENV') === 'production';
+            
+            if (useWebhook) {
+                this.bot = new TelegramBot(token, { polling: false });
+                this.setupCommandHandlers();
+                this.logger.log('Telegram bot initialized in webhook mode');
+            } else {
+                this.bot = new TelegramBot(token, { polling: true });
+                this.setupCommandHandlers();
+                this.logger.log('Telegram bot initialized in polling mode');
+            }
+            
             this.isEnabled = true;
-            this.logger.log('Telegram bot initialized successfully');
         } catch (error) {
             this.logger.error(`Failed to initialize Telegram bot: ${error.message}`);
         }
@@ -368,6 +378,17 @@ Need help? Contact support at lynq.support
             [NotificationType.SYSTEM_ALERT]: '🔔',
         };
         return icons[type] || '📢';
+    }
+
+    async processUpdate(update: any) {
+        if (!this.bot) return;
+
+        try {
+            // Process the update manually when using webhook mode
+            this.bot.processUpdate(update);
+        } catch (error) {
+            this.logger.error(`Failed to process update: ${error.message}`);
+        }
     }
 
     private async sendMessage(chatId: string, text: string, options?: TelegramBot.SendMessageOptions) {

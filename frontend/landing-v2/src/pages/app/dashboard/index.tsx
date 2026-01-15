@@ -131,7 +131,7 @@ export default function DashboardPage() {
                     />
                 </MetricRow>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* User Risk Overview */}
                     <Panel title="Your Risk Profile" isLoading={dashboardLoading}>
                         <div className="space-y-4">
@@ -165,10 +165,10 @@ export default function DashboardPage() {
                             <ConfidenceMeter value={modelConfidence?.fraud || 0.78} label="Fraud" />
                             <ConfidenceMeter value={modelConfidence?.default || 0.85} label="Default" />
                         </div>
-                        <div className="mt-4 pt-4 border-t border-[#1f1f25]">
+                        <div className="mt-4 pt-4 border-t border-white/5">
                             <div className="flex items-center justify-between text-xs">
                                 <span className="text-gray-500">Ensemble Agreement</span>
-                                <span className="font-mono text-green-400">
+                                <span className="font-mono text-emerald-400">
                                     {((modelConfidence?.ensembleAgreement || 0.942) * 100).toFixed(1)}%
                                 </span>
                             </div>
@@ -186,21 +186,21 @@ export default function DashboardPage() {
                     {/* Quick Stats */}
                     <Panel title="Protocol Health" isLoading={statsLoading}>
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-[#1f1f25]">
+                            <div className="flex items-center justify-between py-2 border-b border-white/5">
                                 <span className="text-sm text-gray-400">Total Collateral</span>
                                 <span className="font-mono text-gray-200">
                                     {formatCurrency(stats?.totalCollateral || 58400000)}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b border-[#1f1f25]">
+                            <div className="flex items-center justify-between py-2 border-b border-white/5">
                                 <span className="text-sm text-gray-400">Utilization Rate</span>
-                                <span className="font-mono text-cyan-400">
+                                <span className="font-mono text-primary-400">
                                     {formatPercentage(stats?.utilizationRate || 0.673)}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b border-[#1f1f25]">
+                            <div className="flex items-center justify-between py-2 border-b border-white/5">
                                 <span className="text-sm text-gray-400">Avg. APY</span>
-                                <span className="font-mono text-green-400">
+                                <span className="font-mono text-emerald-400">
                                     {formatPercentage(stats?.avgInterestRate || 0.084)}
                                 </span>
                             </div>

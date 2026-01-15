@@ -27,10 +27,10 @@ export function MetricCard({
     isLoading = false,
 }: MetricCardProps) {
     const variantStyles = {
-        default: 'border-[#1f1f25] bg-[#0d0d0f]',
-        highlight: 'border-cyan-500/30 bg-cyan-500/5',
-        warning: 'border-amber-500/30 bg-amber-500/5',
-        danger: 'border-red-500/30 bg-red-500/5',
+        default: 'border-white/5 bg-surface-50/50 backdrop-blur-sm hover:border-white/10',
+        highlight: 'border-primary-500/30 bg-primary-500/5 backdrop-blur-sm',
+        warning: 'border-amber-500/30 bg-amber-500/5 backdrop-blur-sm',
+        danger: 'border-red-500/30 bg-red-500/5 backdrop-blur-sm',
     };
 
     const sizeStyles = {
@@ -52,38 +52,38 @@ export function MetricCard({
     };
 
     const trendColors = {
-        up: 'text-green-400',
-        down: 'text-red-400',
+        up: 'text-emerald-400',
+        down: 'text-rose-400',
         neutral: 'text-gray-500',
     };
 
     return (
         <div
-            className={`border rounded-lg ${variantStyles[variant]} ${sizeStyles[size]} ${onClick ? 'cursor-pointer hover:border-gray-600 transition-colors' : ''
-                } transition-all duration-200`}
+            className={`border rounded-xl ${variantStyles[variant]} ${sizeStyles[size]} ${onClick ? 'cursor-pointer hover:border-white/20 hover:bg-surface-100/50 transition-colors' : ''
+                } transition-all duration-300 ease-out hover:shadow-lg hover:shadow-primary-500/5`}
             onClick={onClick}
         >
             <div className="flex items-start justify-between mb-2">
                 <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">
                     {label}
                 </span>
-                {icon && <span className="text-gray-600">{icon}</span>}
+                {icon && <span className="text-gray-500">{icon}</span>}
             </div>
             {isLoading ? (
                 <div className="flex items-center gap-2 py-2">
-                    <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
-                    <div className="h-6 w-24 bg-[#1a1a1f] rounded animate-pulse" />
+                    <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
+                    <div className="h-6 w-24 bg-white/5 rounded animate-pulse" />
                 </div>
             ) : (
                 <>
                     <div className="flex items-baseline gap-2">
-                        <span className={`${valueSizes[size]} font-mono font-semibold text-gray-100`}>
+                        <span className={`${valueSizes[size]} font-mono font-semibold text-gray-100 tracking-tight`}>
                             {value}
                         </span>
                         {subValue && <span className="text-sm text-gray-500">{subValue}</span>}
                     </div>
                     {trend && trendValue && (
-                        <div className={`flex items-center gap-1 mt-2 text-xs ${trendColors[trend]}`}>
+                        <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trendColors[trend]}`}>
                             {trend && (() => {
                                 const IconComponent = TrendIcon[trend];
                                 return IconComponent ? <IconComponent className="w-3 h-3" /> : null;
@@ -104,12 +104,12 @@ interface MetricRowProps {
 
 export function MetricRow({ children, columns = 4 }: MetricRowProps) {
     const gridCols = {
-        2: 'grid-cols-2',
-        3: 'grid-cols-3',
-        4: 'grid-cols-4',
-        5: 'grid-cols-5',
-        6: 'grid-cols-6',
+        2: 'grid-cols-1 sm:grid-cols-2',
+        3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+        5: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-5',
+        6: 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-6',
     };
 
-    return <div className={`grid ${gridCols[columns]} gap-3`}>{children}</div>;
+    return <div className={`grid ${gridCols[columns]} gap-4`}>{children}</div>;
 }

@@ -5,7 +5,7 @@ import { TelegramService } from './telegram.service';
 import { SendNotificationDto, NotificationType } from './dto/send-notification.dto';
 
 @ApiTags('Telegram')
-@Controller('telegram')
+@Controller('api/v1/telegram')
 export class TelegramController {
     constructor(
         private readonly telegramService: TelegramService,
@@ -15,16 +15,19 @@ export class TelegramController {
     @Post('webhook')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Telegram webhook endpoint' })
-    @ApiHeader({ name: 'X-Telegram-Bot-Api-Secret-Token', required: true })
+    @ApiHeader({ name: 'X-Telegram-Bot-Api-Secret-Token', required: false })
     async handleWebhook(
-        @Body() body: any,
-        @Headers('X-Telegram-Bot-Api-Secret-Token') secretToken: string,
+        @Body() update: any,
+        @Headers('x-telegram-bot-api-secret-token') secretToken?: string,
     ) {
         const expectedSecret = this.configService.get<string>('TELEGRAM_WEBHOOK_SECRET');
 
         if (expectedSecret && secretToken !== expectedSecret) {
             throw new UnauthorizedException('Invalid webhook secret');
         }
+
+        // Process the update via the service
+        await this.telegramService.processUpdate(update);
 
         return { ok: true };
     }

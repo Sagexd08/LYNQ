@@ -4,8 +4,8 @@ export function Footer() {
 			<div className="max-w-7xl mx-auto">
 				<div className="grid md:grid-cols-4 gap-8 mb-8">
 					<div>
-						<div className="text-xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-							LYNQ
+						<div className="mb-4">
+							<img src="/LYNQ.png" alt="LYNQ" className="h-8 w-auto" />
 						</div>
 						<p className="text-gray-400 text-sm">
 							Learn DeFi lending through interactive education and risk-free practice.
