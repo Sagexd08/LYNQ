@@ -39,6 +39,9 @@ export default function LandingV2() {
 				{/* What is LYNQ? */}
 				<ProductIntroSection />
 
+				{/* Why Mantle */}
+				<NetworkSection />
+
 				{/* The Core Loop: Learn -> Build Reputation -> Unlock Lending */}
 				<CoreLoopSection />
 
@@ -53,9 +56,6 @@ export default function LandingV2() {
 
 				{/* How LYNQ Works: Technical features */}
 				<SystemExplanationSection />
-
-				{/* Why Mantle */}
-				<NetworkSection />
 
 				{/* Security & Trust */}
 				<SecuritySection />
