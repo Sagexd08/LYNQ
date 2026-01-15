@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { TrendingUp, Brain, Eye, Grid3x3, Zap, LineChart } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export function SystemExplanationSection() {
 				>
 					<h2 className="text-4xl lg:text-5xl font-bold mb-4">
 						<span className="text-white">How </span>
-					<span className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+						<span className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
 							LYNQ Works
 						</span>
 					</h2>

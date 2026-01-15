@@ -2,13 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { Wallet, Menu, X } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
 	const { profile, isAuthenticated, connectWallet, disconnect, isConnecting } = useAuth();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	
+
 	const address = profile?.walletAddress || null;
 	const isConnected = isAuthenticated;
 
@@ -41,18 +42,7 @@ export function Header() {
 						Launch App
 					</a>
 
-					<button
-						onClick={isConnected ? disconnect : connectWallet}
-						disabled={isConnecting}
-						className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500/80 to-violet-500/80 hover:from-cyan-400 hover:to-violet-400 text-white text-sm font-medium transition-all border border-cyan-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						<Wallet className="w-4 h-4" />
-						{isConnecting
-							? 'Connecting...'
-							: isConnected && address
-							? `${address.slice(0, 6)}...${address.slice(-4)}`
-							: 'Connect Wallet'}
-					</button>
+					<ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
 				</div>
 
 				<button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -89,8 +79,8 @@ export function Header() {
 							{isConnecting
 								? 'Connecting...'
 								: isConnected && address
-								? `${address.slice(0, 6)}...${address.slice(-4)}`
-								: 'Connect Wallet'}
+									? `${address.slice(0, 6)}...${address.slice(-4)}`
+									: 'Connect Wallet'}
 						</button>
 					</div>
 				</motion.div>

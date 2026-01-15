@@ -40,7 +40,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         address token,
         uint256 amount,
         uint256 loanId
-    ) external nonReentrant returns (uint256) {
+    ) external returns (uint256) {
         return lockCollateralFor(msg.sender, token, amount, loanId);
     }
 

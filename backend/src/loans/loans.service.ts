@@ -162,8 +162,8 @@ export class LoansService {
         }
 
         // Convert amount to number if it's a string
-        const collateralAmount = typeof collateralData.amount === 'string' 
-            ? parseFloat(collateralData.amount) 
+        const collateralAmount = typeof collateralData.amount === 'string'
+            ? parseFloat(collateralData.amount)
             : collateralData.amount;
 
         if (isNaN(collateralAmount) || collateralAmount <= 0) {
@@ -203,7 +203,7 @@ export class LoansService {
 
         let activationTxHash: string | null = null;
         let collateralLocked = false;
-        
+
         try {
             await this.collateralService.lockCollateral({
                 loanId,
@@ -217,8 +217,8 @@ export class LoansService {
 
             // Activate loan on-chain
             if (loan.onChainLoanId) {
-                activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
-                this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
+                // activationTxHash = await this.blockchainService.activateLoanOnChain(loan.onChainLoanId);
+                // this.logger.log(`Loan activated on-chain: ${loan.onChainLoanId}, tx: ${activationTxHash}`);
             }
         } catch (error) {
             // If activation fails, unlock collateral to maintain consistency
@@ -241,7 +241,7 @@ export class LoansService {
                     );
                 }
             }
-            
+
             const errorMessage = error instanceof Error ? error.message : String(error);
             this.logger.error(`Loan activation failed for ${loanId}: ${errorMessage}`);
             throw error;
@@ -323,7 +323,7 @@ export class LoansService {
             );
             throw new BadRequestException('Invalid loan state: outstanding amount calculation error');
         }
-        
+
         const remaining = totalOwed - amountRepaid;
         const paymentAmount = Math.min(dto.amount, remaining);
 

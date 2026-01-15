@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { authApi } from '@/lib/api/auth';
@@ -15,7 +15,7 @@ export function useAuth() {
     queryFn: () => authApi.getProfile(),
     enabled: authApi.isAuthenticated(),
     retry: false,
-    staleTime: 5 * 60 * 1000, 
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function useAuth() {
     mutationFn: (request: WalletVerifyRequest) =>
       authApi.verifySignature(request),
     onSuccess: (data) => {
-      setProfile(data.profile);
+      setProfile(data.profile as Profile);
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       toast.success('Successfully connected wallet!');
     },
@@ -44,7 +44,7 @@ export function useAuth() {
 
   const connectWallet = useCallback(async () => {
     try {
-      
+
       if (!window.ethereum) {
         toast.error('Please install MetaMask to continue');
         return;
@@ -54,7 +54,7 @@ export function useAuth() {
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
       });
-      
+
       if (!accounts || accounts.length === 0) {
         toast.error('No accounts found');
         return;

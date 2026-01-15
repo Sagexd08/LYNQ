@@ -1,6 +1,11 @@
-
-export * from './client';
+export { authApi } from './auth';
+export { loansApi } from './loans';
+export { riskApi } from './risk';
+export { collateralApi } from './collateral';
+export { dashboardApi } from './dashboard';
+export { portfolioApi } from './portfolio';
+export { marketsApi } from './markets';
+export { reputationApi } from './reputation';
+export { intelligenceApi } from './intelligence';
+export { apiClient } from './client';
 export * from './types';
-export * from './auth';
-export * from './loans';
-export * from './risk';

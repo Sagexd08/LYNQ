@@ -1,9 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { riskApi } from '@/lib/api/risk';
-import {
-  RiskEvaluationRequest,
-  RiskEvaluationResponse,
-} from '@/lib/api/types';
+import { RiskEvaluationRequest } from '@/lib/api/types';
 import toast from 'react-hot-toast';
 
 export function useRiskEvaluation() {
@@ -34,7 +31,7 @@ export function useRiskAssessment(loanId: string | null) {
     queryKey: ['risk', loanId],
     queryFn: () => riskApi.getRiskAssessment(loanId!),
     enabled: !!loanId,
-    staleTime: 5 * 60 * 1000, 
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

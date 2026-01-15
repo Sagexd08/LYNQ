@@ -1,4 +1,3 @@
-
 export interface WalletChallengeRequest {
   walletAddress: string;
 }
@@ -106,6 +105,8 @@ export interface Collateral {
   lockedAt: string;
   releasedAt?: string;
   seizedAt?: string;
+  userId?: string;
+  utilization?: number;
 }
 
 export interface RepayLoanRequest {
@@ -173,4 +174,170 @@ export interface HealthResponse {
     responseTime?: number;
   };
   uptime: number;
+}
+
+export interface LockCollateralRequest {
+  loanId: string;
+  tokenAddress: string;
+  tokenSymbol: string;
+  amount: number;
+  chainId?: number;
+}
+
+export interface UnlockCollateralRequest {
+  collateralId: string;
+  loanId: string;
+}
+
+export interface ProtocolStats {
+  totalValueLocked: number;
+  activeLoans: number;
+  totalUsers: number;
+  defaultProbability: number;
+  liquidationExposure: number;
+  avgInterestRate: number;
+  totalCollateral: number;
+  utilizationRate: number;
+  avgHealthFactor: number;
+}
+
+export interface UserPortfolio {
+  totalValue: number;
+  activeLoans: Loan[];
+  totalBorrowed: number;
+  totalRepaid: number;
+  availableCredit: number;
+  collaterals: Collateral[];
+  healthFactor: number;
+  riskLevel: number;
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  id: string;
+  type: 'REPAYMENT' | 'BORROW' | 'COLLATERAL_ADD' | 'COLLATERAL_LOCK' | 'COLLATERAL_UNLOCK';
+  amount: string;
+  loanId?: string;
+  date: string;
+  status: 'completed' | 'pending' | 'failed';
+  txHash?: string;
+}
+
+export interface MarketData {
+  totalMarkets: number;
+  totalLiquidity: number;
+  volume24h: number;
+  avgApy: number;
+  utilization: number;
+  lendingPools: LendingPool[];
+}
+
+export interface LendingPool {
+  asset: string;
+  chain: string;
+  apy: number;
+  apr: number;
+  liquidity: number;
+  utilization: number;
+  riskTier: 'Low' | 'Medium' | 'High';
+  totalBorrowed: number;
+  totalSupplied: number;
+}
+
+export interface ReputationData {
+  score: number;
+  tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+  rank?: number;
+  history: Array<{
+    date: string;
+    score: number;
+  }>;
+  factors: Array<{
+    name: string;
+    weight: number;
+    value: number;
+    contribution: number;
+  }>;
+  achievements: Array<{
+    id: string;
+    name: string;
+    description: string;
+    earnedAt?: string;
+    isEarned: boolean;
+  }>;
+  nextTier?: {
+    name: string;
+    requiredScore: number;
+    pointsNeeded: number;
+  };
+}
+
+export interface DashboardData {
+  protocolStats: ProtocolStats;
+  userRiskProfile: {
+    creditScore: number;
+    riskLevel: number;
+    collateralUtilization: number;
+    liquidationProximity: number;
+    maxBorrow: number;
+    healthFactor: number;
+    tier: string;
+  };
+  modelConfidence: {
+    credit: number;
+    fraud: number;
+    default: number;
+    ensembleAgreement: number;
+  };
+  recentLoans: Loan[];
+  riskAlerts: Array<{
+    severity: 'high' | 'medium' | 'low';
+    title: string;
+    description: string;
+    time: string;
+  }>;
+  marketSignals: Array<{
+    asset: string;
+    signal: string;
+    change: string;
+    direction: 'up' | 'down';
+  }>;
+}
+
+export interface IntelligenceData {
+  predictions: Array<{
+    metric: string;
+    current: number;
+    predicted: number;
+    confidence: number;
+    trend: 'up' | 'down' | 'stable';
+  }>;
+  insights: Array<{
+    id: string;
+    type: 'opportunity' | 'warning' | 'info';
+    title: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    actionable: boolean;
+  }>;
+  riskForecasts: Array<{
+    period: string;
+    defaultRate: number;
+    liquidationRisk: number;
+    marketVolatility: number;
+  }>;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ApiError {
+  statusCode: number;
+  message: string;
+  error?: string;
 }

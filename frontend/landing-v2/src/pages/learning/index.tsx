@@ -1,26 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  BookOpen,
   CheckCircle,
   XCircle,
   Award,
-  TrendingUp,
   ArrowRight,
   ArrowLeft,
   PlayCircle,
   RotateCcw,
   DollarSign,
   AlertCircle,
-  ChevronRight,
+  BookOpen,
   Clock,
-  Target,
+  ChevronRight,
 } from 'lucide-react';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
-import { Button } from '@/components/shared/Buttons';
+
 import { LESSONS } from '@/data/lessons';
 import { useLearningStore, useSandboxStore } from '@/store/useStore';
 
@@ -53,7 +51,7 @@ function LearningHero() {
             before risking real capital.
           </p>
 
-          {}
+          { }
           <div className="max-w-2xl mx-auto p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
             <div className="flex items-center justify-between mb-4">
               <div className="text-left">
@@ -93,7 +91,15 @@ function LearningHero() {
   );
 }
 
-function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
+interface QuizProps {
+  quiz: any;
+  selectedAnswer: number | null;
+  onSelectAnswer: (index: number) => void;
+  onSubmit: () => void;
+  submitted: boolean;
+}
+
+function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }: QuizProps) {
   const isCorrect = selectedAnswer === quiz.correctIndex;
 
   return (
@@ -112,36 +118,34 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
         <h3 className="text-2xl font-bold text-white mb-6">{quiz.question}</h3>
 
         <div className="space-y-3">
-          {quiz.options.map((option, idx) => (
+          {quiz.options.map((option: string, idx: number) => (
             <button
               key={idx}
               onClick={() => !submitted && onSelectAnswer(idx)}
               disabled={submitted}
-              className={`w-full p-4 rounded-xl text-left transition border-2 ${
-                submitted
-                  ? idx === quiz.correctIndex
-                    ? 'bg-green-500/20 border-green-400 text-white'
-                    : idx === selectedAnswer
+              className={`w-full p-4 rounded-xl text-left transition border-2 ${submitted
+                ? idx === quiz.correctIndex
+                  ? 'bg-green-500/20 border-green-400 text-white'
+                  : idx === selectedAnswer
                     ? 'bg-red-500/20 border-red-400 text-white'
                     : 'bg-white/5 border-white/10 text-gray-400'
-                  : idx === selectedAnswer
+                : idx === selectedAnswer
                   ? 'bg-cyan-500/20 border-cyan-400 text-white'
                   : 'bg-white/5 border-white/10 text-white hover:border-cyan-400/50'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                    submitted
-                      ? idx === quiz.correctIndex
-                        ? 'bg-green-500 text-white'
-                        : idx === selectedAnswer
+                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${submitted
+                    ? idx === quiz.correctIndex
+                      ? 'bg-green-500 text-white'
+                      : idx === selectedAnswer
                         ? 'bg-red-500 text-white'
                         : 'bg-white/10 text-gray-400'
-                      : idx === selectedAnswer
+                    : idx === selectedAnswer
                       ? 'bg-cyan-500 text-white'
                       : 'bg-white/10 text-gray-400'
-                  }`}
+                    }`}
                 >
                   {submitted && idx === quiz.correctIndex ? (
                     <CheckCircle className="w-5 h-5" />
@@ -162,11 +166,10 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`p-6 rounded-xl border-2 ${
-            isCorrect
-              ? 'bg-green-500/10 border-green-400'
-              : 'bg-red-500/10 border-red-400'
-          }`}
+          className={`p-6 rounded-xl border-2 ${isCorrect
+            ? 'bg-green-500/10 border-green-400'
+            : 'bg-red-500/10 border-red-400'
+            }`}
         >
           <div className="flex items-start gap-3">
             {isCorrect ? (
@@ -176,9 +179,8 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
             )}
             <div>
               <h4
-                className={`text-lg font-bold mb-2 ${
-                  isCorrect ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`text-lg font-bold mb-2 ${isCorrect ? 'text-green-400' : 'text-red-400'
+                  }`}
               >
                 {isCorrect ? 'Correct! Well done!' : 'Not quite right'}
               </h4>
@@ -202,7 +204,7 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }) {
 }
 
 function LessonSlides() {
-  const { progress, completeLesson, setCurrentLesson } = useLearningStore();
+  const { progress, completeLesson } = useLearningStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
@@ -241,7 +243,7 @@ function LessonSlides() {
   return (
     <section className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        {}
+        { }
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={handlePrevious}
@@ -262,13 +264,12 @@ function LessonSlides() {
                   setQuizAnswer(null);
                   setQuizSubmitted(false);
                 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition ${
-                  idx === currentIndex
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                    : progress.completedLessons.includes(lesson.id)
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition ${idx === currentIndex
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                  : progress.completedLessons.includes(lesson.id)
                     ? 'bg-green-500/20 text-green-400'
                     : 'bg-white/10 text-gray-400'
-                }`}
+                  }`}
               >
                 {progress.completedLessons.includes(lesson.id) ? (
                   <CheckCircle className="w-5 h-5" />
@@ -289,7 +290,7 @@ function LessonSlides() {
           </button>
         </div>
 
-        {}
+        { }
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -398,7 +399,7 @@ function Sandbox() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {}
+          { }
           <div className="space-y-6">
             <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
               <h3 className="text-xl font-bold text-white mb-4">Your Balances</h3>
@@ -420,8 +421,8 @@ function Sandbox() {
                     healthFactor > 1.5
                       ? 'text-green-400'
                       : healthFactor > 1
-                      ? 'text-yellow-400'
-                      : 'text-red-400'
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
                   }
                 >
                   {healthFactor.toFixed(2)}
@@ -433,7 +434,7 @@ function Sandbox() {
             </div>
           </div>
 
-          {}
+          { }
           <div className="p-8 bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-400/30 rounded-2xl">
             <h3 className="text-2xl font-bold text-white mb-6">Take Action</h3>
 
@@ -445,11 +446,10 @@ function Sandbox() {
                     <button
                       key={a}
                       onClick={() => setAction(a)}
-                      className={`px-4 py-3 rounded-xl font-semibold transition ${
-                        action === a
-                          ? 'bg-violet-500 text-white'
-                          : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                      }`}
+                      className={`px-4 py-3 rounded-xl font-semibold transition ${action === a
+                        ? 'bg-violet-500 text-white'
+                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                        }`}
                     >
                       {a.charAt(0).toUpperCase() + a.slice(1)}
                     </button>
@@ -499,7 +499,7 @@ function Sandbox() {
           </div>
         </div>
 
-        {}
+        { }
         {sandbox.transactions.length > 0 && (
           <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl">
             <h3 className="text-xl font-bold text-white mb-4">Recent Transactions</h3>
@@ -615,7 +615,7 @@ function ProgressTracker() {
           )}
         </div>
 
-        {}
+        { }
         <div className="mt-8 p-8 bg-white/5 border border-white/10 rounded-2xl">
           <h3 className="text-2xl font-bold text-white mb-6">Achievements</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -647,11 +647,10 @@ function ProgressTracker() {
             ].map((badge, idx) => (
               <div
                 key={idx}
-                className={`p-6 rounded-xl text-center transition ${
-                  badge.unlocked
-                    ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400'
-                    : 'bg-white/5 border border-white/10 opacity-50'
-                }`}
+                className={`p-6 rounded-xl text-center transition ${badge.unlocked
+                  ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400'
+                  : 'bg-white/5 border border-white/10 opacity-50'
+                  }`}
               >
                 <div className="text-4xl mb-2">{badge.unlocked ? badge.icon : '🔒'}</div>
                 <div className="font-bold text-white text-sm mb-1">{badge.name}</div>

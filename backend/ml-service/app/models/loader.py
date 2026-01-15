@@ -14,7 +14,7 @@ class ModelLoader:
         self._model = None
         self._scaler = None
         self._feature_config = None
-        self._model_version = "v1.0.0-mock"
+        self._model_version = "rule-based"
         self._is_loaded = False
         
     @property
@@ -36,8 +36,8 @@ class ModelLoader:
             logger.info(f"Models loaded successfully: {self._model_version}")
             
         except Exception as e:
-            logger.warning(f"Failed to load ML models: {e}")
-            logger.info("Using mock model for development")
+            logger.error(f"Failed to load ML models: {e}")
+            logger.warning("ML model not available - will use rule-based prediction fallback")
             self._use_mock_model()
             self._is_loaded = True
     
@@ -58,7 +58,7 @@ class ModelLoader:
             
             # Download model file
             if not s3_loader.download_model(settings.S3_BUCKET, settings.S3_KEY, model_path):
-                logger.error("Failed to download model from S3")
+                logger.error("Failed to download model from S3 - model file not found")
                 self._use_mock_model()
                 return
             
@@ -94,7 +94,7 @@ class ModelLoader:
             
         except Exception as e:
             logger.error(f"Failed to load model from S3: {e}")
-            logger.info("Falling back to mock model")
+            logger.warning("Falling back to rule-based prediction")
             
             # Log failure to CloudWatch
             try:
@@ -121,7 +121,7 @@ class ModelLoader:
             config_path = os.path.join(model_dir, "feature_config.json")
         
         if not os.path.exists(model_path):
-            logger.info("No local model file found, using mock model")
+            logger.warning("No local model file found - will use rule-based prediction fallback")
             self._use_mock_model()
             return
         
@@ -148,17 +148,19 @@ class ModelLoader:
                 
         except Exception as e:
             logger.error(f"Failed to load model from local file: {e}")
-            logger.info("Falling back to mock model")
+            logger.warning("Falling back to rule-based prediction")
             self._use_mock_model()
     
     def _use_mock_model(self):
+        """Fallback when model cannot be loaded - use rule-based prediction instead"""
         self._model = None
         self._scaler = None
         self._feature_config = {
             "features": self._get_default_features(),
-            "version": "v1.0.0-mock"
+            "version": "rule-based"
         }
-        self._model_version = "v1.0.0-mock"
+        self._model_version = "rule-based"
+        logger.warning("ML model not available - using rule-based prediction fallback")
     
     def _get_default_features(self) -> List[str]:
         return [

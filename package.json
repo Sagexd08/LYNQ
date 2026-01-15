@@ -29,8 +29,5 @@
     "ethereum",
     "polygon"
   ],
-  "license": "UNLICENSED",
-  "dependencies": {
-    "ethers": "^6.16.0"
-  }
+  "license": "UNLICENSED"
 }

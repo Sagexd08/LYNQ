@@ -184,18 +184,18 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
                 const updateData: any = {};
                 if (data.amount && loan.outstandingAmount) {
                     const repaidAmount = BigInt(data.amount);
-                    const currentOutstanding = BigInt(loan.outstandingAmount);
-                    const newOutstanding = currentOutstanding > repaidAmount 
-                        ? (currentOutstanding - repaidAmount).toString() 
+                    const currentOutstanding = BigInt(loan.outstandingAmount.toString());
+                    const newOutstanding = currentOutstanding > repaidAmount
+                        ? (currentOutstanding - repaidAmount).toString()
                         : '0';
                     updateData.outstandingAmount = newOutstanding;
-                    
+
                     if (newOutstanding === '0') {
                         updateData.status = 'REPAID';
                         updateData.repaidDate = new Date();
                     }
                 }
-                
+
                 if (Object.keys(updateData).length > 0) {
                     await this.prisma.loan.update({
                         where: { id: loan.id },

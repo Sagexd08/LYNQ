@@ -1,4 +1,4 @@
-import { Processor, Process } from '@nestjs/bullmq';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -15,16 +15,26 @@ interface CreateLoanJobData {
 }
 
 @Processor(QUEUE_NAMES.BLOCKCHAIN_SYNC)
-export class BlockchainSyncProcessor {
+export class BlockchainSyncProcessor extends WorkerHost {
     private readonly logger = new Logger(BlockchainSyncProcessor.name);
 
     constructor(
         private readonly prisma: PrismaService,
         private readonly blockchainService: BlockchainService,
-    ) { }
+    ) {
+        super();
+    }
 
-    @Process('create-loan')
-    async handleCreateLoan(job: Job<CreateLoanJobData>) {
+    async process(job: Job<CreateLoanJobData, any, string>): Promise<any> {
+        switch (job.name) {
+            case 'create-loan':
+                return this.handleCreateLoan(job);
+            default:
+                this.logger.warn(`Unknown job name: ${job.name}`);
+        }
+    }
+
+    private async handleCreateLoan(job: Job<CreateLoanJobData>) {
         const { loanId, amountWei, collateralAmountWei, collateralToken, interestRateBps, durationDays } = job.data;
 
         const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });

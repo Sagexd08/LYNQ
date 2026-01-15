@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { loansApi } from '@/lib/api/loans';
-import { CreateLoanRequest, Loan } from '@/lib/api/types';
+import { CreateLoanRequest } from '@/lib/api/types';
 import toast from 'react-hot-toast';
 
 export function useLoans() {
@@ -13,7 +13,7 @@ export function useLoans() {
   } = useQuery({
     queryKey: ['loans'],
     queryFn: () => loansApi.getLoans(),
-    staleTime: 30 * 1000, 
+    staleTime: 30 * 1000,
   });
 
   const createLoanMutation = useMutation({
