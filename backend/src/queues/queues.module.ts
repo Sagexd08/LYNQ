@@ -11,18 +11,13 @@ import { TelegramModule } from '../telegram/telegram.module';
 import { BlockchainModule } from '../blockchain/blockchain.module';
 import { ReputationModule } from '../reputation/reputation.module';
 import { BlockchainSyncProcessor } from './processors/blockchain-sync.processor';
-
-export const QUEUE_NAMES = {
-    ML_ASSESSMENT: 'ml-assessment',
-    NOTIFICATIONS: 'notifications',
-    BLOCKCHAIN_SYNC: 'blockchain-sync',
-    RISK_EVALUATION: 'risk-evaluation',
-    LIQUIDATION: 'liquidation',
-};
+import { QUEUE_NAMES } from './queue-names.const';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
     imports: [
         ScheduleModule.forRoot(),
+        PrismaModule,
         BullModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

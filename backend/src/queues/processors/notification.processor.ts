@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { TelegramService } from '../../telegram/telegram.service';
 import { NotificationType } from '../../telegram/dto/send-notification.dto';
-import { QUEUE_NAMES } from '../queues.module';
+import { QUEUE_NAMES } from '../queue-names.const';
 
 export interface NotificationJobData {
     userId: string;

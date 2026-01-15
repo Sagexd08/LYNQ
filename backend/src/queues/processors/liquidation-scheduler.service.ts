@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
-import { QUEUE_NAMES } from '../queues.module';
+import { QUEUE_NAMES } from '../queue-names.const';
 
 @Injectable()
 export class LiquidationSchedulerService implements OnModuleInit {

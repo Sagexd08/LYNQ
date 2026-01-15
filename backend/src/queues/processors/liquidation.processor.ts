@@ -7,7 +7,7 @@ import { ReputationService } from '../../reputation/reputation.service';
 import { TelegramService } from '../../telegram/telegram.service';
 import { NotificationType } from '../../telegram/dto/send-notification.dto';
 import { RepaymentClassification } from '../../repayments/classification';
-import { QUEUE_NAMES } from '../queues.module';
+import { QUEUE_NAMES } from '../queue-names.const';
 
 export interface LiquidationCheckJobData {
     loanId: string;
