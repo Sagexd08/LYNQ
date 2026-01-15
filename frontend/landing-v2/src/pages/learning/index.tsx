@@ -213,7 +213,7 @@ function LessonSlides() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   const currentLesson = LESSONS[currentIndex];
-  const isCompleted = progress.completedLessons.includes(currentLesson.id);
+
 
   const handleNext = () => {
     if (currentIndex < LESSONS.length - 1) {
@@ -374,146 +374,126 @@ function Sandbox() {
   const healthFactor = totalSupplied > 0 ? 2.5 : 1;
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-b from-black to-violet-950/10">
+    <section className="py-20 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">
-            <span className="text-white">Risk-Free</span>{' '}
-            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
-              Practice Sandbox
-            </span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Practice lending operations with simulated funds. No real money at risk.
+        <div className="mb-12">
+          <h2 className="text-2xl font-medium text-white mb-2 font-sans tracking-tight">Protocol Simulation Environment</h2>
+          <p className="text-sm font-mono text-gray-400 uppercase tracking-wider">
+            Sandbox Mode // Risk-Free Execution
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          { }
           <div className="space-y-6">
-            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-              <h3 className="text-xl font-bold text-white mb-4">Your Balances</h3>
-              <div className="space-y-3">
+            <div className="p-6 bg-[#0A0A0A] border border-white/10 rounded-sm">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-6">Asset Allocation</h3>
+              <div className="space-y-1">
                 {Object.entries(sandbox.balances).map(([asset, balance]) => (
-                  <div key={asset} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
-                    <span className="font-semibold text-white">{asset}</span>
-                    <span className="text-gray-400">{balance.toFixed(2)}</span>
+                  <div key={asset} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                    <span className="font-mono text-sm text-white">{asset}</span>
+                    <span className="font-mono text-sm text-gray-400">{balance.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-              <h3 className="text-xl font-bold text-white mb-4">Health Factor</h3>
-              <div className="text-4xl font-bold mb-2">
-                <span
-                  className={
-                    healthFactor > 1.5
-                      ? 'text-green-400'
-                      : healthFactor > 1
-                        ? 'text-yellow-400'
-                        : 'text-red-400'
-                  }
-                >
-                  {healthFactor.toFixed(2)}
-                </span>
+            <div className="p-6 bg-[#0A0A0A] border border-white/10 rounded-sm">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Health Factor</h3>
+                <div className="px-2 py-0.5 border border-white/10 text-[10px] uppercase text-gray-400">
+                  Live
+                </div>
               </div>
-              <div className="text-sm text-gray-400">
-                {healthFactor > 1.5 ? 'Safe' : healthFactor > 1 ? 'Caution' : 'Liquidation Risk'}
+              <div className="text-5xl font-mono mb-2 tracking-tighter text-white">
+                {healthFactor.toFixed(2)}
+              </div>
+              <div className="text-xs font-mono uppercase tracking-wider">
+                <span className={healthFactor > 1.5 ? 'text-green-500' : healthFactor > 1 ? 'text-yellow-500' : 'text-red-500'}>
+                  STATUS: {healthFactor > 1.5 ? 'SAFE' : healthFactor > 1 ? 'WARNING' : 'LIQUIDATION_RISK'}
+                </span>
               </div>
             </div>
           </div>
 
-          { }
-          <div className="p-8 bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-400/30 rounded-2xl">
-            <h3 className="text-2xl font-bold text-white mb-6">Take Action</h3>
+          <div className="p-8 border border-white/10 rounded-sm bg-[#0A0A0A]">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-8">Execute Transaction</h3>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Action</label>
-                <div className="grid grid-cols-3 gap-2">
+                <label className="block text-[10px] font-mono text-gray-500 uppercase mb-2">Operation Type</label>
+                <div className="grid grid-cols-3 gap-0 border border-white/10">
                   {(['supply', 'borrow', 'repay'] as const).map((a) => (
                     <button
                       key={a}
                       onClick={() => setAction(a)}
-                      className={`px-4 py-3 rounded-xl font-semibold transition ${action === a
-                        ? 'bg-violet-500 text-white'
-                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                      className={`px-4 py-3 text-xs font-bold uppercase tracking-wider transition ${action === a
+                        ? 'bg-white text-black'
+                        : 'bg-[#0A0A0A] text-gray-500 hover:text-white'
                         }`}
                     >
-                      {a.charAt(0).toUpperCase() + a.slice(1)}
+                      {a}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Asset</label>
-                <select
-                  value={selectedAsset}
-                  onChange={(e) => setSelectedAsset(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white"
-                >
-                  <option value="USDC">USDC</option>
-                  <option value="ETH">ETH</option>
-                  <option value="WBTC">WBTC</option>
-                </select>
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase mb-2">Select Asset</label>
+                  <select
+                    value={selectedAsset}
+                    onChange={(e) => setSelectedAsset(e.target.value)}
+                    className="w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 text-white text-sm font-mono focus:border-white/30 outline-none rounded-sm"
+                  >
+                    <option value="USDC">USDC</option>
+                    <option value="ETH">ETH</option>
+                    <option value="WBTC">WBTC</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Amount</label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white"
-                />
+                <div>
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase mb-2">Quantity</label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 text-white text-sm font-mono focus:border-white/30 outline-none rounded-sm"
+                  />
+                </div>
               </div>
 
               <button
                 onClick={handleAction}
-                className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-400 hover:to-purple-400 text-white font-bold transition"
+                className="w-full px-6 py-4 bg-white text-black hover:bg-gray-200 text-sm font-bold uppercase tracking-wider transition rounded-sm border border-transparent"
               >
-                Execute {action.charAt(0).toUpperCase() + action.slice(1)}
+                Confirm {action}
               </button>
 
               <button
                 onClick={sandbox.reset}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 font-semibold transition flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 text-xs font-mono text-gray-500 hover:text-white uppercase tracking-wider transition flex items-center justify-center gap-2 border border-white/10 hover:border-white/20 rounded-sm"
               >
-                <RotateCcw className="w-4 h-4" />
-                Reset Sandbox
+                <RotateCcw className="w-3 h-3" />
+                Reset Environment
               </button>
             </div>
           </div>
         </div>
 
-        { }
         {sandbox.transactions.length > 0 && (
-          <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl">
-            <h3 className="text-xl font-bold text-white mb-4">Recent Transactions</h3>
-            <div className="space-y-2">
+          <div className="mt-8">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Recent Chain Activity</h3>
+            <div className="space-y-0">
               {sandbox.transactions
                 .slice(-5)
                 .reverse()
                 .map((tx, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
-                        <DollarSign className="w-4 h-4 text-violet-400" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white capitalize">{tx.type}</div>
-                        <div className="text-sm text-gray-400">{tx.asset}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-white">{tx.amount.toFixed(2)}</div>
-                      <div className="text-xs text-gray-400">
-                        {new Date(tx.timestamp).toLocaleTimeString()}
-                      </div>
-                    </div>
+                  <div key={idx} className="grid grid-cols-4 p-3 border-b border-white/5 font-mono text-sm hover:bg-white/5">
+                    <span className="text-gray-400">{new Date(tx.timestamp).toLocaleTimeString()}</span>
+                    <span className="text-white uppercase font-bold">{tx.type}</span>
+                    <span className="text-gray-400">{tx.asset}</span>
+                    <span className="text-right text-white">{tx.amount.toFixed(4)}</span>
                   </div>
                 ))}
             </div>
@@ -529,122 +509,117 @@ function ProgressTracker() {
   const completionRate = (progress.completedLessons.length / LESSONS.length) * 100;
 
   return (
-    <section className="py-20 px-6">
+    <section className="py-20 px-6 border-t border-white/10">
       <div className="max-w-4xl mx-auto">
-        <div className="p-8 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 border border-cyan-400/30 rounded-3xl">
+        <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Your Learning Progress</h2>
-              <p className="text-gray-400">Track your journey to DeFi mastery</p>
+              <h2 className="text-xl font-medium text-white mb-1 font-sans">User Progression</h2>
+              <p className="text-xs font-mono text-gray-500 uppercase tracking-wider">Sync Status</p>
             </div>
             <div className="text-right">
-              <div className="text-5xl font-bold text-white mb-1">{Math.round(completionRate)}%</div>
-              <div className="text-sm text-gray-400">Complete</div>
+              <div className="text-4xl font-mono text-white mb-1">{Math.round(completionRate)}%</div>
             </div>
           </div>
 
-          <div className="w-full bg-gray-800 rounded-full h-4 mb-8 overflow-hidden">
+          <div className="w-full bg-white/5 h-1 mb-12">
             <motion.div
-              className="h-full bg-gradient-to-r from-cyan-500 to-violet-500"
+              className="h-full bg-green-500"
               initial={{ width: 0 }}
               animate={{ width: `${completionRate}%` }}
               transition={{ duration: 1 }}
             />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 bg-white/5 rounded-xl text-center">
-              <div className="text-3xl font-bold text-cyan-400 mb-2">
+          <div className="grid md:grid-cols-3 gap-px bg-white/10 border border-white/10 mb-12">
+            <div className="p-6 bg-[#0A0A0A] text-center">
+              <div className="text-2xl font-mono text-white mb-1">
                 {progress.completedLessons.length}
               </div>
-              <div className="text-sm text-gray-400">Lessons Completed</div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Modules Cleared</div>
             </div>
 
-            <div className="p-6 bg-white/5 rounded-xl text-center">
-              <div className="text-3xl font-bold text-violet-400 mb-2">{progress.reputation}</div>
-              <div className="text-sm text-gray-400">Reputation Points</div>
+            <div className="p-6 bg-[#0A0A0A] text-center">
+              <div className="text-2xl font-mono text-green-500 mb-1">{progress.reputation}</div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Reputation</div>
             </div>
 
-            <div className="p-6 bg-white/5 rounded-xl text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">
+            <div className="p-6 bg-[#0A0A0A] text-center">
+              <div className="text-2xl font-mono text-white mb-1">
                 {Object.keys(progress.quizScores).length}
               </div>
-              <div className="text-sm text-gray-400">Quizzes Passed</div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">Validations</div>
             </div>
           </div>
 
           {completionRate === 100 ? (
-            <div className="p-6 bg-green-500/20 border-2 border-green-400 rounded-xl text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <h3 className="text-2xl font-bold text-white mb-2">Congratulations!</h3>
-              <p className="text-gray-300 mb-6">You've completed all lessons. You're ready to start lending!</p>
+            <div className="p-6 border border-green-500/30 bg-green-500/5 rounded-sm text-center">
+              <h3 className="text-sm font-bold text-green-500 uppercase tracking-wider mb-4">Training Complete</h3>
+              <p className="text-gray-400 mb-6 font-mono text-xs">User authorized for mainnet protocol interaction.</p>
               <button
                 onClick={() => (window.location.href = '/app')}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold transition inline-flex items-center gap-2"
+                className="px-8 py-3 bg-green-500 hover:bg-green-400 text-black font-bold uppercase tracking-wider transition inline-flex items-center gap-2 rounded-sm"
               >
-                Launch Lending App
-                <ArrowRight className="w-5 h-5" />
+                Enter Protocol
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-6 bg-blue-500/10 border border-blue-400/30 rounded-xl">
+            <div className="flex items-center justify-between p-6 border border-white/10 bg-white/5 rounded-sm">
               <div>
-                <h4 className="text-lg font-bold text-white mb-1">Next Lesson</h4>
-                <p className="text-gray-400">
-                  {LESSONS[progress.completedLessons.length]?.title || 'All done!'}
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Next Module</h4>
+                <p className="text-white font-mono">
+                  {LESSONS[progress.completedLessons.length]?.title || 'Sequence Complete'}
                 </p>
               </div>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="px-6 py-3 rounded-full bg-blue-500 hover:bg-blue-400 text-white font-semibold transition inline-flex items-center gap-2"
+                className="px-6 py-3 bg-white hover:bg-gray-200 text-black text-xs font-bold uppercase tracking-wider transition inline-flex items-center gap-2 rounded-sm"
               >
-                Continue
-                <ChevronRight className="w-4 h-4" />
+                Resume
+                <ChevronRight className="w-3 h-3" />
               </button>
             </div>
           )}
         </div>
 
-        { }
-        <div className="mt-8 p-8 bg-white/5 border border-white/10 rounded-2xl">
-          <h3 className="text-2xl font-bold text-white mb-6">Achievements</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-8 border border-white/10 rounded-sm overflow-hidden">
+          <div className="p-4 bg-white/5 border-b border-white/10">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Credentials & Badges</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 bg-white/10 gap-px">
             {[
               {
                 name: 'First Steps',
-                desc: 'Complete first lesson',
+                desc: 'Module 1 Complete',
                 unlocked: progress.completedLessons.length >= 1,
-                icon: '🌱',
               },
               {
-                name: 'Knowledge Seeker',
-                desc: 'Complete 3 lessons',
+                name: 'Seeker',
+                desc: '3 Modules Complete',
                 unlocked: progress.completedLessons.length >= 3,
-                icon: '📚',
               },
               {
-                name: 'DeFi Master',
-                desc: 'Complete all lessons',
+                name: 'Master',
+                desc: 'All Modules Complete',
                 unlocked: progress.completedLessons.length === LESSONS.length,
-                icon: '🎓',
               },
               {
-                name: 'Quiz Pro',
-                desc: 'Pass all quizzes',
+                name: 'Analyst',
+                desc: '100% Quiz Accuracy',
                 unlocked: Object.keys(progress.quizScores).length === LESSONS.length,
-                icon: '🏆',
               },
             ].map((badge, idx) => (
               <div
                 key={idx}
-                className={`p-6 rounded-xl text-center transition ${badge.unlocked
-                  ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400'
-                  : 'bg-white/5 border border-white/10 opacity-50'
+                className={`p-6 bg-[#0A0A0A] text-center transition ${badge.unlocked
+                  ? 'opacity-100'
+                  : 'opacity-30'
                   }`}
               >
-                <div className="text-4xl mb-2">{badge.unlocked ? badge.icon : '🔒'}</div>
-                <div className="font-bold text-white text-sm mb-1">{badge.name}</div>
-                <div className="text-xs text-gray-400">{badge.desc}</div>
+                <div className="text-xs mb-2 font-mono">{badge.unlocked ? '[UNLOCKED]' : '[LOCKED]'}</div>
+                <div className="font-bold text-white text-xs uppercase tracking-wider mb-1">{badge.name}</div>
+                <div className="text-[10px] text-gray-500 font-mono">{badge.desc}</div>
               </div>
             ))}
           </div>

@@ -88,7 +88,7 @@ export function useDashboard() {
 export function useProtocolStats() {
     const [stats, setStats] = useState<ProtocolStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
 
     const fetchStats = useCallback(async () => {
         setIsLoading(true);

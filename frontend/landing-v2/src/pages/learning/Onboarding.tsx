@@ -84,59 +84,66 @@ export default function OnboardingPage() {
     const recommendation = getRecommendation();
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
+        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-mono selection:bg-green-500/30">
             <Header />
 
             <main className="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
-                {/* Background Elements */}
-                <div className="absolute inset-0 pointer-events-none opacity-40">
-                    <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-violet-600/20 blur-[120px] rounded-full mix-blend-screen" />
-                    <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-cyan-600/20 blur-[120px] rounded-full mix-blend-screen" />
+                {/* Infrastructure Background */}
+                <div className="absolute inset-0 z-0 pointer-events-none">
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.5)_50%,transparent_100%)] bg-[size:100%_4px] opacity-10" />
                 </div>
 
                 <div className="max-w-2xl w-full relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-[#111114] border border-[#1f1f25] p-8 md:p-12 rounded-3xl shadow-2xl backdrop-blur-xl"
+                        className="bg-[#0A0A0A] border border-white/10 p-8 md:p-12 rounded-sm"
                     >
                         {score === null ? (
                             <>
-                                <div className="mb-8 text-center">
-                                    <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent mb-2">
-                                        DeFi Knowledge Check
+                                <div className="mb-8 border-b border-white/10 pb-6">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-2 h-2 bg-green-500 animate-pulse rounded-full" />
+                                        <span className="text-xs font-bold text-green-500 uppercase tracking-widest">System Check</span>
+                                    </div>
+                                    <h1 className="text-2xl font-medium text-white mb-2 font-sans tracking-tight">
+                                        Competency Verification
                                     </h1>
-                                    <p className="text-gray-400">
-                                        Let's assess your experience level to personalize your onboarding.
+                                    <p className="text-sm text-gray-400 font-sans">
+                                        Protocol access requires verifying baseline DeFi knowledge.
                                     </p>
                                 </div>
 
-                                <div className="mb-6">
-                                    <div className="flex justify-between text-sm text-gray-500 mb-2">
-                                        <span>Question {currentStep + 1} of {QUESTIONS.length}</span>
-                                        <span>{Math.round(((currentStep) / QUESTIONS.length) * 100)}% Complete</span>
+                                <div className="mb-8">
+                                    <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-wider mb-2 font-bold">
+                                        <span>Sequence {currentStep + 1} / {QUESTIONS.length}</span>
+                                        <span>{Math.round(((currentStep) / QUESTIONS.length) * 100)}% Verified</span>
                                     </div>
-                                    <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-1 w-full bg-white/5 overflow-hidden">
                                         <div
-                                            className="h-full bg-gradient-to-r from-cyan-500 to-violet-500 transition-all duration-300"
+                                            className="h-full bg-green-500 transition-all duration-300 ease-out"
                                             style={{ width: `${((currentStep) / QUESTIONS.length) * 100}%` }}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mb-8">
-                                    <h2 className="text-xl font-semibold text-white mb-6">
+                                    <h2 className="text-lg font-medium text-white mb-6 font-sans">
                                         {QUESTIONS[currentStep].question}
                                     </h2>
-                                    <div className="space-y-3">
+                                    <div className="space-y-2">
                                         {QUESTIONS[currentStep].options.map((option, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => handleAnswer(idx)}
-                                                className="w-full p-4 rounded-xl text-left bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 transition-all group flex items-center justify-between"
+                                                className="w-full p-4 text-left bg-[#0A0A0A] hover:bg-white/5 border border-white/10 hover:border-white/30 transition-all group flex items-center justify-between rounded-sm"
                                             >
-                                                <span className="text-gray-300 group-hover:text-white">{option}</span>
-                                                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 text-cyan-400 transform translate-x-[-10px] group-hover:translate-x-0 transition-all" />
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-xs text-gray-500 font-mono">[{String.fromCharCode(65 + idx)}]</span>
+                                                    <span className="text-sm text-gray-300 group-hover:text-white font-sans">{option}</span>
+                                                </div>
+                                                <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 text-green-500 transform -translate-x-2 group-hover:translate-x-0 transition-all" />
                                             </button>
                                         ))}
                                     </div>
@@ -144,27 +151,27 @@ export default function OnboardingPage() {
                             </>
                         ) : (
                             <div className="text-center py-8">
-                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 mb-6">
+                                <div className="inline-flex items-center justify-center w-16 h-16 border border-white/10 bg-white/5 mb-6 rounded-sm">
                                     {recommendation?.type === 'pro' ? (
-                                        <ShieldCheck className="w-10 h-10 text-cyan-400" />
+                                        <ShieldCheck className="w-8 h-8 text-green-500" />
                                     ) : (
-                                        <BookOpen className="w-10 h-10 text-violet-400" />
+                                        <BookOpen className="w-8 h-8 text-yellow-500" />
                                     )}
                                 </div>
 
-                                <h2 className="text-3xl font-bold text-white mb-4">
+                                <h2 className="text-xl font-bold text-white mb-2 uppercase tracking-wider">
                                     {recommendation?.title}
                                 </h2>
-                                <p className="text-xl text-gray-300 mb-8 max-w-md mx-auto">
+                                <p className="text-sm text-gray-400 mb-8 max-w-md mx-auto font-sans leading-relaxed">
                                     {recommendation?.message}
                                 </p>
 
-                                <div className="flex gap-4 justify-center">
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <button
                                         onClick={recommendation?.action}
-                                        className={`px-8 py-4 rounded-full font-bold text-white transition-all transform hover:scale-105 ${recommendation?.type === 'pro'
-                                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                                            : 'bg-gradient-to-r from-violet-500 to-purple-600 shadow-[0_0_20px_rgba(139,92,246,0.3)]'
+                                        className={`px-8 py-3 font-bold uppercase tracking-wider transition-all rounded-sm text-xs ${recommendation?.type === 'pro'
+                                            ? 'bg-green-500 hover:bg-green-400 text-black'
+                                            : 'bg-white hover:bg-gray-200 text-black'
                                             }`}
                                     >
                                         {recommendation?.cta}
@@ -173,9 +180,9 @@ export default function OnboardingPage() {
                                     {recommendation?.type === 'learner' && (
                                         <button
                                             onClick={() => navigate('/app')}
-                                            className="px-6 py-4 rounded-full text-gray-400 hover:text-white font-medium"
+                                            className="px-6 py-3 border border-white/10 hover:border-white/30 text-gray-400 hover:text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors"
                                         >
-                                            Skip to App
+                                            Override & Enter
                                         </button>
                                     )}
                                 </div>
