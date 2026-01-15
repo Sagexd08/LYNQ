@@ -31,7 +31,7 @@ interface CardProps {
 export function Card({ children, className = '', onClick, hover = false }: CardProps) {
     return (
         <div
-            className={`bg-surface-50/50 backdrop-blur-sm border border-white/5 rounded-xl p-5 ${hover || onClick ? 'hover:border-white/20 hover:bg-surface-100/50 transition-colors cursor-pointer' : ''
+            className={`bg-[#0A0A0A] border border-white/10 rounded-sm p-5 ${hover || onClick ? 'hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer' : ''
                 } ${className}`}
             onClick={onClick}
         >
@@ -51,15 +51,15 @@ interface PanelProps {
 
 export function Panel({ title, children, headerAction, noPadding, className = '', isLoading = false }: PanelProps) {
     return (
-        <div className={`bg-surface-50/50 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden ${className}`}>
-            <div className="flex items-center justify-between px-5 py-3 bg-surface-100/30 border-b border-white/5">
-                <h3 className="text-sm font-medium text-gray-300">{title}</h3>
+        <div className={`bg-[#0A0A0A] border border-white/10 rounded-sm overflow-hidden ${className}`}>
+            <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/10">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{title}</h3>
                 {headerAction}
             </div>
             <div className={noPadding ? '' : 'p-5'}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 text-primary-400 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                     </div>
                 ) : (
                     children

@@ -10,12 +10,13 @@ import {
   Award,
   Settings,
   ChevronLeft,
-  Blocks,
-  Wallet,
   Menu,
   X,
-  LogOut
+  ChevronRight,
+  Activity,
+  Server
 } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -42,54 +43,70 @@ export function AppShell({ children }: AppShellProps) {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  const currentPath = location.pathname.split('/').filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans selection:bg-primary-500/30">
-      {/* Background Ambience */}
+    <div className="min-h-screen bg-[#050505] text-gray-300 flex flex-col font-mono selection:bg-green-500/30 selection:text-green-200">
+      {/* Infrastructure Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-900/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-purple/10 rounded-full blur-[120px]" />
+        {/* Subtle Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+        {/* Scan line effect */}
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.5)_50%,transparent_100%)] bg-[size:100%_4px] opacity-10 pointer-events-none" />
       </div>
 
-      {/* Top Bar */}
-      <header className="sticky top-0 z-40 h-16 bg-surface-50/70 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 lg:px-6">
+      {/* Top Bar - Utilitarian Style */}
+      <header className="sticky top-0 z-40 h-14 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
 
-          <Link to="/" className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary-500 blur-lg opacity-20" />
-              <img src="/LYNQ.png" alt="LYNQ" className="relative h-8 w-auto" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-6 h-6 border border-white/20 flex items-center justify-center group-hover:border-green-500/50 transition-colors">
+              <div className="w-3 h-3 bg-white/20 group-hover:bg-green-500 transition-colors" />
             </div>
-            <span className="text-lg font-bold tracking-tight hidden sm:block bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              LYNQ
-            </span>
+            <span className="text-sm font-bold tracking-widest text-white group-hover:text-green-500 transition-colors">LYNQ</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-4 ml-6 pl-6 border-l border-white/5 text-xs font-mono text-gray-500">
-            <span className="flex items-center gap-1.5">
-              <Blocks className="w-3 h-3 text-emerald-500" />
-              <span className="text-gray-400">MAINNET</span>
-            </span>
-            <span className="text-gray-700">|</span>
-            <span>
-              Block <span className="text-gray-300">19,847,293</span>
-            </span>
+          {/* Breadcrumbs - 'One screen = one proof' style */}
+          <div className="hidden md:flex items-center gap-2 ml-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <span>Protocol</span>
+            {currentPath.slice(1).map((segment, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <ChevronRight className="w-3 h-3" />
+                <span className={i === currentPath.length - 2 ? 'text-white' : ''}>{segment}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4 relative z-10">
-          <div className="hidden sm:flex items-center gap-3">
-            <StatusPill label="Risk" value="LOW" variant="success" />
-            <StatusPill label="Score" value="847" />
+        <div className="flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6 text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span>System: Online</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Server className="w-3 h-3" />
+              <span>Latency: 12ms</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Block: #19,284,331</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-100/50 hover:bg-surface-100 border border-white/5 hover:border-primary-500/30 rounded-lg transition-all cursor-pointer group">
-            <Wallet className="w-4 h-4 text-primary-400 group-hover:text-primary-300" />
-            <span className="text-sm text-gray-300 group-hover:text-white font-mono">0x1a...9f8e</span>
+
+          <div className="h-8 w-px bg-white/10 hidden sm:block" />
+
+          <div className="flex items-center">
+            <ConnectButton
+              accountStatus="address"
+              chainStatus="icon"
+              showBalance={false}
+            />
           </div>
         </div>
       </header>
@@ -98,30 +115,30 @@ export function AppShell({ children }: AppShellProps) {
         {/* Mobile Navigation Backdrop */}
         {mobileOpen && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden user-select-none"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
         )}
 
-        {/* Navigation Sidebar */}
+        {/* Navigation Sidebar - 'Terminal' Style */}
         <aside
           className={`
             fixed lg:static inset-y-0 left-0 z-50
             ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            ${collapsed ? 'lg:w-20' : 'lg:w-64'}
-            w-64 bg-surface-50/80 backdrop-blur-xl border-r border-white/5 
-            flex flex-col transition-all duration-300 ease-spring
+            ${collapsed ? 'lg:w-16' : 'lg:w-64'}
+            bg-[#050505]/95 backdrop-blur border-r border-white/10 
+            flex flex-col transition-all duration-300
           `}
         >
           {/* Mobile Header in Drawer */}
-          <div className="lg:hidden h-16 flex items-center justify-between px-4 border-b border-white/5">
-            <span className="font-bold text-lg">Menu</span>
+          <div className="lg:hidden h-14 flex items-center justify-between px-4 border-b border-white/10">
+            <span className="font-bold text-xs uppercase tracking-widest text-white">Menu</span>
             <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-400">
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+          <div className="flex-1 py-6 px-3 space-y-0.5 overflow-y-auto">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -130,33 +147,43 @@ export function AppShell({ children }: AppShellProps) {
                   key={item.path}
                   to={item.path}
                   className={`
-                    flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all group
+                    flex items-center gap-3 px-3 py-2.5 text-xs font-medium uppercase tracking-wider transition-all
                     ${isActive
-                      ? 'bg-primary-500/10 text-primary-400 shadow-[0_0_20px_-5px_rgba(14,165,233,0.3)]'
-                      : 'text-gray-400 hover:text-gray-100 hover:bg-white/5'
+                      ? 'text-white bg-white/5 border-l-2 border-green-500'
+                      : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 border-l-2 border-transparent'
                     }
                   `}
                 >
-                  <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-primary-400' : 'text-gray-500 group-hover:text-gray-300'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-green-500' : 'text-gray-600'}`} />
                   <span className={`${collapsed ? 'lg:hidden' : 'block'}`}>
                     {item.label}
                   </span>
-                  {isActive && !collapsed && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
-                  )}
                 </Link>
               );
             })}
           </div>
 
-          <div className="p-4 border-t border-white/5 space-y-2">
-            <button className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-colors group">
-              <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-              <span className={`${collapsed ? 'lg:hidden' : 'block'}`}>Disconnect</span>
-            </button>
+          <div className="p-3 border-t border-white/10">
+            <div className={`p-4 bg-white/5 border border-white/10 ${collapsed ? 'hidden' : 'block'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] uppercase text-gray-500">Risk Engine</div>
+                <Activity className="w-3 h-3 text-green-500" />
+              </div>
+              <div className="space-y-1 font-mono text-[10px]">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Exposure</span>
+                  <span className="text-white">14%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Status</span>
+                  <span className="text-green-500">HEALTHY</span>
+                </div>
+              </div>
+            </div>
+
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="hidden lg:flex w-full items-center justify-center p-2 text-gray-600 hover:text-gray-300 transition-colors"
+              className="mt-4 flex w-full items-center justify-center p-2 text-gray-600 hover:text-white transition-colors"
             >
               <ChevronLeft
                 className={`w-4 h-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
@@ -167,33 +194,11 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto relative">
-          <div className="min-h-full p-4 md:p-8 max-w-7xl mx-auto animate-fade-in">
+          <div className="min-h-full p-4 md:p-8 max-w-[1600px] mx-auto">
             {children}
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-interface StatusPillProps {
-  label: string;
-  value: string;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
-}
-
-function StatusPill({ label, value, variant = 'default' }: StatusPillProps) {
-  const styles = {
-    default: 'text-primary-400 bg-primary-500/10 border-primary-500/20',
-    success: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    warning: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-    danger: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-  };
-
-  return (
-    <div className={`hidden sm:flex items-center gap-2 px-2.5 py-1 rounded border ${styles[variant]}`}>
-      <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{label}</span>
-      <span className="font-mono text-xs font-bold">{value}</span>
     </div>
   );
 }

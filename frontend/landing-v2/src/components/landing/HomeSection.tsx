@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BookOpen, Rocket, Lock } from 'lucide-react';
+import { ArrowRight, BookOpen, Rocket } from 'lucide-react';
 import Spline from '@splinetool/react-spline';
 
 export function HomeSection() {
@@ -60,19 +60,7 @@ export function HomeSection() {
 						</a>
 					</div>
 
-					<div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
-						<div className="flex items-center gap-2">
-							<div className="w-2 h-2 rounded-full bg-cyan-400" />
-							Built on Mantle
-						</div>
-						<div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600" />
-						<div className="flex items-center gap-2">
-							<Lock className="w-4 h-4" />
-							Locked-token sandbox
-						</div>
-						<div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600" />
-						<div>Progressive identity</div>
-					</div>
+
 				</motion.div>
 
 				{/* Right: 3D Spline Scene */}

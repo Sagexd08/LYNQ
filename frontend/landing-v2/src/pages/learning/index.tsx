@@ -15,6 +15,7 @@ import {
   BookOpen,
   Clock,
   ChevronRight,
+  ChevronLeft, // Added ChevronLeft import
 } from 'lucide-react';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
@@ -22,67 +23,86 @@ import { Footer } from '@/components/shared/Footer';
 import { LESSONS } from '@/data/lessons';
 import { useLearningStore, useSandboxStore } from '@/store/useStore';
 
+function LearningPage() {
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Infrastructure Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.5)_50%,transparent_100%)] bg-[size:100%_4px] opacity-10" />
+      </div>
+
+      <Header />
+      <div className="relative z-10 font-mono">
+        <LearningHero />
+        <LessonSlides />
+        <Sandbox />
+        <ProgressTracker />
+        <Footer />
+      </div>
+    </div>
+  );
+}
+
 function LearningHero() {
   const { progress } = useLearningStore();
   const completionRate = (progress.completedLessons.length / LESSONS.length) * 100;
 
   return (
-    <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-black to-blue-950/10">
+    <section className="pt-32 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-400/30 rounded-full text-sm text-blue-400 mb-6">
-            <BookOpen className="w-4 h-4" />
-            Interactive Learning Experience
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-xs font-medium text-gray-400 uppercase tracking-widest mb-8">
+            <BookOpen className="w-3 h-3" />
+            Interactive Learning Protocol
           </div>
 
-          <h1 className="text-5xl lg:text-6xl font-bold mb-6">
+          <h1 className="text-5xl lg:text-6xl font-medium mb-6 tracking-tight">
             <span className="text-white">Master DeFi</span>{' '}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-gray-500">
               Risk-Free
             </span>
           </h1>
 
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
-            Learn through interactive lessons, practice with simulations, and build your reputation
-            before risking real capital.
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12 font-sans border-l-2 border-white/10 pl-6 text-left">
+            Execute credit operations safely. Build verifiable on-chain reputation.
+            Simulate lending strategies before capital deployment.
           </p>
 
-          { }
-          <div className="max-w-2xl mx-auto p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-4">
+          <div className="max-w-2xl mx-auto p-6 bg-[#0A0A0A] border border-white/10 rounded-sm">
+            <div className="flex items-center justify-between mb-4 font-mono">
               <div className="text-left">
-                <div className="text-sm text-gray-400 mb-1">Your Progress</div>
-                <div className="text-3xl font-bold text-white">
-                  {progress.completedLessons.length} / {LESSONS.length}
+                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Progress Index</div>
+                <div className="text-2xl font-bold text-white">
+                  {progress.completedLessons.length}<span className="text-gray-600 text-lg">/{LESSONS.length}</span>
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-sm text-gray-400 mb-1">Reputation</div>
-                <div className="flex items-center gap-2 text-2xl font-bold text-violet-400">
-                  <Award className="w-6 h-6" />
+                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reputation Score</div>
+                <div className="flex items-center justify-end gap-2 text-2xl font-bold text-white">
+                  <Award className="w-5 h-5 text-green-500" />
                   {progress.reputation}
                 </div>
               </div>
             </div>
 
-            <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-white/5 h-1">
               <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                className="h-full bg-green-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
                 transition={{ duration: 1 }}
               />
             </div>
 
-            <div className="mt-4 text-sm text-gray-400">
-              {completionRate === 100
-                ? '🎉 Congratulations! All lessons completed!'
-                : `${Math.round(completionRate)}% complete - Keep going!`}
+            <div className="mt-3 flex justify-between text-[10px] text-gray-500 uppercase tracking-wider font-mono">
+              <span>Status: {completionRate === 100 ? 'COMPLETED' : 'IN_PROGRESS'}</span>
+              <span>{Math.round(completionRate)}% SYNCED</span>
             </div>
           </div>
         </motion.div>
@@ -104,58 +124,47 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }: Qui
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
-        <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
+      <div className="flex items-start gap-3 p-4 bg-white/5 border-l-2 border-white/20">
+        <AlertCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
         <div>
-          <h3 className="text-lg font-semibold text-white mb-1">Knowledge Check</h3>
-          <p className="text-gray-400 text-sm">
-            Answer correctly to complete this lesson and earn reputation points
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Knowledge Check</h3>
+          <p className="text-gray-400 text-xs font-sans">
+            Verify comprehension to proceed. Reputation points awarded for accuracy.
           </p>
         </div>
       </div>
 
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">{quiz.question}</h3>
+        <h3 className="text-xl font-medium text-white mb-6 font-sans">{quiz.question}</h3>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {quiz.options.map((option: string, idx: number) => (
             <button
               key={idx}
               onClick={() => !submitted && onSelectAnswer(idx)}
               disabled={submitted}
-              className={`w-full p-4 rounded-xl text-left transition border-2 ${submitted
+              className={`w-full p-4 text-left transition border ${submitted
                 ? idx === quiz.correctIndex
-                  ? 'bg-green-500/20 border-green-400 text-white'
+                  ? 'bg-green-500/10 border-green-500 text-white'
                   : idx === selectedAnswer
-                    ? 'bg-red-500/20 border-red-400 text-white'
-                    : 'bg-white/5 border-white/10 text-gray-400'
+                    ? 'bg-red-500/10 border-red-500 text-white'
+                    : 'bg-[#0A0A0A] border-white/5 text-gray-500'
                 : idx === selectedAnswer
-                  ? 'bg-cyan-500/20 border-cyan-400 text-white'
-                  : 'bg-white/5 border-white/10 text-white hover:border-cyan-400/50'
+                  ? 'bg-white/10 border-white/20 text-white'
+                  : 'bg-[#0A0A0A] border-white/10 text-gray-400 hover:bg-white/5 hover:border-white/20 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${submitted
-                    ? idx === quiz.correctIndex
-                      ? 'bg-green-500 text-white'
-                      : idx === selectedAnswer
-                        ? 'bg-red-500 text-white'
-                        : 'bg-white/10 text-gray-400'
-                    : idx === selectedAnswer
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-white/10 text-gray-400'
-                    }`}
-                >
-                  {submitted && idx === quiz.correctIndex ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : submitted && idx === selectedAnswer ? (
-                    <XCircle className="w-5 h-5" />
-                  ) : (
-                    String.fromCharCode(65 + idx)
-                  )}
+              <div className="flex items-center gap-4">
+                <div className="font-mono text-xs text-gray-500">
+                  {String.fromCharCode(65 + idx)}
                 </div>
-                <span>{option}</span>
+                <span className="font-sans text-sm">{option}</span>
+                {submitted && idx === quiz.correctIndex && (
+                  <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                )}
+                {submitted && idx === selectedAnswer && idx !== quiz.correctIndex && (
+                  <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                )}
               </div>
             </button>
           ))}
@@ -164,29 +173,22 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }: Qui
 
       {submitted && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-6 rounded-xl border-2 ${isCorrect
-            ? 'bg-green-500/10 border-green-400'
-            : 'bg-red-500/10 border-red-400'
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className={`p-4 border-l-2 ${isCorrect
+            ? 'border-green-500 bg-green-500/5'
+            : 'border-red-500 bg-red-500/5'
             }`}
         >
           <div className="flex items-start gap-3">
-            {isCorrect ? (
-              <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />
-            ) : (
-              <XCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
-            )}
-            <div>
-              <h4
-                className={`text-lg font-bold mb-2 ${isCorrect ? 'text-green-400' : 'text-red-400'
-                  }`}
-              >
-                {isCorrect ? 'Correct! Well done!' : 'Not quite right'}
-              </h4>
-              <p className="text-gray-300">{quiz.explanation}</p>
+            <div className="font-mono text-xs uppercase font-bold tracking-wider mb-1 text-gray-400">
+              Analysis
             </div>
           </div>
+          <p className={`font-mono text-xs uppercase font-bold mb-2 ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+            {isCorrect ? 'CORRECT_RESPONSE' : 'INCORRECT_RESPONSE'}
+          </p>
+          <p className="text-gray-300 text-sm font-sans">{quiz.explanation}</p>
         </motion.div>
       )}
 
@@ -194,9 +196,9 @@ function Quiz({ quiz, selectedAnswer, onSelectAnswer, onSubmit, submitted }: Qui
         <button
           onClick={onSubmit}
           disabled={selectedAnswer === null}
-          className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-6 py-3 bg-white text-black hover:bg-gray-200 text-sm font-bold uppercase tracking-wider transition disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
         >
-          Submit Answer
+          Submit Response
         </button>
       )}
     </div>
@@ -243,18 +245,8 @@ function LessonSlides() {
   return (
     <section className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        { }
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Previous
-          </button>
-
-          <div className="flex gap-2">
+        <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+          <div className="flex gap-2 items-center">
             {LESSONS.map((lesson, idx) => (
               <button
                 key={lesson.id}
@@ -264,15 +256,15 @@ function LessonSlides() {
                   setQuizAnswer(null);
                   setQuizSubmitted(false);
                 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition ${idx === currentIndex
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                className={`w-8 h-8 flex items-center justify-center font-mono text-xs border transition ${idx === currentIndex
+                  ? 'bg-white text-black border-white'
                   : progress.completedLessons.includes(lesson.id)
-                    ? 'bg-green-500/20 text-green-400'
-                    : 'bg-white/10 text-gray-400'
+                    ? 'bg-green-500/10 text-green-500 border-green-500/30'
+                    : 'bg-[#0A0A0A] text-gray-500 border-white/10'
                   }`}
               >
                 {progress.completedLessons.includes(lesson.id) ? (
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="w-3 h-3" />
                 ) : (
                   idx + 1
                 )}
@@ -280,69 +272,67 @@ function LessonSlides() {
             ))}
           </div>
 
-          <button
-            onClick={handleNext}
-            disabled={currentIndex === LESSONS.length - 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
-          >
-            Next
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+              className="w-8 h-8 flex items-center justify-center border border-white/10 bg-[#0A0A0A] hover:bg-white/5 disabled:opacity-30 transition"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === LESSONS.length - 1}
+              className="w-8 h-8 flex items-center justify-center border border-white/10 bg-[#0A0A0A] hover:bg-white/5 disabled:opacity-30 transition"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        { }
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-xl"
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="bg-[#0A0A0A] border border-white/10 p-8 lg:p-12"
           >
             <div className="flex items-start justify-between mb-8">
               <div>
-                <h2 className="text-4xl font-bold text-white mb-3">{currentLesson.title}</h2>
-                <p className="text-lg text-gray-400">{currentLesson.description}</p>
+                <h2 className="text-3xl font-medium text-white mb-2 font-sans">{currentLesson.title}</h2>
+                <div className="flex items-center gap-4 text-xs font-mono text-gray-500 uppercase tracking-wider">
+                  <span>ID: {currentLesson.id}</span>
+                  <span>Ver: 1.0.0</span>
+                </div>
               </div>
 
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Clock className="w-4 h-4" />
-                  {currentLesson.duration}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-violet-400">
-                  <Award className="w-4 h-4" />
-                  +{currentLesson.reputation} rep
-                </div>
-                {isCompleted && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold">
-                    <CheckCircle className="w-4 h-4" />
-                    Completed
-                  </div>
-                )}
+              <div className="text-right font-mono text-xs">
+                <div className="text-gray-500 mb-1">REWARD</div>
+                <div className="text-green-500">+{currentLesson.reputation} REP</div>
               </div>
             </div>
 
             {!showQuiz ? (
               <>
-                <p className="text-xl text-gray-300 mb-8 leading-relaxed">{currentLesson.content}</p>
+                <p className="text-lg text-gray-300 mb-12 leading-relaxed font-sans max-w-3xl">{currentLesson.content}</p>
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 border-t border-white/10 pt-8">
                   {currentLesson.quiz && currentLesson.quiz.length > 0 && (
                     <button
                       onClick={() => setShowQuiz(true)}
-                      className="flex-1 px-6 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-semibold transition flex items-center justify-center gap-2"
+                      className="px-6 py-3 bg-white text-black hover:bg-gray-200 text-sm font-bold uppercase tracking-wider transition flex items-center gap-3 rounded-sm"
                     >
-                      Take Quiz
-                      <ArrowRight className="w-5 h-5" />
+                      Initialize Quiz
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   )}
 
                   {currentLesson.sandboxTask && (
-                    <button className="px-6 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold transition border border-white/10 flex items-center gap-2">
-                      <PlayCircle className="w-5 h-5" />
-                      Try Sandbox
+                    <button className="px-6 py-3 border border-white/20 text-white hover:bg-white/5 text-sm font-bold uppercase tracking-wider transition flex items-center gap-3 rounded-sm">
+                      <PlayCircle className="w-4 h-4" />
+                      Run Simulation
                     </button>
                   )}
                 </div>
@@ -666,13 +656,21 @@ function ProgressTracker() {
 
 export default function LearningPage() {
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 opacity-30 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-600/20 blur-[100px] rounded-full" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-600/20 blur-[100px] rounded-full" />
+      </div>
+
       <Header />
-      <LearningHero />
-      <LessonSlides />
-      <Sandbox />
-      <ProgressTracker />
-      <Footer />
+      <div className="relative z-10">
+        <LearningHero />
+        <LessonSlides />
+        <Sandbox />
+        <ProgressTracker />
+        <Footer />
+      </div>
     </div>
   );
 }

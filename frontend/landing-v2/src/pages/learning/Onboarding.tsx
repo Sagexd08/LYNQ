@@ -89,9 +89,9 @@ export default function OnboardingPage() {
 
             <main className="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
                 {/* Background Elements */}
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]" />
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-[100px]" />
+                <div className="absolute inset-0 pointer-events-none opacity-40">
+                    <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-violet-600/20 blur-[120px] rounded-full mix-blend-screen" />
+                    <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-cyan-600/20 blur-[120px] rounded-full mix-blend-screen" />
                 </div>
 
                 <div className="max-w-2xl w-full relative z-10">

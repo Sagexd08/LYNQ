@@ -38,38 +38,36 @@ class ApiClient {
       (error: AxiosError) => {
         if (error.response) {
           const status = error.response.status;
-          const data = error.response.data as any;
+          // const data = error.response.data as any;
 
           switch (status) {
             case 401:
-              
               localStorage.removeItem('lynq_access_token');
               localStorage.removeItem('lynq_profile');
-              if (window.location.pathname !== '/') {
-                window.location.href = '/';
-              }
-              toast.error('Session expired. Please login again.');
+              // toast.error('Session expired. Please login again.');
               break;
             case 403:
-              toast.error('You do not have permission to perform this action.');
+              // toast.error('You do not have permission to perform this action.');
               break;
             case 404:
-              toast.error('Resource not found.');
+              // toast.error('Resource not found.');
               break;
             case 422:
-              const message = data?.message || data?.error || 'Validation error';
-              toast.error(Array.isArray(message) ? message.join(', ') : message);
+              // const message = data?.message || data?.error || 'Validation error';
+              // toast.error(Array.isArray(message) ? message.join(', ') : message);
               break;
             case 500:
-              toast.error('Server error. Please try again later.');
+              // toast.error('Server error. Please try again later.');
               break;
             default:
-              toast.error(data?.message || 'An error occurred');
+            // toast.error(data?.message || 'An error occurred');
           }
         } else if (error.request) {
-          toast.error('Network error. Please check your connection.');
+          // toast.error('Network error. Please check your connection.');
+          console.warn('Network error:', error.request);
         } else {
-          toast.error('An unexpected error occurred');
+          // toast.error('An unexpected error occurred');
+          console.warn('Unexpected error:', error.message);
         }
 
         return Promise.reject(error);
